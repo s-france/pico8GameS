@@ -63,6 +63,7 @@ end
 function move_player()
 	//print(collisions(player.x, player.y))
 
+<<<<<<< Updated upstream
 	if(btn(0) and not collisionl(player.x, player.y)) then
 		player.x -=1
 	end
@@ -80,6 +81,30 @@ function move_player()
 	end
 	
 	
+=======
+	if(btn(0) and not collisions(player).l) then
+		player.dx =-1
+		player.x += player.dx
+	end
+	
+	if(btn(1) and not collisions(player).r) then
+		player.dx =1
+		player.x += player.dx
+	end
+	
+	if(btn(2) and not collisions(player).t) then
+		player.dy =-1
+		player.y += player.dy
+	end
+	
+	if(btn(3) and not collisions(player).b) then
+		player.dy =1
+		player.y += player.dy
+	end
+	
+
+
+>>>>>>> Stashed changes
 	
 	
 end
@@ -95,6 +120,7 @@ function draw_map()
 
 end
 
+<<<<<<< Updated upstream
 function collisionl(posx, posy)
 	
 	local lceltop = false
@@ -164,6 +190,76 @@ function collisionb(posx, posy)
 	
 	return bcellef or bcelrig
 end
+=======
+function collisions(obj)
+	local cols = {}
+	
+	cols.tl = false
+	cols.t = false
+	cols.tr = false
+	cols.l = false
+	cols.r = false
+	cols.bl = false
+	cols.b = false
+	cols.br = false
+	
+	--horizontal
+	if(obj.x%8 ==0) then
+		--left collision
+		cols.tl =fget(mget((obj.x/8)-1, (obj.y-obj.y%8)/8), 0)	
+	 cols.bl =fget(mget((obj.x/8)-1, (obj.y+8-obj.y%8)/8), 0)
+	 
+	 if cols.tl or cols.bl then
+	 	cols.l = true
+	 end
+	 
+	 --right collision
+	 cols.tr =fget(mget((obj.x/8)+1, (obj.y-obj.y%8)/8), 0)	
+	 cols.br =fget(mget((obj.x/8)+1, (obj.y+8-obj.y%8)/8), 0)
+	 
+	 if cols.tr or cols.br then
+	 	cols.r = true
+	 end
+	end
+	
+	--vertical
+	if(obj.y%8 ==0) then
+		--top collisions
+		cols.tl =fget(mget(((obj.x-obj.x%8)/8),(obj.y/8)-1),0)
+		cols.tr =fget(mget(((obj.x+8-obj.x%8)/8),(obj.y/8)-1),0)
+		
+		if cols.tl or cols.tr then
+			cols.t = true
+		end
+		
+		--bottom collisions
+		cols.bl =fget(mget(((obj.x-obj.x%8)/8),(obj.y/8)+1),0)
+		cols.br =fget(mget(((obj.x+8-obj.x%8)/8),(obj.y/8)+1),0)
+		
+		if cols.bl or cols.br then
+			cols.b = true
+		end
+	end
+	
+	--centered h+v
+	if(obj.x%8 == 0 and obj.y%8 ==0) then
+		cols.tl =fget(mget((obj.x/8)-1, (obj.y/8)-1), 0)
+		cols.tr =fget(mget((obj.x/8)+1, (obj.y/8)-1), 0)
+		cols.bl =fget(mget((obj.x/8)-1, (obj.y/8)+1), 0)
+		cols.br = fget(mget((obj.x/8)+1, (obj.y/8)+1), 0)
+		
+		cols.l =fget(mget((obj.x/8)-1, obj.y/8), 0)
+		cols.r =fget(mget((obj.x/8)+1, obj.y/8), 0)
+		cols.t =fget(mget(obj.x/8, (obj.y/8)-1), 0)
+		cols.b =fget(mget(obj.x/8, (obj.y/8)+1), 0)
+	end
+	
+	
+	return cols
+end
+
+
+>>>>>>> Stashed changes
 
 -->8
 
@@ -183,6 +279,7 @@ function make_npc(mapposx,mapposy,xpos,ypos,dx,dy)
 end
 
 function update_npc(npc)
+<<<<<<< Updated upstream
 	npc.x += npc.dx
 	npc.y += npc.dy
 	
@@ -198,11 +295,57 @@ function update_npc(npc)
 	if npc.dy < 0 and collisiont(npc.x + (npc.mapposx*128), npc.y + (npc.mapposy*128)) then
 		npc.dy = -npc.dy
 	end
+=======
+	
+	
+	if npc.dx < 0 and collisions(npc).l then
+		npc.dx = -npc.dx
+	end
+	
+	if npc.dx > 0 and collisions(npc).r then
+		npc.dx = -npc.dx
+	end
+	
+	if npc.dy < 0 and collisions(npc).t then
+		npc.dy = -npc.dy
+	end
+	
+	if npc.dy > 0 and collisions(npc).b then
+		npc.dy = -npc.dy
+	end
+	
+	
+	if npc.x%8 ==0 and npc.y%8 ==0 then
+		
+		if collisions(npc).tl and npc.dy <0 and npc.dx <0 then
+			npc.dy = -npc.dy
+			npc.dx = -npc.dx
+		end
+		
+		if collisions(npc).tr and npc.dy <0 and npc.dx >0 then
+			npc.dy = -npc.dy
+			npc.dx = -npc.dx
+		end
+		
+		if collisions(npc).bl and npc.dy >0 and npc.dx <0 then
+			npc.dy = -npc.dy
+			npc.dx = -npc.dx
+		end
+
+		if collisions(npc).br and npc.dy >0 and npc.dx >0 then
+			npc.dy = -npc.dy
+			npc.dx = -npc.dx
+		end
+	end
+
+	npc.x += npc.dx
+	npc.y += npc.dy
+	
+>>>>>>> Stashed changes
 	
 	if npc.dy > 0 and collisionb(npc.x + (npc.mapposx*128), npc.y + (npc.mapposy*128)) then
 		npc.dy = -npc.dy
 	end
-	
 	
 	
 end
