@@ -1,6 +1,20 @@
 pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
+// project squidgame
+// by sam france, frank bubbico
+// and lucas diloreto
+//
+// date created ~ sept. 2024
+//
+// tab 0 contains:
+// - all main functions
+//   (init, update, draw)
+
+
+// initialize all objects and
+// objectpools, as well as begin
+// initial draws.
 function _init()
 	make_player()
 	bombpool = {}
@@ -10,6 +24,8 @@ function _init()
 	draw_map()
 end
 
+// routine updates every frame
+// using designed update funcs.
 function _update()
 	update_player()
 	foreach(bombpool,update_bomb)
@@ -18,6 +34,8 @@ function _update()
 
 end
 
+// routine updates every frame
+// using designed update funcs.
 function _draw()
 	cls()
 
@@ -27,17 +45,27 @@ function _draw()
 	draw_npc(npc1)
 	draw_npc(npc2)
 	
+	// debug menu setup for
+	// debugging info within game
 	--[[ debug:
 	print("x: ")
 	print(player.mapposx)
 	print("y: ")
 	print(player.mapposy)
-	--]]
-	
-
-
+	--]]	
 end
 -->8
+// tab 1 contains player info,
+// the collions function, and
+// map info/functions
+//
+// make player
+//
+// make player generates our
+// player when called in _init
+// it contains a ton of info 
+// that we're gonna use
+
 function make_player()
 	player = {}
 	player.x =104
@@ -47,20 +75,79 @@ function make_player()
 	player.mapposx =0
 	player.mapposy =0
  player.sprite =2
+ // player items
  player.bombs = 5
- // item count
- player.ic = 0
 end
 
+// move player
+//
+// move player is self explanatory
+// the function uses our collions
+// function (bottom of this tab)
+// to restrict movement against
+// walls and objects with the
+// flag #0.
 
+function move_player()
+ //debug
+	//print(collisions(player.x, player.y))
+	
+	// player change in distance 
+	player.dx = 0
+	player.dy = 0
+
+	// runs check on left movement
+	// here, if the collisons and
+	// btn press are both true,
+	// the player can move
+	if(btn(0) and not collisions(player).l) then
+		player.dx =-1
+		player.x += player.dx
+	end
+	
+	// runs check on right movement
+	// here, if the collisons and
+	// btn press are both true,
+	// the player can move
+	if(btn(1) and not collisions(player).r) then
+		player.dx =1
+		player.x += player.dx
+	end
+	
+	// runs check on up movement
+	// here, if the collisons and
+	// btn press are both true,
+	// the player can move
+	if(btn(2) and not collisions(player).t) then
+		player.dy =-1
+		player.y += player.dy
+	end
+	
+	// runs check on down movement
+	// here, if the collisons and
+	// btn press are both true,
+	// the player can move
+	if(btn(3) and not collisions(player).b) then
+		player.dy =1
+		player.y += player.dy
+	end
+end
+
+// update player
+//
+// update player does a variety
+// of things, including use items,
+// update map position, and move
+// the player when called
 
 function update_player()
-
+	// check for if bomb has been placed
 	if ( btnp(5) and player.bombs>0 ) then
 	 player.bombs -= 1
 	 add_bomb(player.x, player.y+0,100,18)
  end
 	--process input, update world pos
+	// called from above
 	move_player()
 	
 	--update mappos	
@@ -71,36 +158,9 @@ function update_player()
 
 end
 
-function move_player()
-	//print(collisions(player.x, player.y))
-	player.dx = 0
-	player.dy = 0
-
-	if(btn(0) and not collisions(player).l) then
-		player.dx =-1
-		player.x += player.dx
-	end
-	
-	if(btn(1) and not collisions(player).r) then
-		player.dx =1
-		player.x += player.dx
-	end
-	
-	if(btn(2) and not collisions(player).t) then
-		player.dy =-1
-		player.y += player.dy
-	end
-	
-	if(btn(3) and not collisions(player).b) then
-		player.dy =1
-		player.y += player.dy
-	end
-	
-
-
-	
-	
-end
+// draw player
+//
+// draws player
 
 function draw_player()
 
@@ -108,14 +168,27 @@ function draw_player()
 
 end
 
+// draw map
+//
+// draws map
+
 function draw_map()
+
 	map(player.mapposx * 16,player.mapposy * 16,0,0,16,16)
 
 end
 
+
+// collisions
+//
+// reads collions around an object
+// for all 8 surrounding cells,
+// returns cell information
+
 function collisions(obj)
+ // local table collisions
 	local cols = {}
-	
+	//list of collisions
 	cols.tl = false
 	cols.t = false
 	cols.tr = false
@@ -183,7 +256,15 @@ end
 
 
 -->8
-
+// tab 2 contains information
+// about drawing npcs, their 
+// movement, and drawing them
+//
+// make npc
+//
+// this function generates a npc
+// upon call in init, and provides
+// npc info
 
 function make_npc(mapposx,mapposy,xpos,ypos,dx,dy)
 	local npc = {}
@@ -198,6 +279,12 @@ function make_npc(mapposx,mapposy,xpos,ypos,dx,dy)
 	
 	return npc
 end
+
+
+// update npc
+//
+// updates npc movement based on
+// collisions and map position
 
 function update_npc(npc)
 	
@@ -255,6 +342,10 @@ function update_npc(npc)
 	
 end
 
+// draw npc
+//
+// draws npc
+
 function draw_npc(npc)
 		if (player.mapposx == npc.mapposx and player.mapposy == npc.mapposy) then
 				--spr(3, npc.x, npc.y)
@@ -303,6 +394,17 @@ end
 			
 --delete_bomb
 -->8
+// tab 4 handles bomb functions
+// and potenitally other future
+// item functions
+//
+// add_bomb
+// 
+// adds a bomb upon call to 
+// the bomb table (called in 
+// update player) with contained
+// information for further use
+
 function add_bomb(x,y,timer,sprite)
 	local bomb = {}
 	bomb.x = x
@@ -312,6 +414,12 @@ function add_bomb(x,y,timer,sprite)
 	add(bombpool,bomb)
 end
 
+// update_bomb
+// 
+// updated the local information
+// of a given bomb until timer 
+// hits 0, which triggers an
+// explosion (aka bomb.sprite = 0)
 function update_bomb(bomb)
 	if (bomb.timer == 0) then
 	 bomb.sprite = 0
@@ -319,6 +427,13 @@ function update_bomb(bomb)
   bomb.timer -= 1
  end
 end
+
+// draw_bomb
+//
+// draws a bomb when called on
+// a given bomb, or stops drawing
+// and removes a bomb from the
+// pool when bomb.sprite == 0.
 
 function draw_bomb(bomb)
  if (bomb.sprite == 0) then
@@ -336,14 +451,14 @@ __gfx__
 0070070011c111c10cccccc011111111222ff222222222ff222ff22222f222222222f7f22f7622220888888022f7f22222fffff22fffff222ffef222222fef22
 0000000011ccccc100c00c0011111111222222222222222222ff2222222222222222ff222f6ff2220080080022ff2222222fff22222222222fcff2222222ff22
 000000001111111100c00c001111111122222222222222222ff7f22222222222222f7f222ffff222008008002222222222222ff22222222222ff222222222222
-22222222000222200000078000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-22222222002222000000700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-222222ff00c2c2000007700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-fff22f7f03fff2300055550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-f77ffff2033333300511115000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2ffff7f20f3333f00511115000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-222fff220f5555f00051150000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-222f7f22005005000005500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+22222222000222200000078000000760000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+22222222002222000000700000007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+222222ff00c2c2000007700000077000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+fff22f7f03fff2300055550000555500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+f77ffff2033333300511115005111150000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2ffff7f20f3333f00511115005111150000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+222fff220f5555f00051150000511500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+222f7f22005005000005500000055000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
