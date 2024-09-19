@@ -47,7 +47,7 @@ function _draw()
 	
 	// debug menu setup for
 	// debugging info within game
-	--[[ debug:
+	// debug:
 	print("x: ")
 	print(player.mapposx)
 	print("y: ")
@@ -100,6 +100,7 @@ function move_player()
 	// here, if the collisons and
 	// btn press are both true,
 	// the player can move
+	
 	if(btn(0) and not collisions(player).l) then
 		player.dx =-1
 		player.x += player.dx
@@ -141,11 +142,7 @@ end
 // the player when called
 
 function update_player()
-	// check for if bomb has been placed
-	if ( btnp(5) and player.bombs>0 ) then
-	 player.bombs -= 1
-	 add_bomb(player.x, player.y+0,100,18)
- end
+
 	--process input, update world pos
 	// called from above
 	move_player()
@@ -155,7 +152,11 @@ function update_player()
 	local mapy = (player.y-(player.y%8))/8
 	player.mapposx = (mapx-(mapx%16)) / 16
 	player.mapposy = (mapy-(mapy%16)) / 16
-
+ 	// check for if bomb has been placed
+	if ( btnp(5) and player.bombs>0 ) then
+	 player.bombs -= 1
+		add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128,100,18)
+ end
 end
 
 // draw player
@@ -405,12 +406,14 @@ end
 // update player) with contained
 // information for further use
 
-function add_bomb(x,y,timer,sprite)
+function add_bomb(mapposx,mapposy,xpos,ypos,timer,sprite)
 	local bomb = {}
-	bomb.x = x
-	bomb.y = y
+	bomb.x = xpos + mapposx*128
+	bomb.y = ypos + mapposy*128 +8
 	bomb.timer = timer
 	bomb.sprite = sprite
+	bomb.mapposx = mapposx
+	bomb.mapposy = mapposy
 	add(bombpool,bomb)
 end
 
@@ -426,6 +429,12 @@ function update_bomb(bomb)
 	else
   bomb.timer -= 1
  end
+ 
+ 	--update mappos	
+	local mapx = (bomb.x-(bomb.x%8))/8
+	local mapy = (bomb.y-(bomb.y%8))/8
+	bomb.mapposx = (mapx-(mapx%16)) / 16
+	bomb.mapposy = (mapy-(mapy%16)) / 16
 end
 
 // draw_bomb
@@ -439,8 +448,19 @@ function draw_bomb(bomb)
  if (bomb.sprite == 0) then
  	del(bombpool,bomb)
  else
-  spr(bomb.sprite,bomb.x,bomb.y)
+  if (player.mapposx == bomb.mapposx and player.mapposy == bomb.mapposy) then
+   spr(bomb.sprite,bomb.x%128,bomb.y%128)
+  end
  end
+end
+
+
+function draw_npc(npc)
+		if (player.mapposx == npc.mapposx and player.mapposy == npc.mapposy) then
+				--spr(3, npc.x, npc.y)
+				spr(npc.sprite, npc.x%128, npc.y%128)
+		end
+
 end
 __gfx__
 00000000111111110000000011111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
