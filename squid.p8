@@ -476,11 +476,11 @@ function update_explosion(explosion)
 	local cells = {}
 	for i =-1,1 do
 	 for j = -1,1 do
-	  xcell += i
-	  ycell += j
+	  local xtemp = i + xcell
+	  local ytemp = j + ycell
 	  local pair = {}
-	  pair.xcell = xcell
-	  pair.ycell = ycell
+	  pair.xcell = xtemp
+	  pair.ycell = ytemp
 	  add(cells, pair)
 	 end
 	end
