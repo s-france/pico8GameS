@@ -471,8 +471,19 @@ function draw_npc(npc)
 end
 
 function update_explosion(explosion)
-	local xcell = ceil(explosion.x/8)
-	local ycell = ceil(explosion.y/8)
+	local xcell = (explosion.x/8)
+	local ycell = (explosion.y/8)
+	if (xcell - flr(xcell) > 0.5) then
+		xcell = ceil(xcell)
+	else
+	 xcell = flr(xcell)
+	end	
+	if (ycell - flr(ycell) > 0.5) then
+	 ycell = ceil(ycell)
+	else
+	 ycell = flr(ycell)
+	end
+	
 	local cells = {}
 	for i =-1,1 do
 	 for j = -1,1 do
