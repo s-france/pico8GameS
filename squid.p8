@@ -500,13 +500,6 @@ function draw_bomb(bomb)
 end
 
 
-function draw_npc(npc)
-		if (player.mapposx == npc.mapposx and player.mapposy == npc.mapposy) then
-				--spr(3, npc.x, npc.y)
-				spr(npc.sprite, npc.x%128, npc.y%128)
-		end
-
-end
 
 function update_explosion(explosion)
 	local xcell = (explosion.x/8)
