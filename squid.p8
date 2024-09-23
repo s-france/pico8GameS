@@ -108,7 +108,7 @@ function move_player()
 	if(btn(0) and not collisions(player).l) then
 		player.dx =-1
 		player.x += player.dx
-		player.face = 0
+		--player.face = 0
 	end
 	
 	// runs check on right movement
@@ -118,7 +118,7 @@ function move_player()
 	if(btn(1) and not collisions(player).r) then
 		player.dx =1
 		player.x += player.dx
-		player.face = 1
+		--player.face = 1
 	end
 	
 	// runs check on up movement
@@ -128,7 +128,7 @@ function move_player()
 	if(btn(2) and not collisions(player).t) then
 		player.dy =-1
 		player.y += player.dy
-		player.face = 2
+		--player.face = 2
 	end
 	
 	// runs check on down movement
@@ -138,7 +138,7 @@ function move_player()
 	if(btn(3) and not collisions(player).b) then
 		player.dy =1
 		player.y += player.dy
-		player.face = 3
+		--player.face = 3
 	end
 end
 
@@ -154,6 +154,32 @@ function update_player()
 	--process input, update world pos
 	// called from above
 	move_player()
+	
+	--update player face direction
+	local prev = player.face
+	
+	if player.dx>0 then
+		player.face = 5
+	elseif player.dx<0 then
+		player.face = 3
+	else
+		player.face = 4
+	end
+	
+	if player.dy >0 then
+		player.face +=3
+	elseif player.dy < 0 then
+	 player.face -=3
+	end
+	
+	if player.face == 4 then
+		player.face = prev
+	elseif player.face >4 then
+		player.face -=1
+	end
+	
+	
+	
 	
 	--update mappos	
 	local mapx = (player.x-(player.x%8))/8
@@ -451,19 +477,27 @@ end
 
 function add_bomb(mapposx,mapposy,xpos,ypos,timer,sprite)
 	local bomb = {}
-	if (player.face == 0) then
+	
+	--left
+	if (player.face == 0 or player.face ==3 or player.face ==5) then
 		bomb.x = xpos + mapposx*128 - 8 // world space
-		bomb.y = ypos + mapposy*128 // world space
- elseif (player.face == 1) then
+	--right
+ elseif (player.face ==2 or player.face ==4 or player.face ==7) then
 	 bomb.x = xpos + mapposx*128 + 8 // world space
-	 bomb.y = ypos + mapposy*128 // world space
- elseif (player.face == 2) then
-		bomb.x = xpos + mapposx*128 // world space
-		bomb.y = ypos + mapposy*128 - 8 // world space
 	else
-		bomb.x = xpos + mapposx*128 // world space
-		bomb.y = ypos + mapposy*128 + 8 // world space
+		bomb.x = xpos + mapposx*128
 	end
+	
+	--up 
+ if (player.face ==0 or player.face ==1 or player.face ==2) then
+		bomb.y = ypos + mapposy*128 - 8 // world space
+	--down
+	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
+		bomb.y = ypos + mapposy*128 + 8 // world space
+	else
+		bomb.y = ypos + mapposy*128
+	end
+	
 	bomb.timer = timer
 	bomb.sprite = sprite
 	bomb.mapposx = mapposx
