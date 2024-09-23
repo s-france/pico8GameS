@@ -466,7 +466,11 @@ end
 function update_bomb(bomb)
 	if (bomb.timer == 0) then
 	 bomb.sprite = 0
-	 
+	 del(bombpool,bomb)
+ 	local explosion = {}
+ 		explosion.x = bomb.x
+ 		explosion.y = bomb.y
+ 		add(explosions, explosion)
 	else
   bomb.timer -= 1
  end
@@ -486,19 +490,10 @@ end
 // pool when bomb.sprite == 0.
 
 function draw_bomb(bomb)
- if (bomb.sprite == 0) then
- 	del(bombpool,bomb)
- 	local explosion = {}
- 		explosion.x = bomb.x
- 		explosion.y = bomb.y
- 		add(explosions, explosion)
- else
   if (player.mapposx == bomb.mapposx and player.mapposy == bomb.mapposy) then
    spr(bomb.sprite,bomb.x%128,bomb.y%128)
   end
- end
 end
-
 
 
 function update_explosion(explosion)
