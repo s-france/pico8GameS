@@ -1,6 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
+-- main functions
 // project squidgame
 // by sam france, frank bubbico
 // and lucas diloreto
@@ -13,16 +14,17 @@ __lua__
 
 
 // initialize all objects and
-// objectpools, as well as begin
-// initial draws.
+// objectpools
 function _init()
 	make_player()
 	bombpool = {}
 	explosions = {}
+	particlesystems = {}
+	particles = {}
 	npc1 = make_npc(1,0,80,48,1,1)
 	npc2 = make_npc(0,0,8,16,0,1)
-	draw_player()
-	draw_map()
+
+
 end
 
 // routine updates every frame
@@ -57,7 +59,7 @@ function _draw()
 	--]]	
 end
 -->8
-// tab 1 contains player info,
+-- player info
 // the collions function, and
 // map info/functions
 //
@@ -70,6 +72,7 @@ end
 
 function make_player()
 	player = {}
+	//player stats
 	player.x =104
 	player.y =104
 	player.dx =0
@@ -259,6 +262,7 @@ end
 
 
 -->8
+-- npcs
 // tab 2 contains information
 // about drawing npcs, their 
 // movement, and drawing them
@@ -359,44 +363,78 @@ end
 
 
 -->8
---[[
-function makeparticles(x,y,t,duration,srange,trange,freq)
+-- particle effects
+
+--creates a particle system
+function add_partsys(x,y,xrange,yrange, sduration,pduration, anglemin,anglemax, speed,srange, freq, parent)
+	local partsys = {}
+	--world position of
+	--particle system
+	partsys.x = x
+	partsys.y = y
+	--range of spawn position
+	--variation for particles:
+	--x +- xrange, y +- yrange
+	partsys.xrange = xrange
+	partsys.yrange = yrange
+	--time until particle system
+	--despawns
+	partsys.sduration = sduration
+	--time until particles despawn
+	partsys.pduration = pduration
+	--range of particle movement
+	--0-360
+ partsys.anglemin = anglemin
+ partsys.anglemax =anglemax
+ --speed of particles
+ partsys.speed =speed
+ --range of speed variation:
+ --speed +- srange
+ partsys.srange =srange
+ --frequency of particle spawns
+ --spawns every freq frames
+ partsys.freq =freq
 	
-	for t, duration do
-		
-		if d%freq == 0 then
-			rnd()
-		
-		end
-		
-		yield()
+	--parent obj of particle system
+	if parent != nil then
+		partsys.parent = parent
+		partsys.x = parent.x
+		partsys.y = parent.y
 	end
+		
+	add(particlesystems, partsys)
+end
+
+
+function update_partsys(partsys)
+	--not sure if this is needed...
+	if partsys.parent != nil then
+		partsys.x = partsys.parent.x
+		partsys.y = partsys.parent.y
+	end
+	
+	--spawn particle
+	if partsys.sduration % partsys.freq == 0 then
+		add_particle(partsys.x-partsys.xrange + rnd(partsys.xrange*2), partsys.y-partsys.yrange + rnd(partsys.yrange*2), partsys.pduration, partsys.anglemin + rnd(partsys.anglemax-partsys.anglemin), partsys.speed-partsys.srange + rnd(partsys.srange*2))
+	end
+	
+	--track sys lifetime
+	partsys.sduration -= 1
+	if partsys.sduration < 0 then
+		del(particlesystems,partsys)
+	end
+end
+
+--creates a single particle
+--from particle system
+function add_particle(x,y, duration, angle, speed)
+	part = {}
+	--sam finish this!!!!!!
+	
 
 end
---]]
-
-
-
---init_bombs()
-		--create table bombpool = {}
-		
---update_bombs()
-		--loop through bombpool:
-				--timer--
-				--if timer ==0 remove from pool
-
-				
---draw_bombs()
-		--loop through bombpool:
-				--draw each bomb
-		
-
---add_bomb(x,y,timer,sprite)
-			--local bomb = {}
-			--add bomb to pool
-			
---delete_bomb
 -->8
+-- bombs
 // tab 4 handles bomb functions
 // and potenitally other future
 // item functions
