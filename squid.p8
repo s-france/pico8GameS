@@ -55,6 +55,9 @@ function _draw()
 	print("y: ")
 	print(player.mapposy)
 	--]]	
+	print("face: ")
+	print(player.face)
+	print(player.testflag)
 end
 -->8
 -- player info
@@ -81,6 +84,7 @@ function make_player()
  player.face = 3
  // player items
  player.bombs = 5
+ player.testflag = 0
 end
 
 // move player
@@ -179,7 +183,7 @@ function update_player()
 	end
 	
 	
-	
+
 	
 	--update mappos	
 	local mapx = (player.x-(player.x%8))/8
@@ -187,6 +191,7 @@ function update_player()
 	player.mapposx = (mapx-(mapx%16)) / 16
 	player.mapposy = (mapy-(mapy%16)) / 16
  	// check for if bomb has been placed
+ 		
 	if ( btnp(5) and player.bombs>0 ) then
 	 player.bombs -= 1
 		add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128,100,18)
