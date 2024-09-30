@@ -201,12 +201,13 @@ function update_player()
  	// check for if bomb has been placed
 -- if ( btnp(5) then	
 -- 	readinfo(player.face) end
-	if (btnp(4)) then
-		openchest(player.face) 
-	end	
-	if ( btnp(5) and player.bombs>0 ) then
-	 player.bombs -= 1
-		add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128,100,18)
+	player.testflag = false
+	if ( btnp(5)) then
+		openchest(player.face)
+		if ( player.testflag==false	 and player.bombs>0 ) then
+	 	player.bombs -= 1
+			add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128,100,18)
+ 	end
  end
 end
 
@@ -306,94 +307,95 @@ function collisions(obj)
 end
 
 function openchest(face)
-	local interflag = false
 	local contentflag = false
  if face == 0 then
-  interflag = fget(mget((player.x/8-1),(player.y/8-1)), 4)
-  if ( interflag == true) then
-  	player.testflag = true
-  	for i=1,3 do
+  player.testflag = fget(mget((player.x/8-1),(player.y/8-1)), 5)
+  if ( player.testflag == true) then
+  	for i=2,4 do
   		contentflag = fget(mget((player.x/8-1),(player.y/8-1)), i)
-  		if (contentflag == true and i==1 ) then
+  		if (contentflag == true and i==2 ) then
   		 player.bombs += 5
   			mset((player.x/8-1),(player.y/8-1),24)
   		end
   	end
   end
  elseif face == 1 then
-  interflag = fget(mget((player.x/8),(player.y/8-1)), 4)
-  if ( interflag == true) then
-  	player.testflag = true
-  	for i=1,3 do
+  player.testflag = fget(mget((player.x/8),(player.y/8-1)), 5)
+  if ( player.testflag == true) then
+  	for i=2,4 do
   		contentflag = fget(mget((player.x/8),(player.y/8-1)), i)
-  		if (contentflag == true and i==1 ) then
+  		if (contentflag == true and i==2 ) then
   		 player.bombs += 5
   			mset((player.x/8),(player.y/8-1),24)
   		end
   	end
   end
  elseif face == 2 then
-  interflag = fget(mget((player.x/8+1),(player.y/8-1)), 4)
-  if ( interflag == true) then
-  	player.testflag = true
-  	for i=1,3 do
+  player.testflag = fget(mget((player.x/8+1),(player.y/8-1)), 5)
+  if ( player.testflag == true) then
+  	for i=2,4 do
   		contentflag = fget(mget((player.x/8+1),(player.y/8-1)), i)
-  		if (contentflag == true and i==1 ) then
+  		if (contentflag == true and i==2 ) then
   		 player.bombs += 5
   			mset((player.x/8+1),(player.y/8-1),24)
   		end
   	end
   end
 	elseif face == 3 then
-	   interflag = fget(mget((player.x/8-1),(player.y/8)), 4)
-  if ( interflag == true) then
-  	player.testflag = true
-  	for i=1,3 do
+	   player.testflag = fget(mget((player.x/8-1),(player.y/8)), 5)
+  if ( player.testflag == true) then
+  	for i=2,4 do
   		contentflag = fget(mget((player.x/8-1),(player.y/8)), i)
-  		if (contentflag == true and i==1 ) then
+  		if (contentflag == true and i==2 ) then
   		 player.bombs += 5
   			mset((player.x/8-1),(player.y/8),24)
   		end
   	end
   end
 	elseif face == 4 then
-	  interflag = fget(mget((player.x/8+1),(player.y/8)), 4)
-  if ( interflag == true) then
-  	player.testflag = true
-  	for i=1,3 do
+	  player.testflag = fget(mget((player.x/8+1),(player.y/8)), 5)
+  if ( player.testflag == true) then
+  	for i=2,4 do
   		contentflag = fget(mget((player.x/8+1),(player.y/8)), i)
-  		if (contentflag == true and i==1 ) then
+  		if (contentflag == true and i==2 ) then
   		 player.bombs += 5
   			mset((player.x/8+1),(player.y/8),24)
   		end
   	end
   end
 	elseif face == 5 then
-	  interflag = fget(mget((player.x/8-1),(player.y/8+1)), 4)
-  if ( interflag == true) then
-  	player.testflag = true
-  	for i=1,3 do
+	  player.testflag = fget(mget((player.x/8-1),(player.y/8+1)), 5)
+  if ( player.testflag == true) then
+  	for i=2,4 do
   		contentflag = fget(mget((player.x/8-1),(player.y/8+1)), i)
-  		if (contentflag == true and i==1 ) then
+  		if (contentflag == true and i==2 ) then
   		 player.bombs += 5
   			mset((player.x/8-1),(player.y/8+1),24)
   		end
   	end
   end
 	elseif face == 6 then
-	  interflag = fget(mget((player.x/8),(player.y/8+1)), 4)
-  if ( interflag == true) then
-  	player.testflag = true
-  	for i=1,3 do
+	  player.testflag = fget(mget((player.x/8),(player.y/8+1)), 5)
+  if ( player.testflag == true) then
+  	for i=2,4 do
   		contentflag = fget(mget((player.x/8),(player.y/8+1)), i)
-  		if (contentflag == true and i==1 ) then
+  		if (contentflag == true and i==2 ) then
   		 player.bombs += 5
   			mset((player.x/8),(player.y/8+1),24)
   		end
   	end
   end
 	else
-	
+		player.testflag = fget(mget((player.x/8+1),(player.y/8+1)), 5)
+  if ( player.testflag == true) then
+  	for i=2,4 do
+  		contentflag = fget(mget((player.x/8+1),(player.y/8+1)), i)
+  		if (contentflag == true and i==2 ) then
+  		 player.bombs += 5
+  			mset((player.x/8+1),(player.y/8+1),24)
+  		end
+  	end
+  end
 	end
 end
 -->8
@@ -698,13 +700,13 @@ __gfx__
 0000000011ccccc100c00c0011111111222222222222222222ff2222222222222222ff222f6ff2220080080022ff2222222fff22222222222fcff2222222ff22
 000000001111111100c00c001111111122222222222222222ff7f22222222222222f7f222ffff222008008002222222222222ff22222222222ff222222222222
 2222222200022220000007800000076016111116000000002ff7f222222222220000000000000000000000000000000000000000000000000000000000000000
-2222222200222200000070000000700061c16161000000002f7ff222222222220000000005455450000000000000000000000000000000000000000000000000
-222222ff00c2c200000770000007700016116c110000000022ffff2f22fffff20444444045455454000000000000000000000000000000000000000000000000
-fff22f7f03fff230005555000055550011c116c100000000f22fefff2ffffeff50000005555aa555000000000000000000000000000000000000000000000000
-f77ffff20333333005111150051111506111111100000000f6ff2fff2ffef6ff400aa004444aa444000000000000000000000000000000000000000000000000
-2ffff7f20f3333f005111150051111501116c16100000000fff222ff2ffcfff25445544554455445000000000000000000000000000000000000000000000000
-222fff220f5555f0051111500511115061111111000000006f22222222ffff225445544554455445000000000000000000000000000000000000000000000000
-222f7f2200500500005555000055550016c611610000000022222222222222225445544554455445000000000000000000000000000000000000000000000000
+2222222200222200000070000000700061c16161000000002f7ff222222222220000000005455450054554500545545000000000000000000000000000000000
+222222ff00c2c200000770000007700016116c110000000022ffff2f22fffff20444444045455454454554544545545400000000000000000000000000000000
+fff22f7f03fff230005555000055550011c116c100000000f22fefff2ffffeff50000005555aa555555aa555555aa55500000000000000000000000000000000
+f77ffff20333333005111150051111506111111100000000f6ff2fff2ffef6ff400aa004444aa444444aa444444aa44400000000000000000000000000000000
+2ffff7f20f3333f005111150051111501116c16100000000fff222ff2ffcfff25445544554455445544554455445544500000000000000000000000000000000
+222fff220f5555f0051111500511115061111111000000006f22222222ffff225445544554455445544554455445544500000000000000000000000000000000
+222f7f2200500500005555000055550016c611610000000022222222222222225445544554455445544554455445544500000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -818,7 +820,7 @@ f77ffff20333333005111150051111506111111100000000f6ff2fff2ffef6ff400aa004444aa444
 50404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040
 40404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404070
 __gff__
-0003000001010101010100010101010101000000000001010113000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0003000001010101010100010101010101000000000001010125293100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0804040404040404100404040404041010040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040409
