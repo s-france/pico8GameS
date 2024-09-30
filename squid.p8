@@ -55,12 +55,12 @@ function _draw()
 	print("y: ")
 	print(player.mapposy)
 	--]]	
-	print("face: ")
+	print("face: ") 
 	print(player.face)
-	print(player.testflag)
+	print("x,y")
 	print(player.x)
 	print(player.y)
-	print(player.testflag)
+	print("bombs")
 	print(player.bombs)
 end
 -->8
