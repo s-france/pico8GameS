@@ -612,7 +612,7 @@ function openchest(face)
   if ( player.testflag == true) then
   	for i=1,4 do
   		contentflag = fget(mget((player.x/8-1),(player.y/8-1)), i)
-  		if (contentflag == true and i==2 ) then
+  		if (contentflag == true and i==1 ) then
   		 player.bombs += 5
   			mset((player.x/8-1),(player.y/8-1),24)
   		end
