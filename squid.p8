@@ -605,6 +605,10 @@ end
 -->8
 --chests
 
+// code here contains all
+// small chest functionality,
+// although we may add in large
+// chests as well
 function openchest(face)
 	local contentflag = false
  if face == 0 then
