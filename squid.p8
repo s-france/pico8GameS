@@ -207,13 +207,11 @@ function update_player()
 	player.openflag = false
 	if ( btnp(5)) then
 		openchest(player.face)
+		opendoor(player.face)
 		if ( player.openflag==false	 and player.bombs>0 ) then
 	 	player.bombs -= 1
 			add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128,100,18)
  	end
- end
- if (btnp(4)) then
- 	opendoor(player.face)
  end
 end
 
@@ -802,24 +800,28 @@ function opendoor(face)
 	if face == 1 then
 		contentflag = fget(mget((player.x/8),(player.y/8-1)), 2)
 		if (contentflag == true and player.keys >0) then
+				player.openflag = true
 			 player.keys -= 1
   		mset((player.x/8),(player.y/8-1),0)
 		end
 	elseif face == 4 then
 		contentflag = fget(mget((player.x/8-1),(player.y/8)), 2)
 		if (contentflag == true and player.keys >0) then
+			 player.openflag = true
 			 player.keys -= 1
   		mset((player.x/8-1),(player.y/8),0)
 		end
 	elseif face == 5 then
 		contentflag = fget(mget((player.x/8+1),(player.y/8)), 2)
 		if (contentflag == true and player.keys >0) then
+			 player.openflag = true
 			 player.keys -= 1
   		mset((player.x/8+1),(player.y/8),0)
 		end
 	elseif face == 7 then
 		contentflag = fget(mget((player.x/8),(player.y/8+1)), 2)
 		if (contentflag == true and player.keys >0) then
+			 player.openflag = true
 			 player.keys -= 1
   		mset((player.x/8),(player.y/8+1),0)
 		end
