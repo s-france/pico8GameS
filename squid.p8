@@ -88,7 +88,7 @@ function make_player()
 	player.mapposy = 0
  player.sprite = 2
  player.face = 3
- player.chestflag = false
+ player.openflag = false
  // player items
  player.itempool = {}
  player.bombs = 0
@@ -204,10 +204,10 @@ function update_player()
  	// check for if bomb has been placed
 -- if ( btnp(5) then	
 -- 	readinfo(player.face) end
-	player.chestflag = false
+	player.openflag = false
 	if ( btnp(5)) then
 		openchest(player.face)
-		if ( player.chestflag==false	 and player.bombs>0 ) then
+		if ( player.openflag==false	 and player.bombs>0 ) then
 	 	player.bombs -= 1
 			add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128,100,18)
  	end
@@ -632,8 +632,8 @@ end
 function openchest(face)
 	local contentflag = false
  if face == 0 then
-  player.chestflag = fget(mget((player.x/8-1),(player.y/8-1)), 5)
-  if ( player.chestflag == true) then
+  player.openflag = fget(mget((player.x/8-1),(player.y/8-1)), 5)
+  if ( player.openflag == true) then
   	for i=1,4 do
   		contentflag = fget(mget((player.x/8-1),(player.y/8-1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -652,8 +652,8 @@ function openchest(face)
   	end
   end
  elseif face == 1 then
-  player.chestflag = fget(mget((player.x/8),(player.y/8-1)), 5)
-  if ( player.chestflag == true) then
+  player.openflag = fget(mget((player.x/8),(player.y/8-1)), 5)
+  if ( player.openflag == true) then
   	for i=1,4 do
   		contentflag = fget(mget((player.x/8),(player.y/8-1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -672,8 +672,8 @@ function openchest(face)
   	end
   end
  elseif face == 2 then
-  player.chestflag = fget(mget((player.x/8+1),(player.y/8-1)), 5)
-  if ( player.chestflag == true) then
+  player.openflag = fget(mget((player.x/8+1),(player.y/8-1)), 5)
+  if ( player.openflag == true) then
   	for i=1,4 do
   		contentflag = fget(mget((player.x/8+1),(player.y/8-1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -692,8 +692,8 @@ function openchest(face)
   	end
   end
 	elseif face == 3 then
-	   player.chestflag = fget(mget((player.x/8-1),(player.y/8)), 5)
-  if ( player.chestflag == true) then
+	   player.openflag = fget(mget((player.x/8-1),(player.y/8)), 5)
+  if ( player.openflag == true) then
   	for i=1,4 do
   		contentflag = fget(mget((player.x/8-1),(player.y/8)), i)
   		  		if (contentflag == true and i == 1 ) then
@@ -712,8 +712,8 @@ function openchest(face)
   	end
   end
 	elseif face == 4 then
-	  player.chestflag = fget(mget((player.x/8+1),(player.y/8)), 5)
-  if ( player.chestflag == true) then
+	  player.openflag = fget(mget((player.x/8+1),(player.y/8)), 5)
+  if ( player.openflag == true) then
   	for i=1,4 do
   		contentflag = fget(mget((player.x/8+1),(player.y/8)), i)
   		if (contentflag == true and i == 1 ) then
@@ -732,8 +732,8 @@ function openchest(face)
   	end
   end
 	elseif face == 5 then
-	  player.chestflag = fget(mget((player.x/8-1),(player.y/8+1)), 5)
-  if ( player.chestflag == true) then
+	  player.openflag = fget(mget((player.x/8-1),(player.y/8+1)), 5)
+  if ( player.openflag == true) then
   	for i=1,4 do
   		contentflag = fget(mget((player.x/8-1),(player.y/8+1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -752,8 +752,8 @@ function openchest(face)
   	end
   end
 	elseif face == 6 then
-	  player.chestflag = fget(mget((player.x/8),(player.y/8+1)), 5)
-  if ( player.chestflag == true) then
+	  player.openflag = fget(mget((player.x/8),(player.y/8+1)), 5)
+  if ( player.openflag == true) then
   	for i=1,4 do
   		contentflag = fget(mget((player.x/8),(player.y/8+1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -772,8 +772,8 @@ function openchest(face)
   	end
   end
 	else
-		player.chestflag = fget(mget((player.x/8+1),(player.y/8+1)), 5)
-  if ( player.chestflag == true) then
+		player.openflag = fget(mget((player.x/8+1),(player.y/8+1)), 5)
+  if ( player.openflag == true) then
   	for i=1,4 do
   		contentflag = fget(mget((player.x/8+1),(player.y/8+1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -826,7 +826,10 @@ function opendoor(face)
 	end
 end
 -->8
---sword
+--sword physics
+function swordswing(face)
+	
+end	
 __gfx__
 00000000111111110000000011111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
 000000001111cc11000cc00011111111222222222f7ff22222ff22222222fff22222222222222222000880002ff222222f62222222ffff22222222222ffff6f2
@@ -992,3 +995,11 @@ __map__
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+__sfx__
+191000001f0201f0201f0201f0201f0201f0201f0201f0201d0201d0201d0201d0201d0201d0201d0201d020210201f020210201f020210202102021020210201f0201f0201f0201f0201f0201f0251f0251f025
+1910000011030110301103011030110301103011030110300f0300f0300f0300f0300f0300f0300f0300f03013030130301103013030160301603016030160301103011035110301103011035110351103511035
+011000100704513015136251362507045130151362513015070451300013000130001362511015136251101507000000001460016600070000000014600166000700000000070001460014600146001460000000
+__music__
+01 00024344
+02 01024344
+
