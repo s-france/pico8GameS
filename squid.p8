@@ -25,7 +25,7 @@ function _init()
 	npc2 = make_npc(0,0,8,16,0,1)
 	
 	--testing
-	--add_partsys(100,100,5,5, 1500,20, 0,0, 1,1, 1)
+	add_partsys(100,100,1,1, 2,5, 0,0, 2,2, 0.0625)
 	add_partsys(50,100,0,1, 4, 4, 2,0, 1,.5, 0.25)
 	
 end
@@ -439,6 +439,11 @@ end
 
 -->8
 -- particle effects
+
+--particle system prefabs:
+---explosion: add_partsys(x,y,1,1, 2,5, 0,0, 2,2, 0.0625)
+---sword swipe: add_partsys(x,y,0,1, 4, 4, 2,0, 1,.5, 0.25)
+
 
 --creates a particle system
 function add_partsys(x,y,xrange,yrange, sduration,pduration, dx,dy, dxrange,dyrange, freq, parent)
