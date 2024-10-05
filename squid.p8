@@ -23,6 +23,11 @@ function _init()
 	particles = {}
 	npc1 = make_npc(1,0,70,35,1,1)
 	npc2 = make_npc(0,0,8,16,0,1)
+	
+	--testing
+	--add_partsys(100,100,5,5, 1500,20, 0,0, 1,1, 1)
+	add_partsys(50,100,0,1, 4, 4, 2,0, 1,.5, 0.25)
+	
 end
 
 // routine updates every frame
@@ -33,6 +38,9 @@ function _update()
 	foreach(explosions,update_explosion)
 	update_npc(npc1)
 	update_npc(npc2)
+	
+	foreach(particlesystems, update_partsys)
+	foreach(particles, update_particle)
 
 end
 
@@ -46,6 +54,8 @@ function _draw()
 	foreach(bombpool,draw_bomb)
 	draw_npc(npc1)
 	draw_npc(npc2)
+	
+	foreach(particles, draw_particle)
 	
 	// debug menu setup for
 	// debugging info within game
@@ -431,7 +441,7 @@ end
 -- particle effects
 
 --creates a particle system
-function add_partsys(x,y,xrange,yrange, sduration,pduration, anglemin,anglemax, speed,srange, freq, parent)
+function add_partsys(x,y,xrange,yrange, sduration,pduration, dx,dy, dxrange,dyrange, freq, parent)
 	local partsys = {}
 	--world position of
 	--particle system
@@ -447,15 +457,12 @@ function add_partsys(x,y,xrange,yrange, sduration,pduration, anglemin,anglemax, 
 	partsys.sduration = sduration
 	--time until particles despawn
 	partsys.pduration = pduration
-	--range of particle movement
-	--0-360
- partsys.anglemin = anglemin
- partsys.anglemax =anglemax
- --speed of particles
- partsys.speed =speed
- --range of speed variation:
- --speed +- srange
- partsys.srange =srange
+	--speed / direction of particles
+ partsys.dx = dx
+ partsys.dy = dy
+ --speed / direction range of particles
+ partsys.dxrange = dxrange
+ partsys.dyrange = dyrange
  --frequency of particle spawns
  --spawns every freq frames
  partsys.freq =freq
@@ -472,6 +479,12 @@ end
 
 
 function update_partsys(partsys)
+	--track sys lifetime
+	partsys.sduration -= 1
+	if partsys.sduration < 0 then
+		del(particlesystems,partsys)
+	end
+	
 	--not sure if this is needed...
 	if partsys.parent != nil then
 		partsys.x = partsys.parent.x
@@ -479,24 +492,61 @@ function update_partsys(partsys)
 	end
 	
 	--spawn particle
-	if partsys.sduration % partsys.freq == 0 then
-		add_particle(partsys.x-partsys.xrange + rnd(partsys.xrange*2), partsys.y-partsys.yrange + rnd(partsys.yrange*2), partsys.pduration, partsys.anglemin + rnd(partsys.anglemax-partsys.anglemin), partsys.speed-partsys.srange + rnd(partsys.srange*2))
+	if partsys.freq <=1 then
+		for i=0, 1/partsys.freq do
+			add_particle(partsys.x-partsys.xrange + rnd(partsys.xrange*2),
+															partsys.y-partsys.yrange + rnd(partsys.yrange*2),
+															partsys.pduration,
+															partsys.dx-partsys.dxrange + rnd(partsys.dxrange*2),
+															partsys.dy-partsys.dyrange + rnd(partsys.dyrange*2))
+		end
+	elseif partsys.sduration % partsys.freq == 0 then
+		add_particle(partsys.x-partsys.xrange + rnd(partsys.xrange*2),
+															partsys.y-partsys.yrange + rnd(partsys.yrange*2),
+															partsys.pduration,
+															partsys.dx-partsys.dxrange + rnd(partsys.dxrange*2),
+															partsys.dy-partsys.dyrange + rnd(partsys.dyrange*2))
 	end
 	
-	--track sys lifetime
-	partsys.sduration -= 1
-	if partsys.sduration < 0 then
-		del(particlesystems,partsys)
-	end
 end
 
 --creates a single particle
 --from particle system
-function add_particle(x,y, duration, angle, speed)
+function add_particle(x,y, duration, dx, dy)
 	part = {}
-	--sam finish this!!!!!!
+	part.x = x
+	part.y = y
+	part.duration = duration
+	part.dx = dx
+	part.dy = dy
 	
+	
+	add(particles, part)
+end
 
+function update_particle(part)
+	--update duration
+	part.duration -=1
+	--delete if done
+	if part.duration < 0 then
+		del(particles, part)
+	end
+	
+	--update position
+	part.x += part.dx
+	part.y += part.dy
+	
+end
+
+function draw_particle(part)
+	local mapx = (part.x-(part.x%8))/8
+	local mapy = (part.y-(part.y%8))/8
+	local mapposx = (mapx-(mapx%16)) / 16
+	local mapposy = (mapy-(mapy%16)) / 16
+	
+	if mapposx == player.mapposx and mapposy == player.mapposy then
+			pset(part.x, part.y, 7)
+	end
 end
 -->8
 -- bombs
