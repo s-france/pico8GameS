@@ -639,6 +639,7 @@ function bomb_animation()
  	sset(22,8,6)
  end
 end
+
 function draw_bomb(bomb)
   if (player.mapposx == bomb.mapposx and player.mapposy == bomb.mapposy) then
    spr(bomb.sprite,bomb.x%128,bomb.y%128)
@@ -898,6 +899,17 @@ end
 function swordswing(face)
 	
 end	
+-->8
+--optimizations tab
+// first order of biznes
+// make world coordinate to
+// map cell function and vice
+// versa?
+
+// make cell estimator function
+// for universal cell estimation
+
+// cook any other code opt.
 __gfx__
 00000000111111110000000011111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
 000000001111cc11000cc00011111111222222222f7ff22222ff22222222fff22222222222222222000880002ff222222f62222222ffff22222222222ffff6f2
