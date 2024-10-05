@@ -51,7 +51,7 @@ end
 // using designed update funcs.
 function _draw()
 	cls(1)
-
+	bomb_animation()
 	draw_map()
 	draw_player()
 	foreach(bombpool,draw_bomb)
@@ -632,13 +632,15 @@ end
 // and removes a bomb from the
 // pool when bomb.sprite == 0.
 
+function bomb_animation()
+ if sget(22,8) == 6 then
+ 	sset(22,8,8)
+ else 
+ 	sset(22,8,6)
+ end
+end
 function draw_bomb(bomb)
   if (player.mapposx == bomb.mapposx and player.mapposy == bomb.mapposy) then
-   if sget(22,8) == 6 then
-   	sset(22,8,8)
-   else 
-   	sset(22,8,6)
-   end
    spr(bomb.sprite,bomb.x%128,bomb.y%128)
   end
 end
