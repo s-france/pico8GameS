@@ -165,6 +165,29 @@ function move_player()
 		player.y += player.dy
 		--player.face = 3
 	end
+	
+	
+	//sword
+	if(btnp(4)) then
+		local xmod =-1
+		local ymod =-4
+		
+		if player.face==0 or player.face==3 or player.face==5 then
+			xmod -=8
+		elseif player.face==2 or player.face==4 or player.face==7 then
+			xmod +=8
+		end
+		
+		if player.face==3 or player.face==4 then
+			ymod +=8
+		elseif player.face==5 or player.face==6 or player.face==7 then
+			ymod +=16
+		end
+	
+		add_partsys(player.x+xmod,player.y+ymod,0,1, 4, 4, 2,0, 1,.5, .25)
+		
+	end
+	
 end
 
 // update player
