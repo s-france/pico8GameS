@@ -553,7 +553,7 @@ function draw_particle(part)
 	local mapposy = (mapy-(mapy%16)) / 16
 	
 	if mapposx == player.mapposx and mapposy == player.mapposy then
-			pset(part.x, part.y, 7)
+			pset(part.x%128, part.y%128, 7)
 	end
 end
 -->8
@@ -608,6 +608,7 @@ end
 function update_bomb(bomb)
 	if (bomb.timer == 0) then
 	 bomb.sprite = 0
+	 add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
 	 del(bombpool,bomb)
  	local explosion = {}
  		explosion.x = bomb.x
