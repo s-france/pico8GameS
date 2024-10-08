@@ -179,7 +179,27 @@ end
 // the player when called
 
 function update_player()
-
+	
+	
+	if btnp(0) then
+		player.face = 3
+	elseif btnp(1) then
+		player.face = 4
+	elseif btnp(2) then
+	 player.face = 1
+	elseif btnp(3) then
+		player.face = 6
+	elseif btnp(0) and btnp(2) then 
+		player.face = 0
+	elseif btnp(0) and btnp(3) then 
+		player.face = 5
+	elseif btnp(1) and btnp(2) then 
+		player.face = 2
+	elseif btnp(1) and btnp(3) then 
+		player.face = 7
+	end
+	
+	
 	--process input, update world pos
 	// called from above
 	move_player()
@@ -875,21 +895,21 @@ function opendoor(face)
 			 player.keys -= 1
   		mset((player.x/8),(player.y/8-1),0)
 		end
-	elseif face == 4 then
+	elseif face == 3 then
 		contentflag = fget(mget((player.x/8-1),(player.y/8)), 2)
 		if (contentflag == true and player.keys >0) then
 			 player.openflag = true
 			 player.keys -= 1
   		mset((player.x/8-1),(player.y/8),0)
 		end
-	elseif face == 5 then
+	elseif face == 4 then
 		contentflag = fget(mget((player.x/8+1),(player.y/8)), 2)
 		if (contentflag == true and player.keys >0) then
 			 player.openflag = true
 			 player.keys -= 1
   		mset((player.x/8+1),(player.y/8),0)
 		end
-	elseif face == 7 then
+	elseif face == 6 then
 		contentflag = fget(mget((player.x/8),(player.y/8+1)), 2)
 		if (contentflag == true and player.keys >0) then
 			 player.openflag = true
