@@ -180,7 +180,6 @@ end
 
 function update_player()
 	
-	
 	if btnp(0) then
 		player.face = 3
 	elseif btnp(1) then
@@ -190,13 +189,13 @@ function update_player()
 	elseif btnp(3) then
 		player.face = 6
 	elseif btnp(0) and btnp(2) then 
-		player.face = 0
+	 player.face = 0
 	elseif btnp(0) and btnp(3) then 
 		player.face = 5
 	elseif btnp(1) and btnp(2) then 
 		player.face = 2
 	elseif btnp(1) and btnp(3) then 
-		player.face = 7
+	 player.face = 7
 	end
 	
 	
