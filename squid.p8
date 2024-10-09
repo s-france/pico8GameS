@@ -670,17 +670,7 @@ end
 function update_explosion(explosion)
 	local xcell = (explosion.x/8)
 	local ycell = (explosion.y/8)
-	if (xcell - flr(xcell) > 0.5) then
-		xcell = ceil(xcell)
-	else
-	 xcell = flr(xcell)
-	end	
-	if (ycell - flr(ycell) > 0.5) then
-	 ycell = ceil(ycell)
-	else
-	 ycell = flr(ycell)
-	end
-	
+	xyestimator(xcell,ycell)
 	local cells = {}
 	for i =-1,1 do
 	 for j = -1,1 do
@@ -933,6 +923,24 @@ end
 // for universal cell estimation
 
 // cook any other code opt.
+
+
+// we are going to make an x,y
+// estimator function for opening
+// shit/the explosion function
+
+function xyestimator(x,y)
+ if (x - flr(x) > 0.5) then
+		x = ceil(x)
+	else
+	 x = flr(x)
+	end	
+	if (y - flr(y) > 0.5) then
+	 y = ceil(y)
+	else
+	 y = flr(y)
+	end
+end
 __gfx__
 00000000111111110000000011111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
 000000001111cc11000cc00011111111222222222f7ff22222ff22222222fff22222222222222222000880002ff222222f62222222ffff22222222222ffff6f2
