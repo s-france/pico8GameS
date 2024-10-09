@@ -721,8 +721,8 @@ end
 // although we may add in large
 // chests as well
 function openchest(face)
-	local xtemp = 
-	local ytemp = 
+	local xtemp = player.x/8
+	local ytemp = player.y/8
 	
 	local contentflag = false
  if face == 0 then
