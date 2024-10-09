@@ -41,14 +41,15 @@ function _update()
 	
 	foreach(particlesystems, update_partsys)
 	foreach(particles, update_particle)
-
 end
+
+
 
 // routine updates every frame
 // using designed update funcs.
 function _draw()
 	cls(1)
-
+	bomb_animation()
 	draw_map()
 	draw_player()
 	foreach(bombpool,draw_bomb)
@@ -377,12 +378,12 @@ end
 
 function make_npc(mapposx,mapposy,xpos,ypos,dx,dy)
 	local npc = {}
-		npc.x =xpos + mapposx*128 --x world space
-		npc.y =ypos + mapposy*128 --y world space
-		npc.dx =dx
-		npc.dy =dy
-		npc.mapposx =mapposx
-		npc.mapposy =mapposy
+		npc.x = xpos + mapposx*128 --x world space
+		npc.y = ypos + mapposy*128 --y world space
+		npc.dx = dx
+		npc.dy = dy
+		npc.mapposx = mapposx
+		npc.mapposy = mapposy
 
 		npc.sprite =10
 	
@@ -935,6 +936,14 @@ end
 
 function yest(y)
  return flr(y+0.5)
+end
+
+function bomb_animation()
+	if (sget(22,8) == 8) then
+		sset(22,8,6)
+	else
+		sset(22,8,8)
+	end
 end
 __gfx__
 00000000111111110000000011111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
