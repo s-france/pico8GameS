@@ -68,14 +68,15 @@ function _draw()
 	print("explosions: ") 
 	print(explosions)
 	print("x,y")
-	print(player.x)
-	print(player.y)
+	print(player.x/8)
+	print(ceil(player.x/8))
+	print(player.y/8)
+	print(ceil(player.y/8))
 	print("bombs")
 	print(player.bombs)
 	print("keys")
 	print(player.keys)
-	print("player.x")
-	print(flr(player.x/8))
+	print(player.openflag)
 
 end
 -->8
@@ -682,6 +683,9 @@ function update_explosion(explosion)
 	 end
 	end
 	foreach(cells,explode_tile)
+	del(explosion)
+	del(cells)
+	sfx(6)
 end
 
 function explode_tile(pair)
@@ -689,11 +693,11 @@ function explode_tile(pair)
 		if fget(mget(pair.xcell,pair.ycell),5) then
 
 		else
-		 sfx(6)
 		 sfx(7)
 			mset(pair.xcell, pair.ycell,20)
 	 end
 	end
+	del(pair)
 end
 -->8
 -- enemy
@@ -706,21 +710,22 @@ end
 // although we may add in large
 // chests as well
 function openchest(face)
-	local xtemp = player.x/8
-	local ytemp = player.y/8
-	xyestimator(xtemp,ytemp)
+	local pair = {}
+ pair.x = player.x/8
+ pair.y = player.y/8
+	xyestimator(pair.x,pair.y)
 	local contentflag = false
  if face == 0 then
-  player.openflag = fget(mget((xtemp-1),(ytemp-1)), 5)
+  player.openflag = fget(mget((pair.x-1),(pair.y-1)), 5)
   if ( player.openflag == true) then
   	for i=1,4 do
-  		contentflag = fget(mget((xtemp-1),(ytemp-1)), i)
+  		contentflag = fget(mget((pair.x-1),(pair.y-1)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
-  			mset((xtemp-1),(ytemp-1),24)
+  			mset((pair.x-1),(pair.y-1),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
-  			mset((xtemp-1),(ytemp-1),24)
+  			mset((pair.x-1),(pair.y-1),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -731,16 +736,16 @@ function openchest(face)
   	end
   end
  elseif face == 1 then
-  player.openflag = fget(mget((xtemp),(ytemp-1)), 5)
+  player.openflag = fget(mget((pair.x),(pair.y-1)), 5)
   if ( player.openflag == true) then
   	for i=1,4 do
-  		contentflag = fget(mget((xtemp),(ytemp-1)), i)
+  		contentflag = fget(mget((pair.x),(pair.y-1)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
-  			mset((xtemp),(ytemp-1),24)
+  			mset((pair.x),(pair.y-1),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
-  			mset((xtemp),(ytemp-1),24)
+  			mset((pair.x),(pair.y-1),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -751,16 +756,16 @@ function openchest(face)
   	end
   end
  elseif face == 2 then
-  player.openflag = fget(mget((xtemp+1),(ytemp-1)), 5)
+  player.openflag = fget(mget((pair.x+1),(pair.y-1)), 5)
   if ( player.openflag == true) then
   	for i=1,4 do
-  		contentflag = fget(mget((xtemp+1),(ytemp-1)), i)
+  		contentflag = fget(mget((pair.x+1),(pair.y-1)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
-  			mset((xtemp+1),(ytemp-1),24)
+  			mset((pair.x+1),(pair.y-1),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
-  			mset((xtemp+1),(ytemp-1),24)
+  			mset((pair.x+1),(pair.y-1),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -771,16 +776,16 @@ function openchest(face)
   	end
   end
 	elseif face == 3 then
-	   player.openflag = fget(mget((xtemp-1),(ytemp)), 5)
+	   player.openflag = fget(mget((pair.x-1),(pair.y)), 5)
   if ( player.openflag == true) then
   	for i=1,4 do
-  		contentflag = fget(mget((xtemp-1),(ytemp)), i)
+  		contentflag = fget(mget((pair.x-1),(pair.y)), i)
   		  		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
-  			mset((xtemp-1),(ytemp),24)
+  			mset((pair.x-1),(pair.y),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
-  			mset((xtemp-1),(ytemp),24)
+  			mset((pair.x-1),(pair.y),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -791,16 +796,16 @@ function openchest(face)
   	end
   end
 	elseif face == 4 then
-	  player.openflag = fget(mget((xtemp+1),(ytemp)), 5)
+	  player.openflag = fget(mget((pair.x+1),(pair.y)), 5)
   if ( player.openflag == true) then
   	for i=1,4 do
-  		contentflag = fget(mget((xtemp+1),(ytemp)), i)
+  		contentflag = fget(mget((pair.x+1),(pair.y)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
-  			mset((xtemp+1),(ytemp),24)
+  			mset((pair.x+1),(pair.y),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
-  			mset((xtemp+1),(ytemp),24)
+  			mset((pair.x+1),(pair.y),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -811,16 +816,16 @@ function openchest(face)
   	end
   end
 	elseif face == 5 then
-	  player.openflag = fget(mget((xtemp-1),(ytemp+1)), 5)
+	  player.openflag = fget(mget((pair.x-1),(pair.y+1)), 5)
   if ( player.openflag == true) then
   	for i=1,4 do
-  		contentflag = fget(mget((xtemp-1),(ytemp+1)), i)
+  		contentflag = fget(mget((pair.x-1),(pair.y+1)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
-  			mset((xtemp-1),(ytemp+1),24)
+  			mset((pair.x-1),(pair.y+1),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
-  			mset((xtemp-1),(ytemp+1),24)
+  			mset((pair.x-1),(pair.y+1),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -831,16 +836,16 @@ function openchest(face)
   	end
   end
 	elseif face == 6 then
-	  player.openflag = fget(mget((xtemp),(ytemp+1)), 5)
+	  player.openflag = fget(mget((pair.x),(pair.y+1)), 5)
   if ( player.openflag == true) then
   	for i=1,4 do
-  		contentflag = fget(mget((xtemp),(ytemp+1)), i)
+  		contentflag = fget(mget((pair.x),(pair.y+1)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
-  			mset((xtemp),(ytemp+1),24)
+  			mset((pair.x),(pair.y+1),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
-  			mset((xtemp),(ytemp+1),24)
+  			mset((pair.x),(pair.y+1),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -851,16 +856,16 @@ function openchest(face)
   	end
   end
 	else
-		player.openflag = fget(mget((xtemp+1),(ytemp+1)), 5)
+		player.openflag = fget(mget((pair.x+1),(pair.y+1)), 5)
   if ( player.openflag == true) then
   	for i=1,4 do
-  		contentflag = fget(mget((xtemp+1),(ytemp+1)), i)
+  		contentflag = fget(mget((pair.x+1),(pair.y+1)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
-  			mset((xtemp+1),(ytemp+1),24)
+  			mset((pair.x+1),(pair.y+1),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
-  			mset((xtemp+1),(xtemp+1),24)
+  			mset((pair.x+1),(pair.y+1),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -934,15 +939,15 @@ end
 // shit/the explosion function
 
 function xyestimator(x,y)
- if (x - flr(x) > 0.5) then
+ if ((x - flr(x)) > 0.5) then
 		x = ceil(x)
 	else
 	 x = flr(x)
-	end	
-	if (y - flr(y) > 0.5) then
-	 y = ceil(y)
+	end
+	if ((y - flr(y)) > 0.5) then
+	  y = ceil(y)
 	else
-	 y = flr(y)
+	  y = flr(y)
 	end
 end
 __gfx__
