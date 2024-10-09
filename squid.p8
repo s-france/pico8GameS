@@ -697,7 +697,6 @@ function update_explosion(explosion)
 	 end
 	end
 	foreach(cells,explode_tile)
-
 end
 
 function explode_tile(pair)
@@ -722,6 +721,9 @@ end
 // although we may add in large
 // chests as well
 function openchest(face)
+	local xtemp = 
+	local ytemp = 
+	
 	local contentflag = false
  if face == 0 then
   player.openflag = fget(mget((player.x/8-1),(player.y/8-1)), 5)
