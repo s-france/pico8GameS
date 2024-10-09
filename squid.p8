@@ -23,7 +23,7 @@ function _init()
 	particles = {}
 	npc1 = make_npc(1,0,70,35,1,1)
 	npc2 = make_npc(0,0,8,16,0,1)
-	
+	music(0)
 	--testing
 	add_partsys(100,100,1,1, 2,5, 0,0, 2,2, 0.0625)
 	add_partsys(50,100,0,1, 4, 4, 2,0, 1,.5, 0.25)
