@@ -74,6 +74,8 @@ function _draw()
 	print(player.bombs)
 	print("keys")
 	print(player.keys)
+	print("player.x")
+	print(flr(player.x/8))
 
 end
 -->8
@@ -723,7 +725,7 @@ end
 function openchest(face)
 	local xtemp = player.x/8
 	local ytemp = player.y/8
-	
+	xyestimator(xtemp,ytemp)
 	local contentflag = false
  if face == 0 then
   player.openflag = fget(mget((xtemp-1),(ytemp-1)), 5)
@@ -892,34 +894,37 @@ end
 // faces are 1, 4,5, 7
 // run check on keys, sprite
 function opendoor(face)
+	local xtemp = player.x/8
+	local ytemp = player.y/8
+	xyestimator(xtemp,ytemp)
 	local contentflag = false
 	if face == 1 then
-		contentflag = fget(mget((player.x/8),(player.y/8-1)), 2)
+		contentflag = fget(mget((xtemp),(ytemp-1)), 2)
 		if (contentflag == true and player.keys >0) then
 				player.openflag = true
 			 player.keys -= 1
-  		mset((player.x/8),(player.y/8-1),0)
+  		mset((xtemp),(ytemp-1),0)
 		end
 	elseif face == 3 then
-		contentflag = fget(mget((player.x/8-1),(player.y/8)), 2)
+		contentflag = fget(mget((xtemp-1),(ytemp)), 2)
 		if (contentflag == true and player.keys >0) then
 			 player.openflag = true
 			 player.keys -= 1
-  		mset((player.x/8-1),(player.y/8),0)
+  		mset((xtemp-1),(ytemp),0)
 		end
 	elseif face == 4 then
-		contentflag = fget(mget((player.x/8+1),(player.y/8)), 2)
+		contentflag = fget(mget((xtemp+1),(ytemp)), 2)
 		if (contentflag == true and player.keys >0) then
 			 player.openflag = true
 			 player.keys -= 1
-  		mset((player.x/8+1),(player.y/8),0)
+  		mset((xtemp+1),(ytemp),0)
 		end
 	elseif face == 6 then
-		contentflag = fget(mget((player.x/8),(player.y/8+1)), 2)
+		contentflag = fget(mget((xtemp),(ytemp+1)), 2)
 		if (contentflag == true and player.keys >0) then
 			 player.openflag = true
 			 player.keys -= 1
-  		mset((player.x/8),(player.y/8+1),0)
+  		mset((xtemp),(ytemp+1),0)
 		end
 	end
 end
