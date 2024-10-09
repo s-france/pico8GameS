@@ -23,7 +23,7 @@ function _init()
 	particles = {}
 	npc1 = make_npc(1,0,70,35,1,1)
 	npc2 = make_npc(0,0,8,16,0,1)
-	
+	music(0)
 	--testing
 	add_partsys(100,100,1,1, 2,5, 0,0, 2,2, 0.0625)
 	--horizontal slash
@@ -46,14 +46,15 @@ function _update()
 	
 	foreach(particlesystems, update_partsys)
 	foreach(particles, update_particle)
-
 end
+
+
 
 // routine updates every frame
 // using designed update funcs.
 function _draw()
 	cls(1)
-
+	bomb_animation()
 	draw_map()
 	draw_player()
 	foreach(bombpool,draw_bomb)
@@ -70,8 +71,6 @@ function _draw()
 	print("y: ")
 	print(player.mapposy)
 	--]]	
-	print("explosions: ") 
-	print(explosions)
 	print("x,y")
 	print(player.x)
 	print(player.y)
@@ -79,6 +78,7 @@ function _draw()
 	print(player.bombs)
 	print("keys")
 	print(player.keys)
+
 
 end
 -->8
@@ -383,12 +383,12 @@ end
 
 function make_npc(mapposx,mapposy,xpos,ypos,dx,dy)
 	local npc = {}
-		npc.x =xpos + mapposx*128 --x world space
-		npc.y =ypos + mapposy*128 --y world space
-		npc.dx =dx
-		npc.dy =dy
-		npc.mapposx =mapposx
-		npc.mapposy =mapposy
+		npc.x = xpos + mapposx*128 --x world space
+		npc.y = ypos + mapposy*128 --y world space
+		npc.dx = dx
+		npc.dy = dy
+		npc.mapposx = mapposx
+		npc.mapposy = mapposy
 
 		npc.sprite =10
 	
@@ -679,9 +679,8 @@ end
 
 
 function update_explosion(explosion)
-	local xcell = (explosion.x/8)
-	local ycell = (explosion.y/8)
-	xyestimator(xcell,ycell)
+	local xcell = xest(explosion.x/8)
+	local ycell = yest(explosion.y/8)
 	local cells = {}
 	for i =-1,1 do
 	 for j = -1,1 do
@@ -694,6 +693,8 @@ function update_explosion(explosion)
 	 end
 	end
 	foreach(cells,explode_tile)
+	del(explosions,explosion)
+	sfx(6)
 end
 
 function explode_tile(pair)
@@ -701,11 +702,11 @@ function explode_tile(pair)
 		if fget(mget(pair.xcell,pair.ycell),5) then
 
 		else
-		 sfx(6)
 		 sfx(7)
 			mset(pair.xcell, pair.ycell,20)
 	 end
 	end
+	del(pair)
 end
 -->8
 -- enemy
@@ -718,9 +719,8 @@ end
 // although we may add in large
 // chests as well
 function openchest(face)
-	local xtemp = player.x/8
-	local ytemp = player.y/8
-	
+	local xtemp = xest(player.x/8)
+ local ytemp = yest(player.y/8)
 	local contentflag = false
  if face == 0 then
   player.openflag = fget(mget((xtemp-1),(ytemp-1)), 5)
@@ -729,9 +729,11 @@ function openchest(face)
   		contentflag = fget(mget((xtemp-1),(ytemp-1)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
+  		 sfx(8)
   			mset((xtemp-1),(ytemp-1),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
+  		 sfx(8)
   			mset((xtemp-1),(ytemp-1),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
@@ -749,9 +751,11 @@ function openchest(face)
   		contentflag = fget(mget((xtemp),(ytemp-1)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
+  		 sfx(8)
   			mset((xtemp),(ytemp-1),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
+  		 sfx(8)
   			mset((xtemp),(ytemp-1),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
@@ -769,9 +773,11 @@ function openchest(face)
   		contentflag = fget(mget((xtemp+1),(ytemp-1)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
+  		 sfx(8)
   			mset((xtemp+1),(ytemp-1),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
+  		 sfx(8)
   			mset((xtemp+1),(ytemp-1),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
@@ -789,9 +795,11 @@ function openchest(face)
   		contentflag = fget(mget((xtemp-1),(ytemp)), i)
   		  		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
+  		 sfx(8)
   			mset((xtemp-1),(ytemp),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
+  		 sfx(8)
   			mset((xtemp-1),(ytemp),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
@@ -809,9 +817,11 @@ function openchest(face)
   		contentflag = fget(mget((xtemp+1),(ytemp)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
+  		 sfx(8)
   			mset((xtemp+1),(ytemp),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
+  		 sfx(8)
   			mset((xtemp+1),(ytemp),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
@@ -829,9 +839,11 @@ function openchest(face)
   		contentflag = fget(mget((xtemp-1),(ytemp+1)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
+  		 sfx(8)
   			mset((xtemp-1),(ytemp+1),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
+  		 sfx(8)
   			mset((xtemp-1),(ytemp+1),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
@@ -849,9 +861,11 @@ function openchest(face)
   		contentflag = fget(mget((xtemp),(ytemp+1)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
+  		 sfx(8)
   			mset((xtemp),(ytemp+1),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
+  		 sfx(8)
   			mset((xtemp),(ytemp+1),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
@@ -869,10 +883,12 @@ function openchest(face)
   		contentflag = fget(mget((xtemp+1),(ytemp+1)), i)
   		if (contentflag == true and i == 1 ) then
   		 player.bombs += 5
+  		 sfx(8)
   			mset((xtemp+1),(ytemp+1),24)
   		elseif (contentflag == true and i== 2 ) then
   		 player.keys += 1
-  			mset((xtemp+1),(xtemp+1),24)
+  		 sfx(8)
+  			mset((xtemp+1),(ytemp+1),24)
   		elseif (contentflag == true and i==3 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -889,34 +905,40 @@ end
 // faces are 1, 4,5, 7
 // run check on keys, sprite
 function opendoor(face)
+	local xtemp = xest(player.x/8)
+	local ytemp = yest(player.y/8)
 	local contentflag = false
 	if face == 1 then
-		contentflag = fget(mget((player.x/8),(player.y/8-1)), 2)
+		contentflag = fget(mget((xtemp),(ytemp-1)), 2)
 		if (contentflag == true and player.keys >0) then
 				player.openflag = true
 			 player.keys -= 1
-  		mset((player.x/8),(player.y/8-1),0)
+			 sfx(9)
+  		mset((xtemp),(ytemp-1),0)
 		end
 	elseif face == 3 then
-		contentflag = fget(mget((player.x/8-1),(player.y/8)), 2)
+		contentflag = fget(mget((xtemp-1),(ytemp)), 2)
 		if (contentflag == true and player.keys >0) then
 			 player.openflag = true
 			 player.keys -= 1
-  		mset((player.x/8-1),(player.y/8),0)
+			 sfx(9)
+  		mset((xtemp-1),(ytemp),0)
 		end
 	elseif face == 4 then
-		contentflag = fget(mget((player.x/8+1),(player.y/8)), 2)
+		contentflag = fget(mget((xtemp+1),(ytemp)), 2)
 		if (contentflag == true and player.keys >0) then
 			 player.openflag = true
 			 player.keys -= 1
-  		mset((player.x/8+1),(player.y/8),0)
+			 sfx(9)
+  		mset((xtemp+1),(ytemp),0)
 		end
 	elseif face == 6 then
-		contentflag = fget(mget((player.x/8),(player.y/8+1)), 2)
+		contentflag = fget(mget((xtemp),(ytemp+1)), 2)
 		if (contentflag == true and player.keys >0) then
 			 player.openflag = true
 			 player.keys -= 1
-  		mset((player.x/8),(player.y/8+1),0)
+			 sfx(9)
+  		mset((xtemp),(ytemp+1),0)
 		end
 	end
 end
@@ -942,16 +964,19 @@ end
 // estimator function for opening
 // shit/the explosion function
 
-function xyestimator(x,y)
- if (x - flr(x) > 0.5) then
-		x = ceil(x)
+function xest(x)
+	return flr(x+0.5)
+end
+
+function yest(y)
+ return flr(y+0.5)
+end
+
+function bomb_animation()
+	if (sget(22,8) == 8) then
+		sset(22,8,6)
 	else
-	 x = flr(x)
-	end	
-	if (y - flr(y) > 0.5) then
-	 y = ceil(y)
-	else
-	 y = flr(y)
+		sset(22,8,8)
 	end
 end
 __gfx__
@@ -1127,7 +1152,9 @@ __sfx__
 611000001f0201f0201f0201f0201f0201f0201f0201f0201d0201d0201d0201d0201d0201d0251d0251d025210201f020210201f020210202302026020240202302023020230202302023020230252302523025
 011000001d0201d0201d0201d0201d0201d0201d0201d0201b0201b0201b0201b0201b0201b0251b0251b0251f0201d0201b020180201d0201b02018020110212102421025210222102021025210252102521025
 030700001064015640176301063017620136201761010610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-100700001364010640106301063010620106201061010610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+110700001364010640106301063010620106201061010610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+490c00000f645000000000000000000000000000000000001f5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+010c00002964500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __music__
 01 00024344
 00 04024344
