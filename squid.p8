@@ -683,8 +683,7 @@ function update_explosion(explosion)
 	 end
 	end
 	foreach(cells,explode_tile)
-	del(explosion)
-	del(cells)
+	del(explosions,explosion)
 	sfx(6)
 end
 
