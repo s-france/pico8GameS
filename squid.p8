@@ -202,43 +202,25 @@ end
 
 function update_player()
 	
-	if btnp(0) then
-		player.face = 3
-	elseif btnp(1) then
-		player.face = 4
-	elseif btnp(2) then
-	 player.face = 1
-	elseif btnp(3) then
-		player.face = 6
-	elseif btnp(0) and btnp(2) then 
-	 player.face = 0
-	elseif btnp(0) and btnp(3) then 
-		player.face = 5
-	elseif btnp(1) and btnp(2) then 
-		player.face = 2
-	elseif btnp(1) and btnp(3) then 
-	 player.face = 7
-	end
-	
-	
 	--process input, update world pos
 	// called from above
 	move_player()
 	
 	--update player face direction
-	local prev = player.face
 	
-	if player.dx>0 then
+ local prev = player.face
+	
+	if btn(1) then
 		player.face = 5
-	elseif player.dx<0 then
+	elseif btn(0) then
 		player.face = 3
 	else
 		player.face = 4
 	end
 	
-	if player.dy >0 then
+	if btn(3) then
 		player.face +=3
-	elseif player.dy < 0 then
+	elseif btn(2) then
 	 player.face -=3
 	end
 	
@@ -248,6 +230,7 @@ function update_player()
 		player.face -=1
 	end
 	
+
 	
 
 	
