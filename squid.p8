@@ -1048,6 +1048,11 @@ function draw_hitbox(hb)
 							hb.y+(.5*hb.ylen), 8)
 	end
 end
+
+
+
+function pick_up_items()
+end
 -->8
 --arrows and bow
 // this tab contains code for
@@ -1059,11 +1064,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	local arrow = {}
 	--left
 	if (player.face == 0 or player.face ==3 or player.face ==5) then
-		arrow.x = xpos + mapposx*128 - 4 // world space
+		arrow.x = xpos + mapposx*128 - 8 // world space
 		arrow.dx = -1.0
 	--right
  elseif (player.face ==2 or player.face ==4 or player.face ==7) then
-	 arrow.x = xpos + mapposx*128 + 4 // world space
+	 arrow.x = xpos + mapposx*128 + 8 // world space
 		arrow.dx = 1.0
 	else
 		arrow.x = xpos + mapposx*128
@@ -1072,11 +1077,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	
 	--up 
  if (player.face ==0 or player.face ==1 or player.face ==2) then
-		arrow.y = ypos + mapposy*128 - 4 // world space
+		arrow.y = ypos + mapposy*128 - 8 // world space
 		arrow.dy = -1.0
 	--down
 	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
-		arrow.y = ypos + mapposy*128 + 4 // world space
+		arrow.y = ypos + mapposy*128 + 8 // world space
 		arrow.dy = 1.0
 	else
 		arrow.y = ypos + mapposy*128
@@ -1115,15 +1120,18 @@ end
 
 
 function update_arrow(arrow)
-	if ( collisions(arrow).r or collisions(arrow).l
-	 or collisions(arrow).tr or collisions(arrow).tl 
-	or collisions(arrow).bl or collisions(arrow).br) then
+	if ( collisions(arrow).r or collisions(arrow).l) then
 	 arrow.dx = 0 
 	end
-	if ( collisions(arrow).t or collisions(arrow).b
-	or collisions(arrow).tr or collisions(arrow).tl 
-	or collisions(arrow).bl or collisions(arrow).br) then
+	if ( collisions(arrow).t or collisions(arrow).b) then
 		arrow.dy = 0
+	end
+	if	arrow.sprite == 40 then
+	 if (collisions(arrow).tr or collisions(arrow).tl 
+	or collisions(arrow).bl or collisions(arrow).br) then
+		arrow.dx = 0
+		arrow.dy = 0
+		end
 	end
 	
 	
