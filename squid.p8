@@ -986,28 +986,42 @@ end
 // combat. if a "combat" tab
 // is formalized later, this 
 // code will be moved there.
-function fire_arrow(mapposx,mapposy,xpos,ypos,dx,dy,timer,sprite)
+function fire_arrow(mapposx,mapposy,xpos,ypos,timer)
 	local arrow = {}
 	--left
 	if (player.face == 0 or player.face ==3 or player.face ==5) then
 		arrow.x = xpos + mapposx*128 - 8 // world space
+		arrow.dx = -1.2
 	--right
  elseif (player.face ==2 or player.face ==4 or player.face ==7) then
 	 arrow.x = xpos + mapposx*128 + 8 // world space
+		arrow.dx = 1.2
 	else
 		arrow.x = xpos + mapposx*128
+		arrow.dx = 0
 	end
 	
 	--up 
  if (player.face ==0 or player.face ==1 or player.face ==2) then
 		arrow.y = ypos + mapposy*128 - 8 // world space
+		arrow.dy = -1.2
 	--down
 	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
 		arrow.y = ypos + mapposy*128 + 8 // world space
+		arrow.dy = 1.2
 	else
 		arrow.y = ypos + mapposy*128
+		arrow.dy = 0
 	end
-
+	
+	arrow.timer = 40
+	
+	if ((arrow.dx == 0) or (arrow.dy == 0)) then
+		arrow.sprite == 39
+	else 
+	 arrow.sprite == 40
+	end
+	add(arrowpool, arrow)
 end
 __gfx__
 00000000111111110000000011111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
