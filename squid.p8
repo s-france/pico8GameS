@@ -170,13 +170,6 @@ function move_player()
 		player.y += player.dy
 		--player.face = 3
 	end
-	
-	
-	//sword
-	if(btnp(4)) then
-		sword()
-	end
-	
 end
 
 // update player
@@ -237,6 +230,10 @@ function update_player()
 			add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128)
  	end
  end
+ //sword
+	if(btnp(4)) then
+		sword()
+	end
 end
 
 // draw player
@@ -578,7 +575,6 @@ end
 // explosion (aka bomb.sprite = 0)
 function update_bomb(bomb)
 	if (bomb.timer == 0) then
-	 bomb.sprite = 0
 	 add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
 	 del(bombpool,bomb)
  	local explosion = {}
@@ -1035,8 +1031,28 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	add(arrowpool, arrow)
 end
 
-function update_arrow()
-	
+
+
+function update_arrow(arrow)
+	if arrow.timer == 0 then
+	 del(arrowpool,arrow)
+	else
+		arrow.timer -= 1
+		arrow.x += arrow.dx
+		arrow.y += arrow.dy
+		
+	end
+	--update mappos
+	local mapx = (arrow.x-(arrow.x%8))/8
+	local mapy = (arrow.y-(arrow.y%8))/8
+	arrow.mapposx = (mapx-(mapx%16)) / 16
+	arrow.mapposy = (mapy-(mapy%16)) / 16
+end
+
+function draw_arrow(arrow)
+	if (player.mapposx == arrow.mapposx and player.mapposy == arrow.mapposy) then
+   spr(arrow.sprite,bomb.x%128,bomb.y%128)
+ end
 end
 __gfx__
 00000000111111110000000011111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
