@@ -16,6 +16,7 @@ __lua__
 // initialize all objects and
 // objectpools
 function _init()
+	hitboxes = {}
 	make_player()
 	bombpool = {}
 	explosions = {}
@@ -25,14 +26,8 @@ function _init()
 	npc1 = make_npc(1,0,70,35,1,1)
 	npc2 = make_npc(0,0,8,16,0,1)
 	//music(0)
+	
 	--testing
-	add_partsys(100,100,1,1, 2,5, 0,0, 2,2, 0.0625)
-	--horizontal slash
-	add_partsys(50,100,0,1, 4, 4, 2,0, 1,.5, 0.25)
-	--vertical slash
-	add_partsys(30,100,1,0, 4, 4, 0,2, .5,1, 0.25)
-	--diagonal slash
-	add_partsys(70,100,.5,.5, 4, 4, 2,2, .5,.5, 0.25)
 	
 end
 
@@ -46,6 +41,7 @@ function _update()
 	update_npc(npc2)
 	foreach(particlesystems, update_partsys)
 	foreach(particles, update_particle)
+	foreach(hitboxes, update_hitbox)
 end
 
 
@@ -75,6 +71,8 @@ function _draw()
 	print(player.bombs)
 	print("keys")
 	print(player.keys)
+	
+	foreach(hitboxes, draw_hitbox)
 
 
 end
@@ -110,6 +108,9 @@ function make_player()
  player.raft = 0
  player.bow = 0
  player.arrows = 0
+	
+	--player hurtbox, tag = 0 
+ add_hitbox(0, 4,4, 7,7, -1, player)
 
 end
 
@@ -581,6 +582,9 @@ function update_bomb(bomb)
 	 bomb.sprite = 0
 	 add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
 	 del(bombpool,bomb)
+	 
+	 add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
+	 
  	local explosion = {}
  		explosion.x = bomb.x
  		explosion.y = bomb.y
@@ -916,8 +920,8 @@ end
 
 // collisions
 //
-// reads collions around an object
-// for all 8 surrounding cells,
+// reads map collions around an object
+// for all 8 surrounding map cells,
 // returns cell information
 
 function collisions(obj)
@@ -988,6 +992,60 @@ function collisions(obj)
 	return cols
 end
 
+
+function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
+	hitbox = {}
+	
+	hitbox.tag = tag
+	hitbox.x = x
+	hitbox.y = y
+	hitbox.xlen = xlen
+	hitbox.ylen = ylen
+	--lifetime of hb
+	---set duration = -1
+	---for parent-based lifetime
+	hitbox.duration = duration
+	
+	if parent != nil then
+	hitbox.parent = parent
+	end
+	
+	add(hitboxes, hitbox)
+end
+
+function update_hitbox(hb)
+	--track lifetime
+	--lifetime based on duration
+	if hb.duration != -1 then
+		hb.duration -= 1
+		if hb.duration == 0 then
+			del(hitboxes, hb)
+		end
+	--lifetime based on parent
+	elseif hb.parent == nil then
+		del(hitboxes, hb)
+	end
+	
+	--add oncollision function here!!!
+	
+	
+end
+
+--for debug purposes only
+function draw_hitbox(hb)
+	if hb.parent != nil then
+		rect(hb.x+hb.parent.x-(.5*hb.xlen),
+							hb.y+hb.parent.y-(.5*hb.ylen),
+							hb.x+hb.parent.x+(.5*hb.xlen),
+							hb.y+hb.parent.y+(.5*hb.ylen), 8)
+	else
+
+		rect(hb.x-(.5*hb.xlen),
+							hb.y-(.5*hb.ylen),
+							hb.x+(.5*hb.xlen),
+							hb.y+(.5*hb.ylen), 8)
+	end
+end
 -->8
 --arrows and bow
 // this tab contains code for
