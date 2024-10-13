@@ -101,7 +101,7 @@ function make_player()
 	player.mapposy = 0
  player.sprite = 2
  player.face = 3
- player.openflag = false
+ player.interaction = false
  // player items
  player.itempool = {}
  player.bombs = 0
@@ -224,11 +224,10 @@ function update_player()
  	// check for if bomb has been placed
 -- if ( btnp(5) then	
 -- 	readinfo(player.face) end
-	player.openflag = false
+	player.interaction = false
 	if ( btnp(5)) then
-		openchest(player.face)
-		opendoor(player.face)
-		if ( player.openflag==false	 and player.bombs>0 ) then
+		interact(player.face)
+		if ( player.interaction==false	 and player.bombs>0 ) then
 	 	player.bombs -= 1
 			add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128)
  	end
@@ -661,8 +660,8 @@ function openchest(face)
  local ytemp = yest(player.y/8)
 	local contentflag = false
  if face == 0 then
-  player.openflag = fget(mget((xtemp-1),(ytemp-1)), 5)
-  if ( player.openflag == true) then
+  player.interaction = fget(mget((xtemp-1),(ytemp-1)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp-1),(ytemp-1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -683,8 +682,8 @@ function openchest(face)
   	end
   end
  elseif face == 1 then
-  player.openflag = fget(mget((xtemp),(ytemp-1)), 5)
-  if ( player.openflag == true) then
+  player.interaction = fget(mget((xtemp),(ytemp-1)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp),(ytemp-1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -705,8 +704,8 @@ function openchest(face)
   	end
   end
  elseif face == 2 then
-  player.openflag = fget(mget((xtemp+1),(ytemp-1)), 5)
-  if ( player.openflag == true) then
+  player.interaction = fget(mget((xtemp+1),(ytemp-1)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp+1),(ytemp-1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -727,8 +726,8 @@ function openchest(face)
   	end
   end
 	elseif face == 3 then
-	   player.openflag = fget(mget((xtemp-1),(ytemp)), 5)
-  if ( player.openflag == true) then
+	   player.interaction = fget(mget((xtemp-1),(ytemp)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp-1),(ytemp)), i)
   		  		if (contentflag == true and i == 1 ) then
@@ -749,8 +748,8 @@ function openchest(face)
   	end
   end
 	elseif face == 4 then
-	  player.openflag = fget(mget((xtemp+1),(ytemp)), 5)
-  if ( player.openflag == true) then
+	  player.interaction = fget(mget((xtemp+1),(ytemp)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp+1),(ytemp)), i)
   		if (contentflag == true and i == 1 ) then
@@ -771,8 +770,8 @@ function openchest(face)
   	end
   end
 	elseif face == 5 then
-	  player.openflag = fget(mget((xtemp-1),(ytemp+1)), 5)
-  if ( player.openflag == true) then
+	  player.interaction = fget(mget((xtemp-1),(ytemp+1)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp-1),(ytemp+1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -793,8 +792,8 @@ function openchest(face)
   	end
   end
 	elseif face == 6 then
-	  player.openflag = fget(mget((xtemp),(ytemp+1)), 5)
-  if ( player.openflag == true) then
+	  player.interaction = fget(mget((xtemp),(ytemp+1)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp),(ytemp+1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -815,8 +814,8 @@ function openchest(face)
   	end
   end
 	else
-		player.openflag = fget(mget((xtemp+1),(ytemp+1)), 5)
-  if ( player.openflag == true) then
+		player.interaction = fget(mget((xtemp+1),(ytemp+1)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp+1),(ytemp+1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -849,7 +848,7 @@ function opendoor(face)
 	if face == 1 then
 		contentflag = fget(mget((xtemp),(ytemp-1)), 2)
 		if (contentflag == true and player.keys >0) then
-				player.openflag = true
+				player.interaction = true
 			 player.keys -= 1
 			 sfx(9)
   		mset((xtemp),(ytemp-1),0)
@@ -857,7 +856,7 @@ function opendoor(face)
 	elseif face == 3 then
 		contentflag = fget(mget((xtemp-1),(ytemp)), 2)
 		if (contentflag == true and player.keys >0) then
-			 player.openflag = true
+			 player.interaction = true
 			 player.keys -= 1
 			 sfx(9)
   		mset((xtemp-1),(ytemp),0)
@@ -865,7 +864,7 @@ function opendoor(face)
 	elseif face == 4 then
 		contentflag = fget(mget((xtemp+1),(ytemp)), 2)
 		if (contentflag == true and player.keys >0) then
-			 player.openflag = true
+			 player.interaction = true
 			 player.keys -= 1
 			 sfx(9)
   		mset((xtemp+1),(ytemp),0)
@@ -873,7 +872,7 @@ function opendoor(face)
 	elseif face == 6 then
 		contentflag = fget(mget((xtemp),(ytemp+1)), 2)
 		if (contentflag == true and player.keys >0) then
-			 player.openflag = true
+			 player.interaction = true
 			 player.keys -= 1
 			 sfx(9)
   		mset((xtemp),(ytemp+1),0)
@@ -1051,7 +1050,19 @@ end
 
 
 
-function pick_up_items()
+function interact(face)
+	openchest(face)
+	opendoor(face)
+	//npcfuncwhendone(face)
+	
+	
+	//items
+	if (player.face == 1) then
+		local temp = mget(xest(player.x/8),yest(player.y/8+1))
+		if temp == 42 then
+		 player.bow = 1
+		end
+	end
 end
 -->8
 --arrows and bow
@@ -1065,11 +1076,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	--left
 	if (player.face == 0 or player.face ==3 or player.face ==5) then
 		arrow.x = xpos + mapposx*128 - 8 // world space
-		arrow.dx = -1.0
+		arrow.dx = -2.0
 	--right
  elseif (player.face ==2 or player.face ==4 or player.face ==7) then
 	 arrow.x = xpos + mapposx*128 + 8 // world space
-		arrow.dx = 1.0
+		arrow.dx = 2.0
 	else
 		arrow.x = xpos + mapposx*128
 		arrow.dx = 0
@@ -1078,11 +1089,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	--up 
  if (player.face ==0 or player.face ==1 or player.face ==2) then
 		arrow.y = ypos + mapposy*128 - 8 // world space
-		arrow.dy = -1.0
+		arrow.dy = -2.0
 	--down
 	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
 		arrow.y = ypos + mapposy*128 + 8 // world space
-		arrow.dy = 1.0
+		arrow.dy = 2.0
 	else
 		arrow.y = ypos + mapposy*128
 		arrow.dy = 0
