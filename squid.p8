@@ -667,7 +667,6 @@ function openchest(face)
 	end
 end
 
-
 function update_chest(xtemp,ytemp,xpm,ypm)
 	local contentflag = false
 	local loopflag = false
@@ -866,8 +865,15 @@ function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
 	---for parent-based lifetime
 	hitbox.duration = duration
 	
+	local mapx = (hitbox.x-(hitbox.x%8))/8
+	local mapy = (hitbox.y-(hitbox.y%8))/8
+	hitbox.mapposx = (mapx-(mapx%16)) / 16
+	hitbox.mapposy = (mapy-(mapy%16)) / 16
+	
 	if parent != nil then
 	hitbox.parent = parent
+	hitbox.mapposx = parent.mapposx
+	hitbox.mapposy = parent.mapposy
 	end
 	
 	add(hitboxes, hitbox)
@@ -886,6 +892,18 @@ function update_hitbox(hb)
 		del(hitboxes, hb)
 	end
 	
+	--update mappos
+	local mapx = (hb.x-(hb.x%8))/8
+	local mapy = (hb.y-(hb.y%8))/8
+	hb.mapposx = (mapx-(mapx%16)) / 16
+	hb.mapposy = (mapy-(mapy%16)) / 16
+	
+	if hb.parent != nil then
+		hb.mapposx = hb.parent.mapposx
+		hb.mapposy = hb.parent.mapposy
+	end
+	
+	
 	--add oncollision function here!!!
 	
 	
@@ -893,17 +911,19 @@ end
 
 --for debug purposes only
 function draw_hitbox(hb)
-	if hb.parent != nil then
-		rect(hb.x+hb.parent.x-(.5*hb.xlen),
-							hb.y+hb.parent.y-(.5*hb.ylen),
-							hb.x+hb.parent.x+(.5*hb.xlen),
-							hb.y+hb.parent.y+(.5*hb.ylen), 8)
-	else
-
-		rect(hb.x-(.5*hb.xlen),
-							hb.y-(.5*hb.ylen),
-							hb.x+(.5*hb.xlen),
-							hb.y+(.5*hb.ylen), 8)
+	
+	if (player.mapposx == hb.mapposx and player.mapposy == hb.mapposy) then
+			if hb.parent != nil then
+				rect((hb.x+hb.parent.x-(.5*hb.xlen))%128,
+									(hb.y+hb.parent.y-(.5*hb.ylen))%128,
+									(hb.x+hb.parent.x+(.5*hb.xlen))%128,
+									(hb.y+hb.parent.y+(.5*hb.ylen))%128, 8)
+			else
+				rect((hb.x-(.5*hb.xlen))%128,
+									(hb.y-(.5*hb.ylen))%128,
+									(hb.x+(.5*hb.xlen))%128,
+									(hb.y+(.5*hb.ylen))%128, 8)
+			end
 	end
 end
 
