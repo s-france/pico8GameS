@@ -175,25 +175,7 @@ function move_player()
 	
 	//sword
 	if(btnp(4)) then
-		--sam finish this!!!!!!
-	
-		local xmod =-1
-		local ymod =-4
-		
-		if player.face==0 or player.face==3 or player.face==5 then
-			xmod -=8
-		elseif player.face==2 or player.face==4 or player.face==7 then
-			xmod +=8
-		end
-		
-		if player.face==3 or player.face==4 then
-			ymod +=8
-		elseif player.face==5 or player.face==6 or player.face==7 then
-			ymod +=16
-		end
-	
-		add_partsys(player.x+xmod,player.y+ymod,0,1, 4, 4, 2,0, 1,.5, .25)
-		
+		sword()
 	end
 	
 end
@@ -369,6 +351,30 @@ function collisions(obj)
 end
 
 
+function sword()
+		//sword visuals	
+		if player.face == 1 then
+			add_partsys(player.x -2,player.y -4, 0,1, 4, 4, 2,0, 1,.5, .25)
+		elseif player.face == 6 then
+			add_partsys(player.x +10,player.y +12, 0,1, 4, 4, -2,0, 1,.5, .25)
+		elseif player.face == 4 then
+			add_partsys(player.x +12,player.y -2, 1,0, 4, 4, 0,2, .5,1, 0.25)
+		elseif player.face == 3 then
+			add_partsys(player.x -4,player.y +10, 1,0, 4, 4, 0,-2, .5,1, 0.25)
+		elseif player.face == 2 then
+			add_partsys(player.x +4,player.y -6, .5,.5, 4, 4, 2,2, .5,.5, 0.25)
+		elseif player.face == 5 then
+			add_partsys(player.x +4,player.y +14, .5,.5, 4, 4, -2,-2, .5,.5, 0.25)
+		elseif player.face == 0 then
+			add_partsys(player.x -6,player.y +4, .5,.5, 4, 4, 2,-2, .5,.5, 0.25)
+		elseif player.face == 7 then
+			add_partsys(player.x +14,player.y +4, .5,.5, 4, 4, -2,2, .5,.5, 0.25)
+		end
+		
+		//add sword hitbox here!!!!
+		
+
+end
 -->8
 -- npcs
 // tab 2 contains information
