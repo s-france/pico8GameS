@@ -63,19 +63,19 @@ function _draw()
 	
 	// debug menu setup for
 	// debugging info within game
-	--[[ debug:
+// debug:
 	print("x: ")
 	print(player.mapposx)
 	print("y: ")
 	print(player.mapposy)
-	--]]	
+	--[[	
 	print("bombs")
 	print(player.bombs)
 	print("keys")
 	print(player.keys)
 	print("arrows")
 	print(player.arrows)
-	
+	--]]
 	
 	foreach(hitboxes, draw_hitbox)
 
@@ -219,11 +219,10 @@ function update_player()
 	
 
 	
-	--update mappos	
-	local mapx = (player.x-(player.x%8))/8
-	local mapy = (player.y-(player.y%8))/8
-	player.mapposx = (mapx-(mapx%16)) / 16
-	player.mapposy = (mapy-(mapy%16)) / 16
+	--update mappos
+	player.mapposx, player.mapposy = map_pos(player.x,player.y)	
+
+
  	// check for if bomb has been placed
 -- if ( btnp(5) then	
 -- 	readinfo(player.face) end
@@ -388,11 +387,7 @@ function update_npc(npc)
 	
 	
 	--update mappos	
-	local mapx = (npc.x-(npc.x%8))/8
-	local mapy = (npc.y-(npc.y%8))/8
-	npc.mapposx = (mapx-(mapx%16)) / 16
-	npc.mapposy = (mapy-(mapy%16)) / 16
-	
+	npc.mapposx, npc.mapposy = map_pos(npc.x,npc.y)
 	
 end
 
@@ -525,11 +520,7 @@ function update_particle(part)
 end
 
 function draw_particle(part)
-	local mapx = (part.x-(part.x%8))/8
-	local mapy = (part.y-(part.y%8))/8
-	local mapposx = (mapx-(mapx%16)) / 16
-	local mapposy = (mapy-(mapy%16)) / 16
-	
+	local mapposx, mapposy = map_pos(part.x,part.y)
 	if mapposx == player.mapposx and mapposy == player.mapposy then
 			pset(part.x%128, part.y%128, 7)
 	end
@@ -599,10 +590,7 @@ function update_bomb(bomb)
  end
  
  	--update mappos	
-	local mapx = (bomb.x-(bomb.x%8))/8
-	local mapy = (bomb.y-(bomb.y%8))/8
-	bomb.mapposx = (mapx-(mapx%16)) / 16
-	bomb.mapposy = (mapy-(mapy%16)) / 16
+	bomb.mapposx, bomb.mapposy = map_pos(bomb.x,bomb.y)
 end
 
 // draw_bomb
@@ -959,6 +947,15 @@ function interact(face)
 	 	mset(xest(player.x/8),yest(player.y/8+1),0)
 	 end
 	end
+end
+
+function map_pos(x,y)
+
+	local mapx = (x-(x%8))/8
+	local mapy = (y-(y%8))/8
+	local mapposx = (mapx-(mapx%16)) / 16
+	local mapposy = (mapy-(mapy%16)) / 16
+	return mapposx, mapposy
 end
 -->8
 --arrows and bow
