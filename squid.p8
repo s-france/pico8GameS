@@ -655,222 +655,55 @@ end
 -->8
 --chests
 
-
-function
 // code here contains all
 // small chest functionality,
 // although we may add in large
 // chests as well
 function openchest(face)
-	local xtemp = xest(player.x/8)
- local ytemp = yest(player.y/8)
-	local contentflag = false
  if face == 0 then
-  player.interaction = fget(mget((xtemp-1),(ytemp-1)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp-1),(ytemp-1)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp-1),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp-1),24)
-  		elseif (contentflag == true and i==3 ) then
-  		 player.arrows += 20
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp-1),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+ 	update_chest(xest(player.x/8),yest(player.y/8),-1,-1)
  elseif face == 1 then
-  player.interaction = fget(mget((xtemp),(ytemp-1)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp),(ytemp-1)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp),(ytemp-1),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp),(ytemp-1),24)
-  		elseif (contentflag == true and i==3 ) then
- 				player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp),(ytemp-1),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+  update_chest(xest(player.x/8),yest(player.y/8),0,-1)
  elseif face == 2 then
-  player.interaction = fget(mget((xtemp+1),(ytemp-1)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp+1),(ytemp-1)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp+1),(ytemp-1),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp+1),(ytemp-1),24)
-  		elseif (contentflag == true and i==3 ) then
-  		 player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp+1),(ytemp-1),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+ 	update_chest(xest(player.x/8),yest(player.y/8),1,-1)
 	elseif face == 3 then
-	   player.interaction = fget(mget((xtemp-1),(ytemp)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp-1),(ytemp)), i)
-  		  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp),24)
-  		elseif (contentflag == true and i==3 ) then
-  		 player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp-1),(ytemp),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+		update_chest(xest(player.x/8),yest(player.y/8),-1,0)
 	elseif face == 4 then
-	  player.interaction = fget(mget((xtemp+1),(ytemp)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp+1),(ytemp)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp+1),(ytemp),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp+1),(ytemp),24)
-  		elseif (contentflag == true and i==3 ) then
-  		 player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp+1),(ytemp),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+	 update_chest(xest(player.x/8),yest(player.y/8),1,0)
 	elseif face == 5 then
-	  player.interaction = fget(mget((xtemp-1),(ytemp+1)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp-1),(ytemp+1)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp+1),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp+1),24)
-  		elseif (contentflag == true and i==3 ) then
-					player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp-1),(ytemp+1),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+	 update_chest(xest(player.x/8),yest(player.y/8),-1,1)
 	elseif face == 6 then
-	  player.interaction = fget(mget((xtemp),(ytemp+1)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp),(ytemp+1)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp),(ytemp+1),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp),(ytemp+1),24)
-  		elseif (contentflag == true and i==3 ) then
-					player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp),(ytemp+1),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+	 update_chest(xest(player.x/8),yest(player.y/8),0,1)
 	else
-		player.interaction = fget(mget((xtemp+1),(ytemp+1)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp+1),(ytemp+1)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp+1),(ytemp+1),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp+1),(ytemp+1),24)
-  		elseif (contentflag == true and i==3 ) then
-  		 player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp+1),(ytemp+1),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+	 update_chest(xest(player.x/8),yest(player.y/8),1,1)
 	end
 end
 
-function update_chest(xtemp,ytemp,xpm,ypm,)
+
+function update_chest(xtemp,ytemp,xpm,ypm)
 	local contentflag = false
+	local loopflag = false
  contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 5)
  if ( contentflag == true) then
   for i=1,4 do
-  	player.interaction = fget(mget((xtemp+pm),(ytemp+pm)), i)
-  	if (player.interaction == true and i == 1 ) then
+  	loopflag = fget(mget((xtemp+xpm),(ytemp+ypm)), i)
+  	if (loopflag == true and i == 1 ) then
   		player.bombs += 5
+  		player.interaction = true
   		sfx(8)
-  		mset((xtemp+pm),(ytemp+pm),24)
-  	elseif (player.interaction == true and i== 2 ) then
+  		mset((xtemp+xpm),(ytemp+ypm),24)
+  	elseif (loopflag == true and i== 2 ) then
   		player.keys += 1
+  		player.interaction = true
   	 sfx(8)
-  		mset((xtemp+pm),(ytemp+pm),24)
-  	elseif (player.interaction == true and i==3 ) then
+  		mset((xtemp+xpm),(ytemp+ypm),24)
+  	elseif (loopflag == true and i==3 ) then
   		player.arrows += 20
+  		player.interaction = true
   		sfx(8)
-  		mset((xtemp+pm),(ytemp+pm),24)
-  	elseif (player.interaction == true and i== 4 ) then
+  		mset((xtemp+xpm),(ytemp+ypm),24)
+  	elseif (loopflag == true and i== 4 ) then
+  		player.interaction = true
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
   	end
