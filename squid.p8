@@ -40,6 +40,7 @@ end
 // using designed update funcs.
 function _update()
 	update_player()
+	foreach(arrowpool,update_arrow)
 	foreach(bombpool,update_bomb)
 	foreach(explosions,update_explosion)
 	update_npc(npc1)
@@ -57,6 +58,7 @@ function _draw()
 	bomb_animation()
 	draw_map()
 	draw_player()
+	foreach(arrowpool,draw_arrow)
 	foreach(bombpool,draw_bomb)
 	draw_npc(npc1)
 	draw_npc(npc2)
@@ -233,6 +235,10 @@ function update_player()
  //sword
 	if(btnp(4)) then
 		sword()
+	end
+	
+	if(btnp(0,1)) then
+		add_arrow(player.mapposx,player.mapposy,player.x%128,player.y%128)
 	end
 end
 
@@ -1051,7 +1057,9 @@ end
 
 function draw_arrow(arrow)
 	if (player.mapposx == arrow.mapposx and player.mapposy == arrow.mapposy) then
-   spr(arrow.sprite,bomb.x%128,bomb.y%128)
+   if player.face == 0 then
+   	spr(arrow.sprite,arrow.x%128,arrow.y%128)
+ 		else if player.face == 5
  end
 end
 __gfx__
