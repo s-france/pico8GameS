@@ -782,6 +782,20 @@ end
 // for all 8 surrounding map cells,
 // returns cell information
 
+function mapcollisions(hb)
+	--find all mapcells
+	--containing/touching hb:
+	---get tl and tr mapcell,
+	
+	---for loops from tl to tr cell
+	---to check collisions,
+	
+	
+	
+	
+	
+end
+
 function collisions(obj)
  // local table collisions
 	local cols = {}
