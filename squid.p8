@@ -24,7 +24,7 @@ function _init()
 	particles = {}
 	npc1 = make_npc(1,0,70,35,1,1)
 	npc2 = make_npc(0,0,8,16,0,1)
-	music(0)
+	//music(0)
 	--testing
 	add_partsys(100,100,1,1, 2,5, 0,0, 2,2, 0.0625)
 	--horizontal slash
@@ -253,7 +253,7 @@ function update_player()
 		opendoor(player.face)
 		if ( player.openflag==false	 and player.bombs>0 ) then
 	 	player.bombs -= 1
-			add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128,100,18)
+			add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128)
  	end
  end
 end
@@ -608,7 +608,7 @@ end
 // update player) with contained
 // information for further use
 
-function add_bomb(mapposx,mapposy,xpos,ypos,timer,sprite)
+function add_bomb(mapposx,mapposy,xpos,ypos)
 	local bomb = {}
 	
 	--left
@@ -631,8 +631,8 @@ function add_bomb(mapposx,mapposy,xpos,ypos,timer,sprite)
 		bomb.y = ypos + mapposy*128
 	end
 	
-	bomb.timer = timer
-	bomb.sprite = sprite
+	bomb.timer = 100
+	bomb.sprite = 18
 	bomb.mapposx = mapposx
 	bomb.mapposy = mapposy
 	add(bombpool,bomb)
@@ -986,7 +986,7 @@ end
 // combat. if a "combat" tab
 // is formalized later, this 
 // code will be moved there.
-function fire_arrow(mapposx,mapposy,xpos,ypos,timer)
+function add_arrow(mapposx,mapposy,xpos,ypos)
 	local arrow = {}
 	--left
 	if (player.face == 0 or player.face ==3 or player.face ==5) then
@@ -1021,8 +1021,12 @@ function fire_arrow(mapposx,mapposy,xpos,ypos,timer)
 	else 
 	 arrow.sprite == 40
 	end
+	arrow.mapposx = mapposx
+	arrow.mapposy = mapposy
 	add(arrowpool, arrow)
 end
+
+function update_arrow()
 __gfx__
 00000000111111110000000011111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
 000000001111cc11000cc00011111111222222222f7ff22222ff22222222fff22222222222222222000880002ff222222f62222222ffff22222222222ffff6f2
