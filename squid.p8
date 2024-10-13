@@ -655,6 +655,8 @@ end
 -->8
 --chests
 
+
+function
 // code here contains all
 // small chest functionality,
 // although we may add in large
@@ -849,25 +851,49 @@ function openchest(face)
   end
 	end
 end
+
+function update_chest(xtemp,ytemp,xpm,ypm,)
+	local contentflag = false
+ contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 5)
+ if ( contentflag == true) then
+  for i=1,4 do
+  	player.interaction = fget(mget((xtemp+pm),(ytemp+pm)), i)
+  	if (player.interaction == true and i == 1 ) then
+  		player.bombs += 5
+  		sfx(8)
+  		mset((xtemp+pm),(ytemp+pm),24)
+  	elseif (player.interaction == true and i== 2 ) then
+  		player.keys += 1
+  	 sfx(8)
+  		mset((xtemp+pm),(ytemp+pm),24)
+  	elseif (player.interaction == true and i==3 ) then
+  		player.arrows += 20
+  		sfx(8)
+  		mset((xtemp+pm),(ytemp+pm),24)
+  	elseif (player.interaction == true and i== 4 ) then
+  		// player.keys += 1
+  		//	mset((player.x/8),(player.y/8-1),24)
+  	end
+  end
+ end
+end
 -->8
 --locked doors
 // faces are 1, 4,5, 7
 // run check on keys, sprite
 function opendoor(face)
-	local xtemp = xest(player.x/8)
-	local ytemp = yest(player.y/8)
 	if face == 1 then
-		dooropen(xest(player.x/8),yest(player.y/8),0,-1,player.keys)
+		update_door(xest(player.x/8),yest(player.y/8),0,-1,player.keys)
 	elseif face == 3 then
-		dooropen(xest(player.x/8),yest(player.y/8),-1,0,player.keys)
+		update_door(xest(player.x/8),yest(player.y/8),-1,0,player.keys)
 	elseif face == 4 then
-		dooropen(xest(player.x/8),yest(player.y/8),1,0,player.keys)
+		update_door(xest(player.x/8),yest(player.y/8),1,0,player.keys)
 	elseif face == 6 then
-		dooropen(xest(player.x/8),yest(player.y/8),0,1,player.keys)
+		update_door(xest(player.x/8),yest(player.y/8),0,1,player.keys)
 	end
 end
 
-function dooropen(xtemp,ytemp,xpm, ypm, keys)
+function update_door(xtemp,ytemp,xpm, ypm, keys)
  local contentflag = false
  contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 2)
 		if (contentflag == true and keys >0) then
