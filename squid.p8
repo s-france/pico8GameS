@@ -40,9 +40,9 @@ end
 // using designed update funcs.
 function _update()
 	update_player()
-	foreach(arrowpool,update_arrow)
 	foreach(bombpool,update_bomb)
 	foreach(explosions,update_explosion)
+	foreach(arrowpool,update_arrow)
 	update_npc(npc1)
 	update_npc(npc2)
 	foreach(particlesystems, update_partsys)
@@ -1001,12 +1001,12 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	local arrow = {}
 	--left
 	if (player.face == 0 or player.face ==3 or player.face ==5) then
-		arrow.x = xpos + mapposx*128 - 8 // world space
-		arrow.dx = -1.2
+		arrow.x = xpos + mapposx*128 - 4 // world space
+		arrow.dx = -1.0
 	--right
  elseif (player.face ==2 or player.face ==4 or player.face ==7) then
-	 arrow.x = xpos + mapposx*128 + 8 // world space
-		arrow.dx = 1.2
+	 arrow.x = xpos + mapposx*128 + 4 // world space
+		arrow.dx = 1.0
 	else
 		arrow.x = xpos + mapposx*128
 		arrow.dx = 0
@@ -1014,12 +1014,12 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	
 	--up 
  if (player.face ==0 or player.face ==1 or player.face ==2) then
-		arrow.y = ypos + mapposy*128 - 8 // world space
-		arrow.dy = -1.2
+		arrow.y = ypos + mapposy*128 - 4 // world space
+		arrow.dy = -1.0
 	--down
 	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
-		arrow.y = ypos + mapposy*128 + 8 // world space
-		arrow.dy = 1.2
+		arrow.y = ypos + mapposy*128 + 4 // world space
+		arrow.dy = 1.0
 	else
 		arrow.y = ypos + mapposy*128
 		arrow.dy = 0
@@ -1036,8 +1036,10 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	else 
 	 arrow.sprite = 40
 	end
+	
 	arrow.mapposx = mapposx
 	arrow.mapposy = mapposy
+	
 	arrow.flipx = false
 	arrow.flipy = false
 	
@@ -1049,18 +1051,29 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	elseif player.face == 2 then
 		arrow.flipx = true
 	end
+	
 	add(arrowpool, arrow)
 end
 
 
 function update_arrow(arrow)
-	if arrow.timer == 0  then
+	if ( collisions(arrow).r or collisions(arrow).l
+	 or collisions(arrow).tr or collisions(arrow).tl 
+	or collisions(arrow).bl or collisions(arrow).br) then
+	 arrow.dx = 0 
+	end
+	if ( collisions(arrow).t or collisions(arrow).b
+	or collisions(arrow).tr or collisions(arrow).tl 
+	or collisions(arrow).bl or collisions(arrow).br) then
+		arrow.dy = 0
+	end
+	
+	
+	
+	if (arrow.timer == 0 or (arrow.dx ==0 and arrow.dy == 0)) then
 	 del(arrowpool,arrow)
 	else
-		if ( collisions(arrow).r ) then
-		 arrow.dx = 0 
-		end
-		arrow.x += arrow.dx
+	 arrow.x += arrow.dx
 		arrow.y += arrow.dy
 		arrow.timer -= 1
 	end
