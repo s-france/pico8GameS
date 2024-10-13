@@ -64,18 +64,18 @@ function _draw()
 	// debug menu setup for
 	// debugging info within game
 // debug:
-	print("x: ")
+	--[[print("x: ")
 	print(player.mapposx)
 	print("y: ")
-	print(player.mapposy)
-	--[[	
+	print(player.mapposy)--]]
+		
 	print("bombs")
 	print(player.bombs)
 	print("keys")
 	print(player.keys)
 	print("arrows")
 	print(player.arrows)
-	--]]
+	
 	
 	foreach(hitboxes, draw_hitbox)
 
