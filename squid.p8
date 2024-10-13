@@ -73,6 +73,9 @@ function _draw()
 	print(player.bombs)
 	print("keys")
 	print(player.keys)
+	print("arrows")
+	print(player.arrows)
+	
 	
 	foreach(hitboxes, draw_hitbox)
 
@@ -101,7 +104,7 @@ function make_player()
 	player.mapposy = 0
  player.sprite = 2
  player.face = 3
- player.openflag = false
+ player.interaction = false
  // player items
  player.itempool = {}
  player.bombs = 0
@@ -224,11 +227,10 @@ function update_player()
  	// check for if bomb has been placed
 -- if ( btnp(5) then	
 -- 	readinfo(player.face) end
-	player.openflag = false
+	player.interaction = false
 	if ( btnp(5)) then
-		openchest(player.face)
-		opendoor(player.face)
-		if ( player.openflag==false	 and player.bombs>0 ) then
+		interact(player.face)
+		if ( player.interaction==false	 and player.bombs>0 ) then
 	 	player.bombs -= 1
 			add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128)
  	end
@@ -238,8 +240,9 @@ function update_player()
 		sword()
 	end
 	
-	if(btnp(0,1)) then
+	if (btnp(0,1) and player.bow == 1 and player.arrows > 0)  then
 		add_arrow(player.mapposx,player.mapposy,player.x%128,player.y%128)
+		player.arrows -= 1
 	end
 end
 
@@ -652,6 +655,8 @@ end
 -->8
 --chests
 
+
+function
 // code here contains all
 // small chest functionality,
 // although we may add in large
@@ -661,8 +666,8 @@ function openchest(face)
  local ytemp = yest(player.y/8)
 	local contentflag = false
  if face == 0 then
-  player.openflag = fget(mget((xtemp-1),(ytemp-1)), 5)
-  if ( player.openflag == true) then
+  player.interaction = fget(mget((xtemp-1),(ytemp-1)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp-1),(ytemp-1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -674,8 +679,9 @@ function openchest(face)
   		 sfx(8)
   			mset((xtemp-1),(ytemp-1),24)
   		elseif (contentflag == true and i==3 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
+  		 player.arrows += 20
+  		 sfx(8)
+  			mset((xtemp-1),(ytemp-1),24)
   		elseif (contentflag == true and i== 4 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -683,8 +689,8 @@ function openchest(face)
   	end
   end
  elseif face == 1 then
-  player.openflag = fget(mget((xtemp),(ytemp-1)), 5)
-  if ( player.openflag == true) then
+  player.interaction = fget(mget((xtemp),(ytemp-1)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp),(ytemp-1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -696,8 +702,9 @@ function openchest(face)
   		 sfx(8)
   			mset((xtemp),(ytemp-1),24)
   		elseif (contentflag == true and i==3 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
+ 				player.arrows += 20
+  		 sfx(8)
+  		 mset((xtemp),(ytemp-1),24)
   		elseif (contentflag == true and i== 4 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -705,8 +712,8 @@ function openchest(face)
   	end
   end
  elseif face == 2 then
-  player.openflag = fget(mget((xtemp+1),(ytemp-1)), 5)
-  if ( player.openflag == true) then
+  player.interaction = fget(mget((xtemp+1),(ytemp-1)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp+1),(ytemp-1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -718,8 +725,9 @@ function openchest(face)
   		 sfx(8)
   			mset((xtemp+1),(ytemp-1),24)
   		elseif (contentflag == true and i==3 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
+  		 player.arrows += 20
+  		 sfx(8)
+  		 mset((xtemp+1),(ytemp-1),24)
   		elseif (contentflag == true and i== 4 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -727,8 +735,8 @@ function openchest(face)
   	end
   end
 	elseif face == 3 then
-	   player.openflag = fget(mget((xtemp-1),(ytemp)), 5)
-  if ( player.openflag == true) then
+	   player.interaction = fget(mget((xtemp-1),(ytemp)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp-1),(ytemp)), i)
   		  		if (contentflag == true and i == 1 ) then
@@ -740,8 +748,9 @@ function openchest(face)
   		 sfx(8)
   			mset((xtemp-1),(ytemp),24)
   		elseif (contentflag == true and i==3 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
+  		 player.arrows += 20
+  		 sfx(8)
+  		 mset((xtemp-1),(ytemp),24)
   		elseif (contentflag == true and i== 4 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -749,8 +758,8 @@ function openchest(face)
   	end
   end
 	elseif face == 4 then
-	  player.openflag = fget(mget((xtemp+1),(ytemp)), 5)
-  if ( player.openflag == true) then
+	  player.interaction = fget(mget((xtemp+1),(ytemp)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp+1),(ytemp)), i)
   		if (contentflag == true and i == 1 ) then
@@ -762,8 +771,9 @@ function openchest(face)
   		 sfx(8)
   			mset((xtemp+1),(ytemp),24)
   		elseif (contentflag == true and i==3 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
+  		 player.arrows += 20
+  		 sfx(8)
+  		 mset((xtemp+1),(ytemp),24)
   		elseif (contentflag == true and i== 4 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -771,8 +781,8 @@ function openchest(face)
   	end
   end
 	elseif face == 5 then
-	  player.openflag = fget(mget((xtemp-1),(ytemp+1)), 5)
-  if ( player.openflag == true) then
+	  player.interaction = fget(mget((xtemp-1),(ytemp+1)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp-1),(ytemp+1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -784,8 +794,9 @@ function openchest(face)
   		 sfx(8)
   			mset((xtemp-1),(ytemp+1),24)
   		elseif (contentflag == true and i==3 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
+					player.arrows += 20
+  		 sfx(8)
+  		 mset((xtemp-1),(ytemp+1),24)
   		elseif (contentflag == true and i== 4 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -793,8 +804,8 @@ function openchest(face)
   	end
   end
 	elseif face == 6 then
-	  player.openflag = fget(mget((xtemp),(ytemp+1)), 5)
-  if ( player.openflag == true) then
+	  player.interaction = fget(mget((xtemp),(ytemp+1)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp),(ytemp+1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -806,8 +817,9 @@ function openchest(face)
   		 sfx(8)
   			mset((xtemp),(ytemp+1),24)
   		elseif (contentflag == true and i==3 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
+					player.arrows += 20
+  		 sfx(8)
+  		 mset((xtemp),(ytemp+1),24)
   		elseif (contentflag == true and i== 4 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -815,8 +827,8 @@ function openchest(face)
   	end
   end
 	else
-		player.openflag = fget(mget((xtemp+1),(ytemp+1)), 5)
-  if ( player.openflag == true) then
+		player.interaction = fget(mget((xtemp+1),(ytemp+1)), 5)
+  if ( player.interaction == true) then
   	for i=1,4 do
   		contentflag = fget(mget((xtemp+1),(ytemp+1)), i)
   		if (contentflag == true and i == 1 ) then
@@ -828,8 +840,9 @@ function openchest(face)
   		 sfx(8)
   			mset((xtemp+1),(ytemp+1),24)
   		elseif (contentflag == true and i==3 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
+  		 player.arrows += 20
+  		 sfx(8)
+  		 mset((xtemp+1),(ytemp+1),24)
   		elseif (contentflag == true and i== 4 ) then
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
@@ -838,47 +851,57 @@ function openchest(face)
   end
 	end
 end
+
+function update_chest(xtemp,ytemp,xpm,ypm,)
+	local contentflag = false
+ contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 5)
+ if ( contentflag == true) then
+  for i=1,4 do
+  	player.interaction = fget(mget((xtemp+pm),(ytemp+pm)), i)
+  	if (player.interaction == true and i == 1 ) then
+  		player.bombs += 5
+  		sfx(8)
+  		mset((xtemp+pm),(ytemp+pm),24)
+  	elseif (player.interaction == true and i== 2 ) then
+  		player.keys += 1
+  	 sfx(8)
+  		mset((xtemp+pm),(ytemp+pm),24)
+  	elseif (player.interaction == true and i==3 ) then
+  		player.arrows += 20
+  		sfx(8)
+  		mset((xtemp+pm),(ytemp+pm),24)
+  	elseif (player.interaction == true and i== 4 ) then
+  		// player.keys += 1
+  		//	mset((player.x/8),(player.y/8-1),24)
+  	end
+  end
+ end
+end
 -->8
 --locked doors
 // faces are 1, 4,5, 7
 // run check on keys, sprite
 function opendoor(face)
-	local xtemp = xest(player.x/8)
-	local ytemp = yest(player.y/8)
-	local contentflag = false
 	if face == 1 then
-		contentflag = fget(mget((xtemp),(ytemp-1)), 2)
-		if (contentflag == true and player.keys >0) then
-				player.openflag = true
-			 player.keys -= 1
-			 sfx(9)
-  		mset((xtemp),(ytemp-1),0)
-		end
+		update_door(xest(player.x/8),yest(player.y/8),0,-1,player.keys)
 	elseif face == 3 then
-		contentflag = fget(mget((xtemp-1),(ytemp)), 2)
-		if (contentflag == true and player.keys >0) then
-			 player.openflag = true
-			 player.keys -= 1
-			 sfx(9)
-  		mset((xtemp-1),(ytemp),0)
-		end
+		update_door(xest(player.x/8),yest(player.y/8),-1,0,player.keys)
 	elseif face == 4 then
-		contentflag = fget(mget((xtemp+1),(ytemp)), 2)
-		if (contentflag == true and player.keys >0) then
-			 player.openflag = true
-			 player.keys -= 1
-			 sfx(9)
-  		mset((xtemp+1),(ytemp),0)
-		end
+		update_door(xest(player.x/8),yest(player.y/8),1,0,player.keys)
 	elseif face == 6 then
-		contentflag = fget(mget((xtemp),(ytemp+1)), 2)
-		if (contentflag == true and player.keys >0) then
-			 player.openflag = true
-			 player.keys -= 1
-			 sfx(9)
-  		mset((xtemp),(ytemp+1),0)
-		end
+		update_door(xest(player.x/8),yest(player.y/8),0,1,player.keys)
 	end
+end
+
+function update_door(xtemp,ytemp,xpm, ypm, keys)
+ local contentflag = false
+ contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 2)
+		if (contentflag == true and keys >0) then
+				player.interaction = true
+			 keys -= 1
+			 sfx(9)
+  		mset((xtemp+xpm),(ytemp+ypm),0)
+		end
 end
 -->8
 --sword physics
@@ -1062,6 +1085,48 @@ function draw_hitbox(hb)
 							hb.y+(.5*hb.ylen), 8)
 	end
 end
+
+
+
+
+function interact(face)
+	openchest(face)
+	opendoor(face)
+	//npcfuncwhendone(face)
+	
+	
+	//items
+	local temp = 0
+	if (player.face == 1) then
+	 temp = mget(xest(player.x/8),yest(player.y/8-1))
+		if temp == 42 then
+		 player.interaction = true
+		 player.bow = 1
+		 mset(xest(player.x/8),yest(player.y/8-1),0)
+		end
+	elseif (player.face == 3) then
+	 temp = mget(xest(player.x/8-1),yest(player.y/8))
+	 if temp == 42 then
+	 	player.interaction = true
+	 	player.bow = 1
+	 	mset(xest(player.x/8-1),yest(player.y/8),0)
+	 end
+	elseif (player.face == 4) then
+	 temp = mget(xest(player.x/8+1),yest(player.y/8))
+	 if temp == 42 then
+	  player.interaction = true
+	 	player.bow = 1
+	 	mset(xest(player.x/8+1),yest(player.y/8),0)
+	 end
+	elseif (player.face == 6) then
+	 temp = mget(xest(player.x/8),yest(player.y/8+1))
+	 if temp == 42 then
+	 	player.interaction = true
+	 	player.bow = 1
+	 	mset(xest(player.x/8),yest(player.y/8+1),0)
+	 end
+	end
+end
 -->8
 --arrows and bow
 // this tab contains code for
@@ -1073,11 +1138,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	local arrow = {}
 	--left
 	if (player.face == 0 or player.face ==3 or player.face ==5) then
-		arrow.x = xpos + mapposx*128 - 4 // world space
+		arrow.x = xpos + mapposx*128 - 8 // world space
 		arrow.dx = -1.0
 	--right
  elseif (player.face ==2 or player.face ==4 or player.face ==7) then
-	 arrow.x = xpos + mapposx*128 + 4 // world space
+	 arrow.x = xpos + mapposx*128 + 8 // world space
 		arrow.dx = 1.0
 	else
 		arrow.x = xpos + mapposx*128
@@ -1086,11 +1151,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	
 	--up 
  if (player.face ==0 or player.face ==1 or player.face ==2) then
-		arrow.y = ypos + mapposy*128 - 4 // world space
+		arrow.y = ypos + mapposy*128 - 8 // world space
 		arrow.dy = -1.0
 	--down
 	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
-		arrow.y = ypos + mapposy*128 + 4 // world space
+		arrow.y = ypos + mapposy*128 + 8 // world space
 		arrow.dy = 1.0
 	else
 		arrow.y = ypos + mapposy*128
@@ -1129,15 +1194,18 @@ end
 
 
 function update_arrow(arrow)
-	if ( collisions(arrow).r or collisions(arrow).l
-	 or collisions(arrow).tr or collisions(arrow).tl 
-	or collisions(arrow).bl or collisions(arrow).br) then
+	if ( collisions(arrow).r or collisions(arrow).l) then
 	 arrow.dx = 0 
 	end
-	if ( collisions(arrow).t or collisions(arrow).b
-	or collisions(arrow).tr or collisions(arrow).tl 
-	or collisions(arrow).bl or collisions(arrow).br) then
+	if ( collisions(arrow).t or collisions(arrow).b) then
 		arrow.dy = 0
+	end
+	if	arrow.sprite == 40 then
+	 if (collisions(arrow).tr or collisions(arrow).tl 
+	or collisions(arrow).bl or collisions(arrow).br) then
+		arrow.dx = 0
+		arrow.dy = 0
+		end
 	end
 	
 	
@@ -1304,10 +1372,10 @@ __map__
 0b0c0c0504090303080407080703030303030303030303030103030303030301030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0c0b080404070303050404070303030303030303030303030103030303030301030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0804070303030303030303010101030810040d03030303030301030303030103030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-0603030303030303030303030301010606030303030303030303010101010303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-0603030303030303030303030303010507030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-0603030303030303030303030303030103030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-0603030303010303030303030303010103030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+0603030103030303030303030301010606030303030303030303010101010303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+0603030101030303030303030303010507030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+0619030301030303030303030303030103030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+0603030103010303030303030303010103030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603010103030303030303030303010303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0504090101080404040404090101030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0804070303050404040404070303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
@@ -1315,12 +1383,12 @@ __map__
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 060303030303030303030303030303030303030308040d031704040903030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303031f1e1f1e1f030303030303030303060101010101010603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-0603030303031f0319031f030303030303030303060101010101010f03030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-0603030303031f0303031f0303030303030303030f0101010101010303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-0603030303031f1e1d1e1f030303030303030303030101011901010e03030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-06030303030303030303030303030303030303030e0101010101010603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-0603030303030303030303030303030303030303060101010101010603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-06030303030303030303030303030303030303030504040d0317040703030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+06031a0303031f0319031f030303030303030303060101010101010f03030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+06031a0303031f0303031f0303030303030303030f0101010101010303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+06031a0303031f1e1d1e1f030303030303030303030101011b01010e03030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+06031a03030303030303030303030303030303030e0101010101010603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+06031a0303030303030303030303030303030303060101010101010603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+06030303031d03031d03031d03030303030303030504040d0317040703030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
