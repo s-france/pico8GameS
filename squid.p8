@@ -716,22 +716,22 @@ end
 // run check on keys, sprite
 function opendoor(face)
 	if face == 1 then
-		update_door(xest(player.x/8),yest(player.y/8),0,-1,player.keys)
+		update_door(xest(player.x/8),yest(player.y/8),0,-1)
 	elseif face == 3 then
-		update_door(xest(player.x/8),yest(player.y/8),-1,0,player.keys)
+		update_door(xest(player.x/8),yest(player.y/8),-1,0)
 	elseif face == 4 then
-		update_door(xest(player.x/8),yest(player.y/8),1,0,player.keys)
+		update_door(xest(player.x/8),yest(player.y/8),1,0)
 	elseif face == 6 then
-		update_door(xest(player.x/8),yest(player.y/8),0,1,player.keys)
+		update_door(xest(player.x/8),yest(player.y/8),0,1)
 	end
 end
 
-function update_door(xtemp,ytemp,xpm, ypm, keys)
+function update_door(xtemp,ytemp,xpm, ypm)
  local contentflag = false
  contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 2)
-		if (contentflag == true and keys >0) then
+		if (contentflag == true and player.keys > 0) then
 				player.interaction = true
-			 keys -= 1
+			 player.keys -= 1
 			 sfx(9)
   		mset((xtemp+xpm),(ytemp+ypm),0)
 		end
