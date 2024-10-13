@@ -63,19 +63,19 @@ function _draw()
 	
 	// debug menu setup for
 	// debugging info within game
-	--[[ debug:
+// debug:
 	print("x: ")
 	print(player.mapposx)
 	print("y: ")
 	print(player.mapposy)
-	--]]	
+	--[[	
 	print("bombs")
 	print(player.bombs)
 	print("keys")
 	print(player.keys)
 	print("arrows")
 	print(player.arrows)
-	
+	--]]
 	
 	foreach(hitboxes, draw_hitbox)
 
@@ -219,11 +219,10 @@ function update_player()
 	
 
 	
-	--update mappos	
-	local mapx = (player.x-(player.x%8))/8
-	local mapy = (player.y-(player.y%8))/8
-	player.mapposx = (mapx-(mapx%16)) / 16
-	player.mapposy = (mapy-(mapy%16)) / 16
+	--update mappos
+	player.mapposx, player.mapposy = map_pos(player.x,player.y)	
+
+
  	// check for if bomb has been placed
 -- if ( btnp(5) then	
 -- 	readinfo(player.face) end
@@ -388,11 +387,7 @@ function update_npc(npc)
 	
 	
 	--update mappos	
-	local mapx = (npc.x-(npc.x%8))/8
-	local mapy = (npc.y-(npc.y%8))/8
-	npc.mapposx = (mapx-(mapx%16)) / 16
-	npc.mapposy = (mapy-(mapy%16)) / 16
-	
+	npc.mapposx, npc.mapposy = map_pos(npc.x,npc.y)
 	
 end
 
@@ -525,11 +520,7 @@ function update_particle(part)
 end
 
 function draw_particle(part)
-	local mapx = (part.x-(part.x%8))/8
-	local mapy = (part.y-(part.y%8))/8
-	local mapposx = (mapx-(mapx%16)) / 16
-	local mapposy = (mapy-(mapy%16)) / 16
-	
+	local mapposx, mapposy = map_pos(part.x,part.y)
 	if mapposx == player.mapposx and mapposy == player.mapposy then
 			pset(part.x%128, part.y%128, 7)
 	end
@@ -599,10 +590,7 @@ function update_bomb(bomb)
  end
  
  	--update mappos	
-	local mapx = (bomb.x-(bomb.x%8))/8
-	local mapy = (bomb.y-(bomb.y%8))/8
-	bomb.mapposx = (mapx-(mapx%16)) / 16
-	bomb.mapposy = (mapy-(mapy%16)) / 16
+	bomb.mapposx, bomb.mapposy = map_pos(bomb.x,bomb.y)
 end
 
 // draw_bomb
@@ -655,221 +643,54 @@ end
 -->8
 --chests
 
-
 // code here contains all
 // small chest functionality,
 // although we may add in large
 // chests as well
 function openchest(face)
-	local xtemp = xest(player.x/8)
- local ytemp = yest(player.y/8)
-	local contentflag = false
  if face == 0 then
-  player.interaction = fget(mget((xtemp-1),(ytemp-1)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp-1),(ytemp-1)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp-1),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp-1),24)
-  		elseif (contentflag == true and i==3 ) then
-  		 player.arrows += 20
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp-1),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+ 	update_chest(xest(player.x/8),yest(player.y/8),-1,-1)
  elseif face == 1 then
-  player.interaction = fget(mget((xtemp),(ytemp-1)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp),(ytemp-1)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp),(ytemp-1),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp),(ytemp-1),24)
-  		elseif (contentflag == true and i==3 ) then
- 				player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp),(ytemp-1),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+  update_chest(xest(player.x/8),yest(player.y/8),0,-1)
  elseif face == 2 then
-  player.interaction = fget(mget((xtemp+1),(ytemp-1)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp+1),(ytemp-1)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp+1),(ytemp-1),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp+1),(ytemp-1),24)
-  		elseif (contentflag == true and i==3 ) then
-  		 player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp+1),(ytemp-1),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+ 	update_chest(xest(player.x/8),yest(player.y/8),1,-1)
 	elseif face == 3 then
-	   player.interaction = fget(mget((xtemp-1),(ytemp)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp-1),(ytemp)), i)
-  		  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp),24)
-  		elseif (contentflag == true and i==3 ) then
-  		 player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp-1),(ytemp),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+		update_chest(xest(player.x/8),yest(player.y/8),-1,0)
 	elseif face == 4 then
-	  player.interaction = fget(mget((xtemp+1),(ytemp)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp+1),(ytemp)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp+1),(ytemp),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp+1),(ytemp),24)
-  		elseif (contentflag == true and i==3 ) then
-  		 player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp+1),(ytemp),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+	 update_chest(xest(player.x/8),yest(player.y/8),1,0)
 	elseif face == 5 then
-	  player.interaction = fget(mget((xtemp-1),(ytemp+1)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp-1),(ytemp+1)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp+1),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp-1),(ytemp+1),24)
-  		elseif (contentflag == true and i==3 ) then
-					player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp-1),(ytemp+1),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+	 update_chest(xest(player.x/8),yest(player.y/8),-1,1)
 	elseif face == 6 then
-	  player.interaction = fget(mget((xtemp),(ytemp+1)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp),(ytemp+1)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp),(ytemp+1),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp),(ytemp+1),24)
-  		elseif (contentflag == true and i==3 ) then
-					player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp),(ytemp+1),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+	 update_chest(xest(player.x/8),yest(player.y/8),0,1)
 	else
-		player.interaction = fget(mget((xtemp+1),(ytemp+1)), 5)
-  if ( player.interaction == true) then
-  	for i=1,4 do
-  		contentflag = fget(mget((xtemp+1),(ytemp+1)), i)
-  		if (contentflag == true and i == 1 ) then
-  		 player.bombs += 5
-  		 sfx(8)
-  			mset((xtemp+1),(ytemp+1),24)
-  		elseif (contentflag == true and i== 2 ) then
-  		 player.keys += 1
-  		 sfx(8)
-  			mset((xtemp+1),(ytemp+1),24)
-  		elseif (contentflag == true and i==3 ) then
-  		 player.arrows += 20
-  		 sfx(8)
-  		 mset((xtemp+1),(ytemp+1),24)
-  		elseif (contentflag == true and i== 4 ) then
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  		end
-  	end
-  end
+	 update_chest(xest(player.x/8),yest(player.y/8),1,1)
 	end
 end
 
 function update_chest(xtemp,ytemp,xpm,ypm)
 	local contentflag = false
+	local loopflag = false
  contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 5)
  if ( contentflag == true) then
   for i=1,4 do
-  	player.interaction = fget(mget((xtemp+pm),(ytemp+pm)), i)
-  	if (player.interaction == true and i == 1 ) then
+  	loopflag = fget(mget((xtemp+xpm),(ytemp+ypm)), i)
+  	if (loopflag == true and i == 1 ) then
   		player.bombs += 5
+  		player.interaction = true
   		sfx(8)
-  		mset((xtemp+pm),(ytemp+pm),24)
-  	elseif (player.interaction == true and i== 2 ) then
+  		mset((xtemp+xpm),(ytemp+ypm),24)
+  	elseif (loopflag == true and i== 2 ) then
   		player.keys += 1
+  		player.interaction = true
   	 sfx(8)
-  		mset((xtemp+pm),(ytemp+pm),24)
-  	elseif (player.interaction == true and i==3 ) then
+  		mset((xtemp+xpm),(ytemp+ypm),24)
+  	elseif (loopflag == true and i==3 ) then
   		player.arrows += 20
+  		player.interaction = true
   		sfx(8)
-  		mset((xtemp+pm),(ytemp+pm),24)
-  	elseif (player.interaction == true and i== 4 ) then
+  		mset((xtemp+xpm),(ytemp+ypm),24)
+  	elseif (loopflag == true and i== 4 ) then
+  		player.interaction = true
   		// player.keys += 1
   		//	mset((player.x/8),(player.y/8-1),24)
   	end
@@ -882,22 +703,22 @@ end
 // run check on keys, sprite
 function opendoor(face)
 	if face == 1 then
-		update_door(xest(player.x/8),yest(player.y/8),0,-1,player.keys)
+		update_door(xest(player.x/8),yest(player.y/8),0,-1)
 	elseif face == 3 then
-		update_door(xest(player.x/8),yest(player.y/8),-1,0,player.keys)
+		update_door(xest(player.x/8),yest(player.y/8),-1,0)
 	elseif face == 4 then
-		update_door(xest(player.x/8),yest(player.y/8),1,0,player.keys)
+		update_door(xest(player.x/8),yest(player.y/8),1,0)
 	elseif face == 6 then
-		update_door(xest(player.x/8),yest(player.y/8),0,1,player.keys)
+		update_door(xest(player.x/8),yest(player.y/8),0,1)
 	end
 end
 
-function update_door(xtemp,ytemp,xpm, ypm, keys)
+function update_door(xtemp,ytemp,xpm, ypm)
  local contentflag = false
  contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 2)
-		if (contentflag == true and keys >0) then
+		if (contentflag == true and player.keys > 0) then
 				player.interaction = true
-			 keys -= 1
+			 player.keys -= 1
 			 sfx(9)
   		mset((xtemp+xpm),(ytemp+ypm),0)
 		end
@@ -1147,6 +968,15 @@ function interact(face)
 	 end
 	end
 end
+
+function map_pos(x,y)
+
+	local mapx = (x-(x%8))/8
+	local mapy = (y-(y%8))/8
+	local mapposx = (mapx-(mapx%16)) / 16
+	local mapposy = (mapy-(mapy%16)) / 16
+	return mapposx, mapposy
+end
 -->8
 --arrows and bow
 // this tab contains code for
@@ -1238,10 +1068,7 @@ function update_arrow(arrow)
 		arrow.timer -= 1
 	end
 	--update mappos
-	local mapx = (arrow.x-(arrow.x%8))/8
-	local mapy = (arrow.y-(arrow.y%8))/8
-	arrow.mapposx = (mapx-(mapx%16)) / 16
-	arrow.mapposy = (mapy-(mapy%16)) / 16
+	arrow.mapposx, arrow.mapposy = map_pos(arrow.x, arrow.y)
 end
 
 function draw_arrow(arrow)
