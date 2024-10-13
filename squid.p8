@@ -936,7 +936,7 @@ function collisions(obj)
 	cols.br = false
 	
 	--horizontal
-	if(obj.x%8 ==0) then
+	if(obj.x%8 == 0) then
 		--left collision
 		cols.tl =fget(mget((obj.x/8)-1, (obj.y-obj.y%8)/8), 0)	
 	 cols.bl =fget(mget((obj.x/8)-1, (obj.y+8-obj.y%8)/8), 0)
@@ -1053,14 +1053,16 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 end
 
 
-
 function update_arrow(arrow)
-	if arrow.timer == 0 then
+	if arrow.timer == 0  then
 	 del(arrowpool,arrow)
 	else
-		arrow.timer -= 1
+		if ( collisions(arrow).r ) then
+		 arrow.dx = 0 
+		end
 		arrow.x += arrow.dx
 		arrow.y += arrow.dy
+		arrow.timer -= 1
 	end
 	--update mappos
 	local mapx = (arrow.x-(arrow.x%8))/8
