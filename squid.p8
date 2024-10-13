@@ -729,7 +729,7 @@ function swordswing(face)
 	
 end	
 -->8
---optimizations tab
+--optimizations and development functions
 // first order of biznes
 // make world coordinate to
 // map cell function and vice
@@ -893,11 +893,7 @@ function update_hitbox(hb)
 	end
 	
 	--update mappos
-	local mapx = (hb.x-(hb.x%8))/8
-	local mapy = (hb.y-(hb.y%8))/8
-	hb.mapposx = (mapx-(mapx%16)) / 16
-	hb.mapposy = (mapy-(mapy%16)) / 16
-	
+	hb.mapposx, hb.mapposy = map_pos(hb.x,hb.y)
 	if hb.parent != nil then
 		hb.mapposx = hb.parent.mapposx
 		hb.mapposy = hb.parent.mapposy
