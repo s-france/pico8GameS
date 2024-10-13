@@ -964,6 +964,8 @@ end
 // combat. if a "combat" tab
 // is formalized later, this 
 // code will be moved there.
+
+
 function add_arrow(mapposx,mapposy,xpos,ypos)
 	local arrow = {}
 	--left
