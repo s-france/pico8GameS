@@ -1048,10 +1048,7 @@ function update_arrow(arrow)
 		arrow.timer -= 1
 	end
 	--update mappos
-	local mapx = (arrow.x-(arrow.x%8))/8
-	local mapy = (arrow.y-(arrow.y%8))/8
-	arrow.mapposx = (mapx-(mapx%16)) / 16
-	arrow.mapposy = (mapy-(mapy%16)) / 16
+	arrow.mapposx, arrow.mapposy = map_pos(arrow.x, arrow.y)
 end
 
 function draw_arrow(arrow)
