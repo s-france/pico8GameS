@@ -77,6 +77,12 @@ function _draw()
 	print("arrows")
 	print(player.resources.arrows)
 	
+	local topx, topy = map_cell(player.hb.left-1,player.hb.top-1)		
+	print(topx)
+	print(topy)
+	local botx, boty = map_cell(player.hb.left-1,player.hb.bot+1)
+	print(botx)
+	print(boty)
 	
 	foreach(hitboxes, draw_hitbox)
 
@@ -117,7 +123,7 @@ function make_player()
 
 	
 	--player hurtbox, tag = 0 
- add_hitbox(0, 4,4, 7,7, -1, player)
+ player.hb = add_hitbox(0, 4,4, 6,6, -1, player)
 
 end
 
@@ -143,7 +149,7 @@ function move_player()
 	// btn press are both true,
 	// the player can move
 	
-	if(btn(0) and not collisions(player).l) then
+	if(btn(0) and not mapcollisions(player.hb).l) then
 		player.dx =-1
 		player.x += player.dx
 		--player.face = 0
@@ -153,7 +159,7 @@ function move_player()
 	// here, if the collisons and
 	// btn press are both true,
 	// the player can move
-	if(btn(1) and not collisions(player).r) then
+	if(btn(1) and not mapcollisions(player.hb).r) then
 		player.dx =1
 		player.x += player.dx
 		--player.face = 1
@@ -163,7 +169,7 @@ function move_player()
 	// here, if the collisons and
 	// btn press are both true,
 	// the player can move
-	if(btn(2) and not collisions(player).t) then
+	if(btn(2) and not mapcollisions(player.hb).t) then
 		player.dy =-1
 		player.y += player.dy
 		--player.face = 2
@@ -173,7 +179,7 @@ function move_player()
 	// here, if the collisons and
 	// btn press are both true,
 	// the player can move
-	if(btn(3) and not collisions(player).b) then
+	if(btn(3) and not mapcollisions(player.hb).b) then
 		player.dy =1
 		player.y += player.dy
 		--player.face = 3
@@ -793,15 +799,60 @@ function mapcollisions(hb)
 	cols.b = false
 	cols.br = false
 	
+	
 	--left collisions
-	if hb.left % 8 == 0 then
-		
+	local topx, topy = map_cell(hb.left-1,hb.top)		
+	local botx, boty = map_cell(hb.left-1,hb.bot)
+	
+	for y=boty, topy, -1 do
+		if fget(mget(topx, y), 0) then
+			cols.l = true
+		end
+	end
+ --if cols.tl or cols.bl then
+ 	--cols.l = true
+ --end
+ 
+ --right collisions
+	local topx, topy = map_cell(hb.right+1,hb.top)		
+	local botx, boty = map_cell(hb.right+1,hb.bot)
+	
+	for y=boty, topy, -1 do
+		if fget(mget(topx, y), 0) then
+			cols.r = true
+		end
 	end
 	
+	--top collisions
+	local leftx, lefty = map_cell(hb.left,hb.top-1)		
+	local rightx, righty = map_cell(hb.right,hb.top-1)
+	
+	for x=rightx, leftx, -1 do
+		if fget(mget(x, lefty), 0) then
+			cols.t = true
+		end
+	end
+	
+	--bottom collisions
+	local leftx, lefty = map_cell(hb.left,hb.bot+1)		
+	local rightx, righty = map_cell(hb.right,hb.bot+1)
+	
+	for x=rightx, leftx, -1 do
+		if fget(mget(x, lefty), 0) then
+			cols.b = true
+		end
+	end
+	 
+	--diagonals
+	local tlx, tly = map_cell(hb.left-1,hb.top-1)		
+	local trx, try = map_cell(hb.right+1,hb.top-1)
+	local blx, bly = map_cell(hb.left-1,hb.bot+1)
+	local brx, bry = map_cell(hb.right+1,hb.bot+1)
 	
 	
 	
 	
+	return cols
 end
 
 function collisions(obj)
@@ -903,13 +954,22 @@ function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
 		hitbox.mapposx = parent.mapposx
 		hitbox.mapposy = parent.mapposy
 		
-		hitbox.left = hitbox.x+hitbox.parent.x -(.5*hitbox.xlen)	
-		hitbox.right = hitbox.x+hitbox.parent.x +(.5*hitbox.xlen)	
-		hitbox.top = hitbox.y+hitbox.parent.y -(.5*hitbox.ylen)
-		hitbox.bot = hitbox.y+hitbox.parent.y+(.5*hitbox.ylen)
+		--hb pos offset from parent x,y pos
+		hitbox.xoff = x
+		hitbox.yoff = y
+		
+ 	hitbox.x = hitbox.xoff+hitbox.parent.x
+ 	hitbox.y = hitbox.yoff+hitbox.parent.y
 	end
 	
+	--coordinates of the hb edges
+	hitbox.left = hitbox.x-(.5*hitbox.xlen)	
+	hitbox.right = hitbox.x+(.5*hitbox.xlen)	
+	hitbox.top = hitbox.y-(.5*hitbox.ylen)
+	hitbox.bot = hitbox.y+(.5*hitbox.ylen)
+	
 	add(hitboxes, hitbox)
+	return hitbox
 end
 
 function update_hitbox(hb)
@@ -931,10 +991,14 @@ function update_hitbox(hb)
 		hb.mapposx = hb.parent.mapposx
 		hb.mapposy = hb.parent.mapposy
 		
-		hb.left = hb.x+hb.parent.x -(.5*hb.xlen)	
-		hb.right = hb.x+hb.parent.x +(.5*hb.xlen)	
-		hb.top = hb.y+hb.parent.y -(.5*hb.ylen)
-		hb.bot = hb.y+hb.parent.y+(.5*hb.ylen)
+		hb.x = hb.xoff+hb.parent.x
+ 	hb.y = hb.yoff+hb.parent.y
+		
+		--coordinates of the hb edges
+		hb.left = hb.x-(.5*hb.xlen)	
+		hb.right = hb.x+(.5*hb.xlen)	
+		hb.top = hb.y-(.5*hb.ylen)
+		hb.bot = hb.y+(.5*hb.ylen)
 	end
 	
 	
@@ -965,38 +1029,6 @@ function interact(face)
 	//npcfuncwhendone(face)
 	
 	pickup_item(face)	
-	
-	//items
-	--[[local temp = 0
-	if (player.face == 1) then
-	 temp = mget(xest(player.x/8),yest(player.y/8-1))
-		if temp == 42 then
-		 player.interaction = true
-		 player.bow = 1
-		 mset(xest(player.x/8),yest(player.y/8-1),0)
-		end
-	elseif (player.face == 3) then
-	 temp = mget(xest(player.x/8-1),yest(player.y/8))
-	 if temp == 42 then
-	 	player.interaction = true
-	 	player.bow = 1
-	 	mset(xest(player.x/8-1),yest(player.y/8),0)
-	 end
-	elseif (player.face == 4) then
-	 temp = mget(xest(player.x/8+1),yest(player.y/8))
-	 if temp == 42 then
-	  player.interaction = true
-	 	player.bow = 1
-	 	mset(xest(player.x/8+1),yest(player.y/8),0)
-	 end
-	elseif (player.face == 6) then
-	 temp = mget(xest(player.x/8),yest(player.y/8+1))
-	 if temp == 42 then
-	 	player.interaction = true
-	 	player.bow = 1
-	 	mset(xest(player.x/8),yest(player.y/8+1),0)
-	 end
-	--end]]
 end
 
 --returns the map cell containing x,y
