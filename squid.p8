@@ -69,7 +69,7 @@ function _draw()
 	print("y: ")
 	print(player.mapposy)--]]
 	print("player.itempool")
-	print(player.itempool)
+	print(player.itempool.bow[2])
 	print("bombs")
 	print(player.resources.bombs)
 	print("keys")
@@ -107,9 +107,9 @@ function make_player()
  player.face = 3
  player.interaction = false
  // player items
- player.itempool = {}
-  player.itempool.bow = {42, 0}
- 	player.itempool.raft = {43, 0} 
+ player.itempool = {
+  ["bow"] = {42, 0},
+ 	["raft"] = {43, 0}}
  player.resources = {}
  	player.resources.bombs = 0
  	player.resources.keys = 0
@@ -718,9 +718,9 @@ end
 function update_door(xtemp,ytemp,xpm, ypm)
  local contentflag = false
  contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 2)
-		if (contentflag == true and player.keys > 0) then
+		if (contentflag == true and player.resources.keys > 0) then
 				player.interaction = true
-			 player.keys -= 1
+			 player.resources.keys -= 1
 			 sfx(9)
   		mset((xtemp+xpm),(ytemp+ypm),0)
 		end
@@ -996,7 +996,7 @@ function pickup_item(face)
 end
 
 function p_i_recieve(xpm,ypm)
- local temp = mget(xest(player.x/0+xpm),yest(player.y/0+ypm))
+ local temp = mget(xest(player.x/8+xpm),yest(player.y/8+ypm))
 	for k,v in pairs(player.itempool) do
 		if temp == v[1] then
 		 player.interaction = true
