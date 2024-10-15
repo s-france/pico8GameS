@@ -124,7 +124,7 @@ function make_player()
  player.resources = {
   ["bombs"] = {0, 0},
   ["keys"] = {0},
-  ["arrows"] = {0} }
+  ["arrows"] = {20} }
  player.equipped_item_1 = {}
 	player.equipped_item_2 = {}
 
@@ -645,7 +645,7 @@ end
 function explode_tile(pair)
 	if fget(mget(pair.xcell,pair.ycell),1) then
 		if fget(mget(pair.xcell,pair.ycell),5) then
-
+		
 		else
 		 sfx(7)
 			mset(pair.xcell, pair.ycell,20)
@@ -654,12 +654,13 @@ function explode_tile(pair)
 	del(pair)
 end
 -->8
--- enemy
+
 
 -->8
 
 -->8
 --player interaction functions
+
 --[[
 interactions range from opening
 chests/doors to picking up items,
@@ -671,6 +672,7 @@ player is directly looking at/
 will interact with.
 --]]
 
+// interaction process
 function interact(face)
 	openchest(face)
 	opendoor(face)
@@ -990,11 +992,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	--left
 	if (player.face == 0 or player.face ==3 or player.face ==5) then
 		arrow.x = xpos + mapposx*128 - 8 // world space
-		arrow.dx = -1.0
+		arrow.dx = -2.0
 	--right
  elseif (player.face ==2 or player.face ==4 or player.face ==7) then
 	 arrow.x = xpos + mapposx*128 + 8 // world space
-		arrow.dx = 1.0
+		arrow.dx = 2.0
 	else
 		arrow.x = xpos + mapposx*128
 		arrow.dx = 0
@@ -1003,11 +1005,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	--up 
  if (player.face ==0 or player.face ==1 or player.face ==2) then
 		arrow.y = ypos + mapposy*128 - 8 // world space
-		arrow.dy = -1.0
+		arrow.dy = -2.0
 	--down
 	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
 		arrow.y = ypos + mapposy*128 + 8 // world space
-		arrow.dy = 1.0
+		arrow.dy = 2.0
 	else
 		arrow.y = ypos + mapposy*128
 		arrow.dy = 0
