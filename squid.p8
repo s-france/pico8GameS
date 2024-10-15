@@ -265,22 +265,19 @@ end
 // draws player
 
 function draw_player()
-	if player.face == 6 then
-		player.sprite = 2
-	elseif player.face == 1 then
-		player.sprite = 35
-	elseif player.face == 7 then
-		player.sprite = 37
-	elseif player.face == 5 then
-		player.sprite = 38	
-	elseif player.face == 2 then
-		player.sprite = 34
-	elseif player.face == 0 then
-		player.sprite = 36
-	elseif player.face == 3 then
-	 player.sprite = 33
-	else
-	 player.sprite = 32
+ local table = {
+ [6] = {2},
+ [1] = {35},
+ [7] = {37},
+ [5] = {38},
+ [2] = {34},
+ [0] = {36}, 
+ [3] = {33}, 
+ [4] = {32} }
+ for k,v in pairs(table) do
+		if player.face == k then
+		 player.sprite = v[1]
+		end
 	end	
 	spr(player.sprite, player.x%128, player.y%128)
 end
