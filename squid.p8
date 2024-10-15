@@ -23,6 +23,17 @@ function _init()
 	arrowpool = {}
 	particlesystems = {}
 	particles = {}
+	
+ global_faces = {
+	[0] = {-1,-1},
+ [1] = {0,-1},
+ [2] = {1,-1},
+	[3] = {-1,0},
+	[4] = {1,0},
+	[5] = {-1,1},
+	[6] = {0,1},
+	[7] = {1,1} }
+	
 	npc1 = make_npc(1,0,70,35,1,1)
 	npc2 = make_npc(0,0,8,16,0,1)
 	//music(0)
@@ -71,11 +82,11 @@ function _draw()
 	print("player.itempool")
 	print(player.itempool.bow[2])
 	print("bombs")
-	print(player.resources.bombs)
+	print(player.resources.bombs[1])
 	print("keys")
-	print(player.resources.keys)
+	print(player.resources.keys[1])
 	print("arrows")
-	print(player.resources.arrows)
+	print(player.resources.arrows[1])
 	
 	
 	foreach(hitboxes, draw_hitbox)
@@ -111,9 +122,9 @@ function make_player()
   ["bow"] = {42, 0},
  	["raft"] = {43, 0}}
  player.resources = {
-  ["bombs"] = 0,
-  ["keys"] = 0,
-  ["arrows"] =0 }
+  ["bombs"] = {0},
+  ["keys"] = {0},
+  ["arrows"] = {0} }
 
 
 	
@@ -232,8 +243,8 @@ function update_player()
 	player.interaction = false
 	if ( btnp(5)) then
 		interact(player.face)
-		if ( player.interaction==false	 and player.resources.bombs>0 ) then
-	 	player.resources.bombs -= 1
+		if ( player.interaction==false	 and player.resources.bombs[1]>0 ) then
+	 	player.resources.bombs[1] -= 1
 			add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128)
  	end
  end
@@ -242,9 +253,9 @@ function update_player()
 		sword()
 	end
 	
-	if (btnp(0,1) and player.itempool.bow[2] == 1 and player.resources.arrows > 0)  then
+	if (btnp(0,1) and player.itempool.bow[2] == 1 and player.resources.arrows[1] > 0)  then
 		add_arrow(player.mapposx,player.mapposy,player.x%128,player.y%128)
-		player.resources.arrows -= 1
+		player.resources.arrows[1] -= 1
 	end
 end
 
@@ -651,52 +662,34 @@ end
 // although we may add in large
 // chests as well
 function openchest(face)
- if face == 0 then
- 	update_chest(xest(player.x/8),yest(player.y/8),-1,-1)
- elseif face == 1 then
-  update_chest(xest(player.x/8),yest(player.y/8),0,-1)
- elseif face == 2 then
- 	update_chest(xest(player.x/8),yest(player.y/8),1,-1)
-	elseif face == 3 then
-		update_chest(xest(player.x/8),yest(player.y/8),-1,0)
-	elseif face == 4 then
-	 update_chest(xest(player.x/8),yest(player.y/8),1,0)
-	elseif face == 5 then
-	 update_chest(xest(player.x/8),yest(player.y/8),-1,1)
-	elseif face == 6 then
-	 update_chest(xest(player.x/8),yest(player.y/8),0,1)
-	else
-	 update_chest(xest(player.x/8),yest(player.y/8),1,1)
+	for k,v in pairs(global_faces) do
+		if face == k then
+		 update_chest(xest(player.x/8),yest(player.y/8),v[1],v[2])
+		end
 	end
 end
 
 function update_chest(xtemp,ytemp,xpm,ypm)
 	local contentflag = false
 	local loopflag = false
+	local loot_table = {
+	["bombs"] = {1,5},
+	["keys"] = {2,1},
+	["arrows"] = {3,20} }
  contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 5)
  if ( contentflag == true) then
-  for i=1,4 do
-  	loopflag = fget(mget((xtemp+xpm),(ytemp+ypm)), i)
-  	if (loopflag == true and i == 1 ) then
-  		player.resources.bombs += 5
-  		player.interaction = true
-  		sfx(8)
-  		mset((xtemp+xpm),(ytemp+ypm),24)
-  	elseif (loopflag == true and i== 2 ) then
-  		player.resources.keys += 1
-  		player.interaction = true
-  	 sfx(8)
-  		mset((xtemp+xpm),(ytemp+ypm),24)
-  	elseif (loopflag == true and i==3 ) then
-  		player.resources.arrows += 20
-  		player.interaction = true
-  		sfx(8)
-  		mset((xtemp+xpm),(ytemp+ypm),24)
-  	elseif (loopflag == true and i== 4 ) then
-  		player.interaction = true
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  	end
+  for k,v in pairs(loot_table) do
+   loopflag = fget(mget((xtemp+xpm),(ytemp+ypm)),v[1])
+  	if loopflag == true then
+  		for i,j in pairs(player.resources) do
+  			if (k == i) then
+  			 player.interaction = true
+  			 sfx(8)
+  			 mset((xtemp+xpm),(ytemp+ypm),24)
+  			 j[1] += v[2]
+  			end	
+  		end
+  	end	
   end
  end
 end
@@ -951,13 +944,7 @@ end
 
 function pickup_item(face) 
 	local xpm, ypm
-	local faces = {
- [1] = {0,-1},
-	[3] = {-1,0},
-	[4] = {1,0},
-	[6] = {0,1}
-	}
-	for k, v in pairs(faces) do
+	for k, v in pairs(global_faces) do
 		if face == k then
 		  p_i_recieve(v[1],v[2])
 		end
