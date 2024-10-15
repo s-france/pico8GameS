@@ -809,9 +809,6 @@ function mapcollisions(hb)
 			cols.l = true
 		end
 	end
- --if cols.tl or cols.bl then
- 	--cols.l = true
- --end
  
  --right collisions
 	local topx, topy = map_cell(hb.right+1,hb.top)		
