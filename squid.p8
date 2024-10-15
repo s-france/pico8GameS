@@ -110,10 +110,11 @@ function make_player()
  player.itempool = {
   ["bow"] = {42, 0},
  	["raft"] = {43, 0}}
- player.resources = {}
- 	player.resources.bombs = 0
- 	player.resources.keys = 0
- 	player.resources.arrows = 0
+ player.resources = {
+  ["bombs"] = 0,
+  ["keys"] = 0,
+  ["arrows"] =0 }
+
 
 	
 	--player hurtbox, tag = 0 
