@@ -119,13 +119,14 @@ function make_player()
  player.interaction = false
  // player items
  player.itempool = {
-  ["bow"] = {42, 0},
- 	["raft"] = {43, 0}}
+  ["bow"] = {42, 0, 0},
+ 	["raft"] = {43, 0, 0} }
  player.resources = {
-  ["bombs"] = {0},
+  ["bombs"] = {0, 0},
   ["keys"] = {0},
   ["arrows"] = {0} }
-
+ player.equipped_item_1 = {}
+	player.equipped_item_2 = {}
 
 	
 	--player hurtbox, tag = 0 
@@ -321,6 +322,7 @@ function sword()
 		
 
 end
+
 -->8
 -- npcs
 // tab 2 contains information
@@ -655,7 +657,26 @@ end
 -- enemy
 
 -->8
---chests
+
+-->8
+--player interaction functions
+--[[
+interactions range from opening
+chests/doors to picking up items,
+and the like. all code here 
+utilizes the global_faces table
+which has a set of parameters to
+determine which map cell the 
+player is directly looking at/
+will interact with.
+--]]
+
+function interact(face)
+	openchest(face)
+	opendoor(face)
+	pickup_item(face)	
+	//npcfuncwhendone(face)
+end
 
 // code here contains all
 // small chest functionality,
@@ -669,6 +690,9 @@ function openchest(face)
 	end
 end
 
+// this function updates the
+// state of the chest and returns
+// items to the player.
 function update_chest(xtemp,ytemp,xpm,ypm)
 	local contentflag = false
 	local loopflag = false
@@ -693,11 +717,13 @@ function update_chest(xtemp,ytemp,xpm,ypm)
   end
  end
 end
--->8
---locked doors
-// faces are 1, 4,5, 7
-// run check on keys, sprite
 
+
+
+// this code handles the opening
+// of locked doors. functionality
+// here removes keys from player
+// per open.
 function opendoor(face)
 	for k,v in pairs(global_faces) do
 		if face == k then
@@ -706,7 +732,8 @@ function opendoor(face)
 	end
 end
 
-
+// updates the state of the door
+// and removes the players key
 function update_door(xtemp,ytemp,xpm, ypm)
  local contentflag = false
  contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 2)
@@ -716,6 +743,27 @@ function update_door(xtemp,ytemp,xpm, ypm)
 			 sfx(9)
   		mset((xtemp+xpm),(ytemp+ypm),0)
 		end
+end
+
+// picks up player inventory 
+// items which are meant to lie
+// static on the map.	can be 
+// utilized post acquisition
+function pickup_item(face) 
+	local xpm, ypm
+	for k, v in pairs(global_faces) do
+		if face == k then
+		 //p_i_recieve(v[1],v[2])
+		 local temp = mget(xest(player.x/8+v[1]),yest(player.y/8+v[2]))
+			for i,j in pairs(player.itempool) do
+				if temp == j[1] then
+		 		player.interaction = true
+	 			j[2] += 1
+	 			mset(xest(player.x/8+v[1]),yest(player.y/8+v[2]),0)
+				end
+			end
+		end
+	end
 end
 -->8
 --sword physics
@@ -919,20 +967,7 @@ end
 
 
 
-
-function interact(face)
-	local itemtable = {42, 43}
-	local xpm, ypm
-	local faces = {1,3,4,6}
-	openchest(face)
-	opendoor(face)
-	//npcfuncwhendone(face)
-	
-	pickup_item(face)	
-end
-
 function map_pos(x,y)
-
 	local mapx = (x-(x%8))/8
 	local mapy = (y-(y%8))/8
 	local mapposx = (mapx-(mapx%16)) / 16
@@ -940,25 +975,7 @@ function map_pos(x,y)
 	return mapposx, mapposy
 end
 
-function pickup_item(face) 
-	local xpm, ypm
-	for k, v in pairs(global_faces) do
-		if face == k then
-		  p_i_recieve(v[1],v[2])
-		end
-	end
-end
 
-function p_i_recieve(xpm,ypm)
- local temp = mget(xest(player.x/8+xpm),yest(player.y/8+ypm))
-	for k,v in pairs(player.itempool) do
-		if temp == v[1] then
-		 player.interaction = true
-	 	v[2] += 1
-	 	mset(xest(player.x/8+xpm),yest(player.y/8+ypm),0)
-		end
-	end
-end
 -->8
 --arrows and bow
 // this tab contains code for
@@ -1194,7 +1211,7 @@ __gff__
 __map__
 0804040404040404100404040404041010040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040409
 0603030303030303060303030301010606030303030303030303030303030303030303030303040403030303030304040404040404030303030303030303030303030303030303030303030303030304040303030303030303030303030303030303030303030303030303030303030303030303030304040403030303030306
-0603030119030303062a01030301030606010303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+0603030119030303062a010303012b0606010303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303010303050409030303030606031a03080903030303010101010303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 06030103030303030303050d0303030606030804070f03030301030303030103030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303030301030301030303030516040703030303030103030303030301030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
