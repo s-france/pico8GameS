@@ -772,12 +772,31 @@ end
 // returns cell information
 
 function mapcollisions(hb)
+	--sam finish this!!!!
+	
 	--find all mapcells
 	--containing/touching hb:
 	---get tl and tr mapcell,
 	
 	---for loops from tl to tr cell
 	---to check collisions,
+	
+	// local table collisions
+	local cols = {}
+	//list of collisions to check
+	cols.tl = false
+	cols.t = false
+	cols.tr = false
+	cols.l = false
+	cols.r = false
+	cols.bl = false
+	cols.b = false
+	cols.br = false
+	
+	--left collisions
+	if hb.left % 8 == 0 then
+		
+	end
 	
 	
 	
@@ -862,6 +881,13 @@ function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
 	hitbox.y = y
 	hitbox.xlen = xlen
 	hitbox.ylen = ylen
+
+	--coordinates of the hb edges
+	hitbox.left = hitbox.x-(.5*hitbox.xlen)	
+	hitbox.right = hitbox.x+(.5*hitbox.xlen)	
+	hitbox.top = hitbox.y-(.5*hitbox.ylen)
+	hitbox.bot = hitbox.y+(.5*hitbox.ylen)
+	
 	--lifetime of hb
 	---set duration = -1
 	---for parent-based lifetime
@@ -873,9 +899,14 @@ function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
 	hitbox.mapposy = (mapy-(mapy%16)) / 16
 	
 	if parent != nil then
-	hitbox.parent = parent
-	hitbox.mapposx = parent.mapposx
-	hitbox.mapposy = parent.mapposy
+		hitbox.parent = parent
+		hitbox.mapposx = parent.mapposx
+		hitbox.mapposy = parent.mapposy
+		
+		hitbox.left = hitbox.x+hitbox.parent.x -(.5*hitbox.xlen)	
+		hitbox.right = hitbox.x+hitbox.parent.x +(.5*hitbox.xlen)	
+		hitbox.top = hitbox.y+hitbox.parent.y -(.5*hitbox.ylen)
+		hitbox.bot = hitbox.y+hitbox.parent.y+(.5*hitbox.ylen)
 	end
 	
 	add(hitboxes, hitbox)
@@ -899,6 +930,11 @@ function update_hitbox(hb)
 	if hb.parent != nil then
 		hb.mapposx = hb.parent.mapposx
 		hb.mapposy = hb.parent.mapposy
+		
+		hb.left = hb.x+hb.parent.x -(.5*hb.xlen)	
+		hb.right = hb.x+hb.parent.x +(.5*hb.xlen)	
+		hb.top = hb.y+hb.parent.y -(.5*hb.ylen)
+		hb.bot = hb.y+hb.parent.y+(.5*hb.ylen)
 	end
 	
 	
@@ -908,20 +944,12 @@ function update_hitbox(hb)
 end
 
 --for debug purposes only
-function draw_hitbox(hb)
-	
+function draw_hitbox(hb)	
 	if (player.mapposx == hb.mapposx and player.mapposy == hb.mapposy) then
-			if hb.parent != nil then
-				rect((hb.x+hb.parent.x-(.5*hb.xlen))%128,
-									(hb.y+hb.parent.y-(.5*hb.ylen))%128,
-									(hb.x+hb.parent.x+(.5*hb.xlen))%128,
-									(hb.y+hb.parent.y+(.5*hb.ylen))%128, 8)
-			else
-				rect((hb.x-(.5*hb.xlen))%128,
-									(hb.y-(.5*hb.ylen))%128,
-									(hb.x+(.5*hb.xlen))%128,
-									(hb.y+(.5*hb.ylen))%128, 8)
-			end
+		rect(hb.left%128,
+							hb.top%128,
+							hb.right%128,
+							hb.bot%128, 8)
 	end
 end
 
@@ -971,10 +999,18 @@ function interact(face)
 	--end]]
 end
 
-function map_pos(x,y)
-
+--returns the map cell containing x,y
+function map_cell(x,y)
 	local mapx = (x-(x%8))/8
 	local mapy = (y-(y%8))/8
+	
+	return mapx, mapy
+end
+
+--returns the map screen containing x,y
+function map_pos(x,y)
+	local mapx, mapy = map_cell(x,y)
+	
 	local mapposx = (mapx-(mapx%16)) / 16
 	local mapposy = (mapy-(mapy%16)) / 16
 	return mapposx, mapposy
