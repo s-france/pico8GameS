@@ -68,13 +68,14 @@ function _draw()
 	print(player.mapposx)
 	print("y: ")
 	print(player.mapposy)--]]
-		
+	print("player.itempool")
+	print(player.itempool)
 	print("bombs")
-	print(player.bombs)
+	print(player.resources.bombs)
 	print("keys")
-	print(player.keys)
+	print(player.resources.keys)
 	print("arrows")
-	print(player.arrows)
+	print(player.resources.arrows)
 	
 	
 	foreach(hitboxes, draw_hitbox)
@@ -676,17 +677,17 @@ function update_chest(xtemp,ytemp,xpm,ypm)
   for i=1,4 do
   	loopflag = fget(mget((xtemp+xpm),(ytemp+ypm)), i)
   	if (loopflag == true and i == 1 ) then
-  		player.bombs += 5
+  		player.resources.bombs += 5
   		player.interaction = true
   		sfx(8)
   		mset((xtemp+xpm),(ytemp+ypm),24)
   	elseif (loopflag == true and i== 2 ) then
-  		player.keys += 1
+  		player.resources.keys += 1
   		player.interaction = true
   	 sfx(8)
   		mset((xtemp+xpm),(ytemp+ypm),24)
   	elseif (loopflag == true and i==3 ) then
-  		player.arrows += 20
+  		player.resources.arrows += 20
   		player.interaction = true
   		sfx(8)
   		mset((xtemp+xpm),(ytemp+ypm),24)
