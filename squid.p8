@@ -868,15 +868,18 @@ function mapcollisions(hb)
 	end
 	 
 	--diagonals
+	--sam finish this!!!!!
 	local tlx, tly = map_cell(hb.left-1,hb.top-1)		
 	local trx, try = map_cell(hb.right+1,hb.top-1)
 	local blx, bly = map_cell(hb.left-1,hb.bot+1)
 	local brx, bry = map_cell(hb.right+1,hb.bot+1)
-	--sam finish this!!!!!
+	
 	
 	return cols
 end
 
+--delete this and
+--use mapcollisions() instead
 function collisions(obj)
  // local table collisions
 	local cols = {}
