@@ -23,6 +23,17 @@ function _init()
 	arrowpool = {}
 	particlesystems = {}
 	particles = {}
+	
+ global_faces = {
+	[0] = {-1,-1},
+ [1] = {0,-1},
+ [2] = {1,-1},
+	[3] = {-1,0},
+	[4] = {1,0},
+	[5] = {-1,1},
+	[6] = {0,1},
+	[7] = {1,1} }
+	
 	npc1 = make_npc(1,0,70,35,1,1)
 	npc2 = make_npc(0,0,8,16,0,1)
 	//music(0)
@@ -69,20 +80,14 @@ function _draw()
 	print("y: ")
 	print(player.mapposy)--]]
 	print("player.itempool")
-	print(player.itempool)
+	print(player.itempool.bow[2])
 	print("bombs")
-	print(player.resources.bombs)
+	print(player.resources.bombs[1])
 	print("keys")
-	print(player.resources.keys)
+	print(player.resources.keys[1])
 	print("arrows")
-	print(player.resources.arrows)
+	print(player.resources.arrows[1])
 	
-	local topx, topy = map_cell(player.hb.left-1,player.hb.top-1)		
-	print(topx)
-	print(topy)
-	local botx, boty = map_cell(player.hb.left-1,player.hb.bot+1)
-	print(botx)
-	print(boty)
 	
 	foreach(hitboxes, draw_hitbox)
 
@@ -113,17 +118,19 @@ function make_player()
  player.face = 3
  player.interaction = false
  // player items
- player.itempool = {}
-  player.itempool.bow = {42, 0}
- 	player.itempool.raft = {43, 0} 
- player.resources = {}
- 	player.resources.bombs = 0
- 	player.resources.keys = 0
- 	player.resources.arrows = 0
+ player.itempool = {
+  ["bow"] = {42, 0, 0},
+ 	["raft"] = {43, 0, 0} }
+ player.resources = {
+  ["bombs"] = {0, 0},
+  ["keys"] = {0},
+  ["arrows"] = {20} }
+ player.equipped_item_1 = {}
+	player.equipped_item_2 = {}
 
 	
 	--player hurtbox, tag = 0 
- player.hb = add_hitbox(0, 4,4, 6,6, -1, player)
+ add_hitbox(0, 4,4, 7,7, -1, player)
 
 end
 
@@ -149,7 +156,7 @@ function move_player()
 	// btn press are both true,
 	// the player can move
 	
-	if(btn(0) and not mapcollisions(player.hb).l) then
+	if(btn(0) and not collisions(player).l) then
 		player.dx =-1
 		player.x += player.dx
 		--player.face = 0
@@ -159,7 +166,7 @@ function move_player()
 	// here, if the collisons and
 	// btn press are both true,
 	// the player can move
-	if(btn(1) and not mapcollisions(player.hb).r) then
+	if(btn(1) and not collisions(player).r) then
 		player.dx =1
 		player.x += player.dx
 		--player.face = 1
@@ -169,7 +176,7 @@ function move_player()
 	// here, if the collisons and
 	// btn press are both true,
 	// the player can move
-	if(btn(2) and not mapcollisions(player.hb).t) then
+	if(btn(2) and not collisions(player).t) then
 		player.dy =-1
 		player.y += player.dy
 		--player.face = 2
@@ -179,7 +186,7 @@ function move_player()
 	// here, if the collisons and
 	// btn press are both true,
 	// the player can move
-	if(btn(3) and not mapcollisions(player.hb).b) then
+	if(btn(3) and not collisions(player).b) then
 		player.dy =1
 		player.y += player.dy
 		--player.face = 3
@@ -237,8 +244,8 @@ function update_player()
 	player.interaction = false
 	if ( btnp(5)) then
 		interact(player.face)
-		if ( player.interaction==false	 and player.resources.bombs>0 ) then
-	 	player.resources.bombs -= 1
+		if ( player.interaction==false	 and player.resources.bombs[1]>0 ) then
+	 	player.resources.bombs[1] -= 1
 			add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128)
  	end
  end
@@ -247,9 +254,9 @@ function update_player()
 		sword()
 	end
 	
-	if (btnp(0,1) and player.itempool.bow[2] == 1 and player.resources.arrows > 0)  then
+	if (btnp(0,1) and player.itempool.bow[2] == 1 and player.resources.arrows[1] > 0)  then
 		add_arrow(player.mapposx,player.mapposy,player.x%128,player.y%128)
-		player.resources.arrows -= 1
+		player.resources.arrows[1] -= 1
 	end
 end
 
@@ -315,6 +322,7 @@ function sword()
 		
 
 end
+
 -->8
 -- npcs
 // tab 2 contains information
@@ -637,7 +645,7 @@ end
 function explode_tile(pair)
 	if fget(mget(pair.xcell,pair.ycell),1) then
 		if fget(mget(pair.xcell,pair.ycell),5) then
-
+		
 		else
 		 sfx(7)
 			mset(pair.xcell, pair.ycell,20)
@@ -646,90 +654,118 @@ function explode_tile(pair)
 	del(pair)
 end
 -->8
--- enemy
+
 
 -->8
---chests
+
+-->8
+--player interaction functions
+
+--[[
+interactions range from opening
+chests/doors to picking up items,
+and the like. all code here 
+utilizes the global_faces table
+which has a set of parameters to
+determine which map cell the 
+player is directly looking at/
+will interact with.
+--]]
+
+// interaction process
+function interact(face)
+	openchest(face)
+	opendoor(face)
+	pickup_item(face)	
+	//npcfuncwhendone(face)
+end
 
 // code here contains all
 // small chest functionality,
 // although we may add in large
 // chests as well
 function openchest(face)
- if face == 0 then
- 	update_chest(xest(player.x/8),yest(player.y/8),-1,-1)
- elseif face == 1 then
-  update_chest(xest(player.x/8),yest(player.y/8),0,-1)
- elseif face == 2 then
- 	update_chest(xest(player.x/8),yest(player.y/8),1,-1)
-	elseif face == 3 then
-		update_chest(xest(player.x/8),yest(player.y/8),-1,0)
-	elseif face == 4 then
-	 update_chest(xest(player.x/8),yest(player.y/8),1,0)
-	elseif face == 5 then
-	 update_chest(xest(player.x/8),yest(player.y/8),-1,1)
-	elseif face == 6 then
-	 update_chest(xest(player.x/8),yest(player.y/8),0,1)
-	else
-	 update_chest(xest(player.x/8),yest(player.y/8),1,1)
+	for k,v in pairs(global_faces) do
+		if face == k then
+		 update_chest(xest(player.x/8),yest(player.y/8),v[1],v[2])
+		end
 	end
 end
 
+// this function updates the
+// state of the chest and returns
+// items to the player.
 function update_chest(xtemp,ytemp,xpm,ypm)
 	local contentflag = false
 	local loopflag = false
+	local loot_table = {
+	["bombs"] = {1,5},
+	["keys"] = {2,1},
+	["arrows"] = {3,20} }
  contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 5)
  if ( contentflag == true) then
-  for i=1,4 do
-  	loopflag = fget(mget((xtemp+xpm),(ytemp+ypm)), i)
-  	if (loopflag == true and i == 1 ) then
-  		player.resources.bombs += 5
-  		player.interaction = true
-  		sfx(8)
-  		mset((xtemp+xpm),(ytemp+ypm),24)
-  	elseif (loopflag == true and i== 2 ) then
-  		player.resources.keys += 1
-  		player.interaction = true
-  	 sfx(8)
-  		mset((xtemp+xpm),(ytemp+ypm),24)
-  	elseif (loopflag == true and i==3 ) then
-  		player.resources.arrows += 20
-  		player.interaction = true
-  		sfx(8)
-  		mset((xtemp+xpm),(ytemp+ypm),24)
-  	elseif (loopflag == true and i== 4 ) then
-  		player.interaction = true
-  		// player.keys += 1
-  		//	mset((player.x/8),(player.y/8-1),24)
-  	end
+  for k,v in pairs(loot_table) do
+   loopflag = fget(mget((xtemp+xpm),(ytemp+ypm)),v[1])
+  	if loopflag == true then
+  		for i,j in pairs(player.resources) do
+  			if (k == i) then
+  			 player.interaction = true
+  			 sfx(8)
+  			 mset((xtemp+xpm),(ytemp+ypm),24)
+  			 j[1] += v[2]
+  			end	
+  		end
+  	end	
   end
  end
 end
--->8
---locked doors
-// faces are 1, 4,5, 7
-// run check on keys, sprite
+
+
+
+// this code handles the opening
+// of locked doors. functionality
+// here removes keys from player
+// per open.
 function opendoor(face)
-	if face == 1 then
-		update_door(xest(player.x/8),yest(player.y/8),0,-1)
-	elseif face == 3 then
-		update_door(xest(player.x/8),yest(player.y/8),-1,0)
-	elseif face == 4 then
-		update_door(xest(player.x/8),yest(player.y/8),1,0)
-	elseif face == 6 then
-		update_door(xest(player.x/8),yest(player.y/8),0,1)
+	for k,v in pairs(global_faces) do
+		if face == k then
+		 update_door(xest(player.x/8),yest(player.y/8),v[1],v[2])
+		end
 	end
 end
 
+// updates the state of the door
+// and removes the players key
 function update_door(xtemp,ytemp,xpm, ypm)
  local contentflag = false
  contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 2)
-		if (contentflag == true and player.keys > 0) then
+		if (contentflag == true and player.resources.keys[1] > 0) then
 				player.interaction = true
-			 player.keys -= 1
+			 player.resources.keys[1] -= 1
 			 sfx(9)
   		mset((xtemp+xpm),(ytemp+ypm),0)
 		end
+end
+
+// picks up player inventory 
+// items which are meant to lie
+// static on the map.	can be 
+// utilized post acquisition
+function pickup_item(face) 
+	local xpm, ypm
+	for k, v in pairs(global_faces) do
+		if face == k then
+		 //p_i_recieve(v[1],v[2])
+		 local temp = mget(xest(player.x/8+v[1]),yest(player.y/8+v[2]))
+			for i,j in pairs(player.itempool) do
+				if temp == j[1] then
+		 		player.interaction = true
+	 			j[2] += 1
+	 			mset(xest(player.x/8+v[1]),yest(player.y/8+v[2]),0)
+				end
+			end
+		end
+	end
 end
 -->8
 --sword physics
@@ -778,8 +814,6 @@ end
 // returns cell information
 
 function mapcollisions(hb)
-	--sam finish this!!!!
-	
 	--find all mapcells
 	--containing/touching hb:
 	---get tl and tr mapcell,
@@ -787,72 +821,10 @@ function mapcollisions(hb)
 	---for loops from tl to tr cell
 	---to check collisions,
 	
-	// local table collisions
-	local cols = {}
-	//list of collisions to check
-	cols.tl = false
-	cols.t = false
-	cols.tr = false
-	cols.l = false
-	cols.r = false
-	cols.bl = false
-	cols.b = false
-	cols.br = false
-	
-	
-	--left collisions
-	local topx, topy = map_cell(hb.left-1,hb.top)		
-	local botx, boty = map_cell(hb.left-1,hb.bot)
-	
-	for y=boty, topy, -1 do
-		if fget(mget(topx, y), 0) then
-			cols.l = true
-		end
-	end
- --if cols.tl or cols.bl then
- 	--cols.l = true
- --end
- 
- --right collisions
-	local topx, topy = map_cell(hb.right+1,hb.top)		
-	local botx, boty = map_cell(hb.right+1,hb.bot)
-	
-	for y=boty, topy, -1 do
-		if fget(mget(topx, y), 0) then
-			cols.r = true
-		end
-	end
-	
-	--top collisions
-	local leftx, lefty = map_cell(hb.left,hb.top-1)		
-	local rightx, righty = map_cell(hb.right,hb.top-1)
-	
-	for x=rightx, leftx, -1 do
-		if fget(mget(x, lefty), 0) then
-			cols.t = true
-		end
-	end
-	
-	--bottom collisions
-	local leftx, lefty = map_cell(hb.left,hb.bot+1)		
-	local rightx, righty = map_cell(hb.right,hb.bot+1)
-	
-	for x=rightx, leftx, -1 do
-		if fget(mget(x, lefty), 0) then
-			cols.b = true
-		end
-	end
-	 
-	--diagonals
-	local tlx, tly = map_cell(hb.left-1,hb.top-1)		
-	local trx, try = map_cell(hb.right+1,hb.top-1)
-	local blx, bly = map_cell(hb.left-1,hb.bot+1)
-	local brx, bry = map_cell(hb.right+1,hb.bot+1)
 	
 	
 	
 	
-	return cols
 end
 
 function collisions(obj)
@@ -932,13 +904,6 @@ function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
 	hitbox.y = y
 	hitbox.xlen = xlen
 	hitbox.ylen = ylen
-
-	--coordinates of the hb edges
-	hitbox.left = hitbox.x-(.5*hitbox.xlen)	
-	hitbox.right = hitbox.x+(.5*hitbox.xlen)	
-	hitbox.top = hitbox.y-(.5*hitbox.ylen)
-	hitbox.bot = hitbox.y+(.5*hitbox.ylen)
-	
 	--lifetime of hb
 	---set duration = -1
 	---for parent-based lifetime
@@ -950,26 +915,12 @@ function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
 	hitbox.mapposy = (mapy-(mapy%16)) / 16
 	
 	if parent != nil then
-		hitbox.parent = parent
-		hitbox.mapposx = parent.mapposx
-		hitbox.mapposy = parent.mapposy
-		
-		--hb pos offset from parent x,y pos
-		hitbox.xoff = x
-		hitbox.yoff = y
-		
- 	hitbox.x = hitbox.xoff+hitbox.parent.x
- 	hitbox.y = hitbox.yoff+hitbox.parent.y
+	hitbox.parent = parent
+	hitbox.mapposx = parent.mapposx
+	hitbox.mapposy = parent.mapposy
 	end
 	
-	--coordinates of the hb edges
-	hitbox.left = hitbox.x-(.5*hitbox.xlen)	
-	hitbox.right = hitbox.x+(.5*hitbox.xlen)	
-	hitbox.top = hitbox.y-(.5*hitbox.ylen)
-	hitbox.bot = hitbox.y+(.5*hitbox.ylen)
-	
 	add(hitboxes, hitbox)
-	return hitbox
 end
 
 function update_hitbox(hb)
@@ -990,15 +941,6 @@ function update_hitbox(hb)
 	if hb.parent != nil then
 		hb.mapposx = hb.parent.mapposx
 		hb.mapposy = hb.parent.mapposy
-		
-		hb.x = hb.xoff+hb.parent.x
- 	hb.y = hb.yoff+hb.parent.y
-		
-		--coordinates of the hb edges
-		hb.left = hb.x-(.5*hb.xlen)	
-		hb.right = hb.x+(.5*hb.xlen)	
-		hb.top = hb.y-(.5*hb.ylen)
-		hb.bot = hb.y+(.5*hb.ylen)
 	end
 	
 	
@@ -1008,71 +950,34 @@ function update_hitbox(hb)
 end
 
 --for debug purposes only
-function draw_hitbox(hb)	
+function draw_hitbox(hb)
+	
 	if (player.mapposx == hb.mapposx and player.mapposy == hb.mapposy) then
-		rect(hb.left%128,
-							hb.top%128,
-							hb.right%128,
-							hb.bot%128, 8)
+			if hb.parent != nil then
+				rect((hb.x+hb.parent.x-(.5*hb.xlen))%128,
+									(hb.y+hb.parent.y-(.5*hb.ylen))%128,
+									(hb.x+hb.parent.x+(.5*hb.xlen))%128,
+									(hb.y+hb.parent.y+(.5*hb.ylen))%128, 8)
+			else
+				rect((hb.x-(.5*hb.xlen))%128,
+									(hb.y-(.5*hb.ylen))%128,
+									(hb.x+(.5*hb.xlen))%128,
+									(hb.y+(.5*hb.ylen))%128, 8)
+			end
 	end
 end
 
 
 
-
-function interact(face)
-	local itemtable = {42, 43}
-	local xpm, ypm
-	local faces = {1,3,4,6}
-	openchest(face)
-	opendoor(face)
-	//npcfuncwhendone(face)
-	
-	pickup_item(face)	
-end
-
---returns the map cell containing x,y
-function map_cell(x,y)
+function map_pos(x,y)
 	local mapx = (x-(x%8))/8
 	local mapy = (y-(y%8))/8
-	
-	return mapx, mapy
-end
-
---returns the map screen containing x,y
-function map_pos(x,y)
-	local mapx, mapy = map_cell(x,y)
-	
 	local mapposx = (mapx-(mapx%16)) / 16
 	local mapposy = (mapy-(mapy%16)) / 16
 	return mapposx, mapposy
 end
 
-function pickup_item(face) 
-	local xpm, ypm
-	local faces = {
- [1] = {0,-1},
-	[3] = {-1,0},
-	[4] = {1,0},
-	[6] = {0,1}
-	}
-	for k, v in pairs(faces) do
-		if face == k then
-		  p_i_recieve(v[1],v[2])
-		end
-	end
-end
 
-function p_i_recieve(xpm,ypm)
- local temp = mget(xest(player.x/0+xpm),yest(player.y/0+ypm))
-	for k,v in pairs(player.itempool) do
-		if temp == v[1] then
-		 player.interaction = true
-	 	v[2] += 1
-	 	mset(xest(player.x/8+xpm),yest(player.y/8+ypm),0)
-		end
-	end
-end
 -->8
 --arrows and bow
 // this tab contains code for
@@ -1087,11 +992,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	--left
 	if (player.face == 0 or player.face ==3 or player.face ==5) then
 		arrow.x = xpos + mapposx*128 - 8 // world space
-		arrow.dx = -1.0
+		arrow.dx = -2.0
 	--right
  elseif (player.face ==2 or player.face ==4 or player.face ==7) then
 	 arrow.x = xpos + mapposx*128 + 8 // world space
-		arrow.dx = 1.0
+		arrow.dx = 2.0
 	else
 		arrow.x = xpos + mapposx*128
 		arrow.dx = 0
@@ -1100,11 +1005,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	--up 
  if (player.face ==0 or player.face ==1 or player.face ==2) then
 		arrow.y = ypos + mapposy*128 - 8 // world space
-		arrow.dy = -1.0
+		arrow.dy = -2.0
 	--down
 	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
 		arrow.y = ypos + mapposy*128 + 8 // world space
-		arrow.dy = 1.0
+		arrow.dy = 2.0
 	else
 		arrow.y = ypos + mapposy*128
 		arrow.dy = 0
@@ -1193,11 +1098,11 @@ f77ffff203333330051111500000000061111111cc676cccf6ff2fff2ffef6ff400aa004444aa444
 00000000000000000000000000000000000000000000000000000000000040000000000000000000005440000747647000000000000000000000000000000000
 000cc000000cc000000cc000000cc000000cc000000cc000000cc000000444000440000000000000007004000404404000000000000000000000000000000000
 00cccc0000cccc0000ccdc0000cdcc0000ccdc0000cccc0000cccc000000f00004f0000004000077007000400645547000000000000000000000000000000000
-0cc7cc7007cc7cc000ccdc7000cdcc0007ccdc00007cc700007cc7000000f000000f000044fffff0007000900404404000000000000000000000000000000000
+0cc7cc7007cc7cc000ccdc7000cdcc0007ccdc000c7cc700007cc7c00000f000000f000044fffff0007000900404404000000000000000000000000000000000
 0cc1cc1001cc1cc00ccdcc100cdcccc001cdccc00c1cc1c00c1cc1c00000f0000000f00004000077007000400404404000000000000000000000000000000000
 0ccccc400cccc4c00ccdccc00cdcccc004cdccc00ccccc400ccccc400000f00000000f7000000000007000400745546000000000000000000000000000000000
-00cc044000c0c40000c0cc0004c00c0004cc0c0000c00c4000c004400007f700000007f700000000007004000404404000000000000000000000000000000000
-00c00c0000c00c0000c00c0000c00c0000c00c000c00c000000c00c0000707000000007000000000005440000647747000000000000000000000000000000000
+00cc044000c0c40000c0cc0004c00c0004cc0c0000cc0c4000c0c4400007f700000007f700000000007004000404404000000000000000000000000000000000
+00c00c0000c00c0000c00c0000c00c0000c00c0000c00c0000c00c00000707000000007000000000005440000647747000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -1308,7 +1213,7 @@ __gff__
 __map__
 0804040404040404100404040404041010040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040409
 0603030303030303060303030301010606030303030303030303030303030303030303030303040403030303030304040404040404030303030303030303030303030303030303030303030303030304040303030303030303030303030303030303030303030303030303030303030303030303030304040403030303030306
-0603030119030303062a01030301030606010303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+0603030119030303062a010303012b0606010303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303010303050409030303030606031a03080903030303010101010303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 06030103030303030303050d0303030606030804070f03030301030303030103030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303030301030301030303030516040703030303030103030303030301030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
