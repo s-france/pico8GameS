@@ -697,24 +697,22 @@ end
 --locked doors
 // faces are 1, 4,5, 7
 // run check on keys, sprite
+
 function opendoor(face)
-	if face == 1 then
-		update_door(xest(player.x/8),yest(player.y/8),0,-1)
-	elseif face == 3 then
-		update_door(xest(player.x/8),yest(player.y/8),-1,0)
-	elseif face == 4 then
-		update_door(xest(player.x/8),yest(player.y/8),1,0)
-	elseif face == 6 then
-		update_door(xest(player.x/8),yest(player.y/8),0,1)
+	for k,v in pairs(global_faces) do
+		if face == k then
+		 update_door(xest(player.x/8),yest(player.y/8),v[1],v[2])
+		end
 	end
 end
+
 
 function update_door(xtemp,ytemp,xpm, ypm)
  local contentflag = false
  contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 2)
-		if (contentflag == true and player.resources.keys > 0) then
+		if (contentflag == true and player.resources.keys[1] > 0) then
 				player.interaction = true
-			 player.resources.keys -= 1
+			 player.resources.keys[1] -= 1
 			 sfx(9)
   		mset((xtemp+xpm),(ytemp+ypm),0)
 		end
