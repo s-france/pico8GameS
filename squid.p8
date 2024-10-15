@@ -89,7 +89,7 @@ function _draw()
 	print(player.resources.arrows[1])
 	
 	
-	//foreach(hitboxes, draw_hitbox)
+	foreach(hitboxes, draw_hitbox)
 
 
 end
