@@ -130,7 +130,7 @@ function make_player()
 
 	
 	--player hurtbox, tag = 0 
- player.hb = add_hitbox(0, 4,4, 7,7, -1, player)
+ player.hb = add_hitbox(0, 4,4, 6,6, -1, player)
 
 end
 
@@ -1120,6 +1120,8 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	elseif player.face == 2 then
 		arrow.flipx = true
 	end
+	
+	arrow.hb = add_hitbox(1,4,4,4,4,-1,arrow)
 	
 	add(arrowpool, arrow)
 end
