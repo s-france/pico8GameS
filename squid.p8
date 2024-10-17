@@ -1040,6 +1040,11 @@ function draw_hitbox(hb)
 	end
 end
 
+function on_collision_test(hb1, hb2)
+	
+
+end
+
 --returns the map cell containing x,y
 function map_cell(x,y)
 	local mapx = (x-(x%8))/8
@@ -1142,17 +1147,19 @@ function update_arrow(arrow)
 		end
 	end
 	
+	--update mappos
+	arrow.mapposx, arrow.mapposy = map_pos(arrow.x, arrow.y)
+	
 	if (arrow.timer == 0 or (arrow.dx ==0 and arrow.dy == 0)) then 
 	 sfx(10)
 	 del(arrowpool,arrow)
+	 arrow = nil
 	 
 	else
 	 arrow.x += arrow.dx
 		arrow.y += arrow.dy
 		arrow.timer -= 1
 	end
-	--update mappos
-	arrow.mapposx, arrow.mapposy = map_pos(arrow.x, arrow.y)
 end
 
 function draw_arrow(arrow)
