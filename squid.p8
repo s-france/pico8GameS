@@ -1071,11 +1071,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	--left
 	if (player.face == 0 or player.face ==3 or player.face ==5) then
 		arrow.x = xpos + mapposx*128 - 8 // world space
-		arrow.dx = -2.0
+		arrow.dx = -1.5
 	--right
  elseif (player.face ==2 or player.face ==4 or player.face ==7) then
 	 arrow.x = xpos + mapposx*128 + 8 // world space
-		arrow.dx = 2.0
+		arrow.dx = 1.5
 	else
 		arrow.x = xpos + mapposx*128
 		arrow.dx = 0
@@ -1084,11 +1084,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	--up 
  if (player.face ==0 or player.face ==1 or player.face ==2) then
 		arrow.y = ypos + mapposy*128 - 8 // world space
-		arrow.dy = -2.0
+		arrow.dy = -1.5
 	--down
 	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
 		arrow.y = ypos + mapposy*128 + 8 // world space
-		arrow.dy = 2.0
+		arrow.dy = 1.5
 	else
 		arrow.y = ypos + mapposy*128
 		arrow.dy = 0
@@ -1128,15 +1128,15 @@ end
 
 
 function update_arrow(arrow)
-	if ( collisions(arrow).r or collisions(arrow).l) then
+	if ( mapcollisions(arrow.hb).r or mapcollisions(arrow.hb).l) then
 	 arrow.dx = 0 
 	end
-	if ( collisions(arrow).t or collisions(arrow).b) then
+	if ( mapcollisions(arrow.hb).t or mapcollisions(arrow.hb).b) then
 		arrow.dy = 0
 	end
 	if	arrow.sprite == 40 then
-	 if (collisions(arrow).tr or collisions(arrow).tl 
-	or collisions(arrow).bl or collisions(arrow).br) then
+	 if (mapcollisions(arrow.hb).tr or mapcollisions(arrow.hb).tl 
+	or mapcollisions(arrow.hb).bl or mapcollisions(arrow.hb).br) then
 		arrow.dx = 0
 		arrow.dy = 0
 		end
@@ -1145,6 +1145,7 @@ function update_arrow(arrow)
 	if (arrow.timer == 0 or (arrow.dx ==0 and arrow.dy == 0)) then 
 	 sfx(10)
 	 del(arrowpool,arrow)
+	 
 	else
 	 arrow.x += arrow.dx
 		arrow.y += arrow.dy
