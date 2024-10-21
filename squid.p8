@@ -34,8 +34,8 @@ function _init()
 	[6] = {0,1},
 	[7] = {1,1} }
 	
-	npc1 = make_npc(1,0,70,35,1,1)
-	npc2 = make_npc(0,0,8,16,0,1)
+	//npc1 = make_npc(1,0,70,35,1,1)
+	//npc2 = make_npc(0,0,8,16,0,1)
 	//music(0)
 	
 	--testing
@@ -49,8 +49,8 @@ function _update()
 	foreach(bombpool,update_bomb)
 	foreach(explosions,update_explosion)
 	foreach(arrowpool,update_arrow)
-	update_npc(npc1)
-	update_npc(npc2)
+	//update_npc(npc1)
+	//update_npc(npc2)
 	foreach(particlesystems, update_partsys)
 	foreach(particles, update_particle)
 	foreach(hitboxes, update_hitbox)
@@ -67,8 +67,8 @@ function _draw()
 	draw_player()
 	foreach(arrowpool,draw_arrow)
 	foreach(bombpool,draw_bomb)
-	draw_npc(npc1)
-	draw_npc(npc2)
+	//draw_npc(npc1)
+	//draw_npc(npc2)
 	
 	foreach(particles, draw_particle)
 	
@@ -322,6 +322,7 @@ end
 
 -->8
 -- npcs
+--[[
 // tab 2 contains information
 // about drawing npcs, their 
 // movement, and drawing them
@@ -416,7 +417,7 @@ function draw_npc(npc)
 
 end
 
-
+--]]
 -->8
 -- particle effects
 
@@ -1028,8 +1029,6 @@ function update_hitbox(hb)
 	
 	
 	--add oncollision function here!!!
-	
-	
 end
 
 --for debug purposes only
