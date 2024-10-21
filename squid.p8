@@ -124,7 +124,8 @@ function make_player()
  player.resources = {
   ["bombs"] = {0, 0},
   ["keys"] = {0},
-  ["arrows"] = {20} }
+  ["arrows"] = {20},
+  ["😐oney"] = {0} }
  player.equipped_item_1 = {}
 	player.equipped_item_2 = {}
 
@@ -1004,8 +1005,10 @@ function update_hitbox(hb)
 			del(hitboxes, hb)
 		end
 	--lifetime based on parent
-	elseif hb.parent == nil then
-		del(hitboxes, hb)
+	else
+		if hb.parent == nil then
+		 del(hitboxes, hb)
+		end
 	end
 	
 	--update mappos
@@ -1076,11 +1079,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	--left
 	if (player.face == 0 or player.face ==3 or player.face ==5) then
 		arrow.x = xpos + mapposx*128 - 8 // world space
-		arrow.dx = -1.5
+		arrow.dx = -2.0
 	--right
  elseif (player.face ==2 or player.face ==4 or player.face ==7) then
 	 arrow.x = xpos + mapposx*128 + 8 // world space
-		arrow.dx = 1.5
+		arrow.dx = 2.0
 	else
 		arrow.x = xpos + mapposx*128
 		arrow.dx = 0
@@ -1089,11 +1092,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	--up 
  if (player.face ==0 or player.face ==1 or player.face ==2) then
 		arrow.y = ypos + mapposy*128 - 8 // world space
-		arrow.dy = -1.5
+		arrow.dy = -2.0
 	--down
 	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
 		arrow.y = ypos + mapposy*128 + 8 // world space
-		arrow.dy = 1.5
+		arrow.dy = 2.0
 	else
 		arrow.y = ypos + mapposy*128
 		arrow.dy = 0
@@ -1133,28 +1136,32 @@ end
 
 
 function update_arrow(arrow)
+	if	arrow.sprite == 40 then
+	 if (arrow.dx ==0 or arrow.dy == 0) then
+			arrow.dx = 0
+			arrow.dy = 0
+	 elseif (mapcollisions(arrow.hb).tr or mapcollisions(arrow.hb).tl 
+	or mapcollisions(arrow.hb).bl or mapcollisions(arrow.hb).br) then	
+			arrow.dx = 0
+			arrow.dy = 0
+		end
+	end
 	if ( mapcollisions(arrow.hb).r or mapcollisions(arrow.hb).l) then
 	 arrow.dx = 0 
 	end
 	if ( mapcollisions(arrow.hb).t or mapcollisions(arrow.hb).b) then
 		arrow.dy = 0
 	end
-	if	arrow.sprite == 40 then
-	 if (mapcollisions(arrow.hb).tr or mapcollisions(arrow.hb).tl 
-	or mapcollisions(arrow.hb).bl or mapcollisions(arrow.hb).br) then
-		arrow.dx = 0
-		arrow.dy = 0
-		end
-	end
+
 	
 	--update mappos
 	arrow.mapposx, arrow.mapposy = map_pos(arrow.x, arrow.y)
 	
-	if (arrow.timer == 0 or (arrow.dx ==0 and arrow.dy == 0)) then 
+	if (arrow.timer == 0 or (arrow.dx == 0 and arrow.dy == 0) ) then 
 	 sfx(10)
 	 del(arrowpool,arrow)
 	 arrow = nil
-	 
+
 	else
 	 arrow.x += arrow.dx
 		arrow.y += arrow.dy
