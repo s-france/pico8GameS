@@ -318,7 +318,6 @@ function sword()
 		
 		//add sword hitbox here!!!!
 		
-
 end
 
 -->8
