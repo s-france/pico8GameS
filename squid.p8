@@ -46,7 +46,7 @@ end
 // routine updates every frame
 // using designed update funcs.
 function _update()
-	get_mapdata(0,0,32,32) 
+	get_mapdata(0,0,31,31) 
 	update_player()
 	foreach(bombpool,update_bomb)
 	foreach(explosions,update_explosion)
