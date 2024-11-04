@@ -98,7 +98,7 @@ function _draw()
 	print(player.resources.arrows[1])
 	
 	
-	foreach(hitboxes, draw_hitbox)
+	//foreach(hitboxes, draw_hitbox)
 
 
 end
@@ -134,10 +134,12 @@ function make_player()
   ["bombs"] = {20, 0},
   ["keys"] = {0},
   ["arrows"] = {20},
-  ["😐oney"] = {0} }
- player.equipped_item_1 = {}
-	player.equipped_item_2 = {}
-	player.equipped_item_3 = {}
+  ["money"] = {0} }
+ player.inputs = {
+  [1] = "sword",
+  [2] = "bomb",
+  [3] = "bow"
+ }
 
 	
 	--player hurtbox, tag = 0 
