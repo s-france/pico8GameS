@@ -26,19 +26,12 @@ function _init()
 	
  global_faces = {
 	[0] = {-1,-1,-6,4,.5,.5,4,4,2,-2,.5,.5,.25},
-	
  [1] = {0,-1,-2,-4,0,1,4,4,2,0,1,.5,.2},
- 
  [2] = {1,-1,4,-6,.5,.5,4,4,2,2,.5,.5,.25},
- 
 	[3] = {-1,0,-4,10,1,0,4,4,0,-2,.5,1,.25},
-	
 	[4] = {1,0,12,-2,1,0,4,4,0,2,.5,1,.25},
-	
 	[5] = {-1,1,4,14,.5,.5,4,4,-2,-2,.5,.5,.25},
-	
 	[6] = {0,1,10,12,0,1,4,4,-2,0,1,.5,.25},
-	
 	[7] = {1,1,14,4,.5,.5,4,4,-2,2,.5,.5,.25} }
 	
 	//npc1 = make_npc(1,0,70,35,1,1)
@@ -53,7 +46,7 @@ end
 // routine updates every frame
 // using designed update funcs.
 function _update()
-	get_mapdata(0,0,31,31) 
+	//get_mapdata(0,0,31,31) 
 	update_player()
 	foreach(bombpool,update_bomb)
 	foreach(explosions,update_explosion)
@@ -177,7 +170,7 @@ function move_player()
 	// the player can move
 	
 	if(btn(0) and not mapcollisions(player.hb).l) then
-		player.dx =-1
+		player.dx =-1 
 		player.x += player.dx
 		--player.face = 0
 	end
@@ -197,7 +190,7 @@ function move_player()
 	// btn press are both true,
 	// the player can move
 	if(btn(2) and not mapcollisions(player.hb).t) then
-		player.dy =-1
+		player.dy = -1
 		player.y += player.dy
 		--player.face = 2
 	end
@@ -210,11 +203,9 @@ function move_player()
 		player.dy =1
 		player.y += player.dy
 		--player.face = 3
+		
+		
 	end
-	if (player.dx != 0) and (player.dy != 0) then
-	 player.dx * .71
-	 player.dy * .71
-	end 
 end
 
 // update player
