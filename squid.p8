@@ -172,7 +172,6 @@ function move_player()
 	if(btn(0) and not mapcollisions(player.hb).l) then
 		player.dx =-1 
 		player.x += player.dx
-		--player.face = 0
 	end
 	
 	// runs check on right movement
@@ -182,7 +181,6 @@ function move_player()
 	if(btn(1) and not mapcollisions(player.hb).r) then
 		player.dx =1
 		player.x += player.dx
-		--player.face = 1
 	end
 	
 	// runs check on up movement
@@ -192,7 +190,6 @@ function move_player()
 	if(btn(2) and not mapcollisions(player.hb).t) then
 		player.dy = -1
 		player.y += player.dy
-		--player.face = 2
 	end
 	
 	// runs check on down movement
@@ -202,9 +199,6 @@ function move_player()
 	if(btn(3) and not mapcollisions(player.hb).b) then
 		player.dy =1
 		player.y += player.dy
-		--player.face = 3
-		
-		
 	end
 end
 
