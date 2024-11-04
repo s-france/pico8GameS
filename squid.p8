@@ -137,6 +137,7 @@ function make_player()
   ["😐oney"] = {0} }
  player.equipped_item_1 = {}
 	player.equipped_item_2 = {}
+	player.equipped_item_3 = {}
 
 	
 	--player hurtbox, tag = 0 
