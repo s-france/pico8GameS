@@ -311,8 +311,6 @@ function sword()
 				add_partsys(player.x + v[3],player.y + v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13])
 			end
 		end
-
-		
 end
 
 -->8
