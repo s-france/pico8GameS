@@ -211,6 +211,10 @@ function move_player()
 		player.y += player.dy
 		--player.face = 3
 	end
+	if (player.dx != 0) and (player.dy != 0) then
+	 player.dx * .71
+	 player.dy * .71
+	end 
 end
 
 // update player
