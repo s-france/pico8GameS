@@ -25,14 +25,21 @@ function _init()
 	particles = {}
 	
  global_faces = {
-	[0] = {-1,-1},
- [1] = {0,-1},
- [2] = {1,-1},
-	[3] = {-1,0},
-	[4] = {1,0},
-	[5] = {-1,1},
-	[6] = {0,1},
-	[7] = {1,1} }
+	[0] = {-1,-1,-6,4,.5,.5,4,4,2,-2,.5,.5,.25},
+	
+ [1] = {0,-1,-2,-4,0,1,4,4,2,0,1,.5,.2},
+ 
+ [2] = {1,-1,4,-6,.5,.5,4,4,2,2,.5,.5,.25},
+ 
+	[3] = {-1,0,-4,10,1,0,4,4,0,-2,.5,1,.25},
+	
+	[4] = {1,0,12,-2,1,0,4,4,0,2,.5,1,.25},
+	
+	[5] = {-1,1,4,14,.5,.5,4,4,-2,-2,.5,.5,.25},
+	
+	[6] = {0,1,10,12,0,1,4,4,-2,0,1,.5,.25},
+	
+	[7] = {1,1,14,4,.5,.5,4,4,-2,2,.5,.5,.25} }
 	
 	//npc1 = make_npc(1,0,70,35,1,1)
 	//npc2 = make_npc(0,0,8,16,0,1)
@@ -98,7 +105,7 @@ function _draw()
 	print(player.resources.arrows[1])
 	
 	
-	//foreach(hitboxes, draw_hitbox)
+	foreach(hitboxes, draw_hitbox)
 
 
 end
@@ -309,29 +316,13 @@ function draw_map()
 end
 
 
-
-
 function sword()
-		//sword visuals	
-		if player.face == 1 then
-			add_partsys(player.x -2,player.y -4, 0,1, 4, 4, 2,0, 1,.5, .25)
-		elseif player.face == 6 then
-			add_partsys(player.x +10,player.y +12, 0,1, 4, 4, -2,0, 1,.5, .25)
-		elseif player.face == 4 then
-			add_partsys(player.x +12,player.y -2, 1,0, 4, 4, 0,2, .5,1, 0.25)
-		elseif player.face == 3 then
-			add_partsys(player.x -4,player.y +10, 1,0, 4, 4, 0,-2, .5,1, 0.25)
-		elseif player.face == 2 then
-			add_partsys(player.x +4,player.y -6, .5,.5, 4, 4, 2,2, .5,.5, 0.25)
-		elseif player.face == 5 then
-			add_partsys(player.x +4,player.y +14, .5,.5, 4, 4, -2,-2, .5,.5, 0.25)
-		elseif player.face == 0 then
-			add_partsys(player.x -6,player.y +4, .5,.5, 4, 4, 2,-2, .5,.5, 0.25)
-		elseif player.face == 7 then
-			add_partsys(player.x +14,player.y +4, .5,.5, 4, 4, -2,2, .5,.5, 0.25)
+		for k,v in pairs(global_faces) do
+			if player.face == k then
+				add_partsys(player.x + v[3],player.y + v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13])
+			end
 		end
-		
-		//add sword hitbox here!!!!
+
 		
 end
 
@@ -959,6 +950,8 @@ function mapcollisions(hb)
 	return cols
 end
 
+
+--[[
 --delete this and
 --use mapcollisions() instead
 function collisions(obj)
@@ -1028,6 +1021,7 @@ function collisions(obj)
 	
 	return cols
 end
+--]]
 
 
 function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
