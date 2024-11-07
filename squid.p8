@@ -101,7 +101,6 @@ function _draw()
 	
 	foreach(hitboxes, draw_hitbox)
 
-
 end
 -->8
 -- player info
