@@ -164,11 +164,34 @@ function move_player()
 	player.dx = 0
 	player.dy = 0
 
+	// new movement calculations
+	// to make diags smooth
+	--[[
+	if (btn(0) or btn(1) or btn(2) or btn(3)) then
+		if (btn(0) and not mapcollisions(player.hb).l and not btn(2) and not btn(3)) then
+		 player.dx = -1 
+			player.x += player.dx
+		elseif (btn(1) and not mapcollisions(player.hb).r and not btn(2) and not btn(3)) then
+			player.dx = 1
+			player.x += player.dx
+	 elseif (btn(2) and not mapcollisions(player.hb).t and not btn(0) and not btn(1)) then
+			player.dy = -1
+			player.y += player.dy
+		elseif (btn(3) and not mapcollisions(player.hb).b and not btn(0) and not btn(1)) then
+			player.dy = 1
+			player.y += player.dy
+		elseif (btn(0) and btn(2) and not ( mapcollisions(player.hb).l or mapcollisions(player.hb).t)) then
+			player.dx,player.dy = -.707,-.707
+			player.x += player.dx
+			player.y += player.dy
+		end
+	end
+	--]]
+	
 	// runs check on left movement
 	// here, if the collisons and
 	// btn press are both true,
 	// the player can move
-	
 	if(btn(0) and not mapcollisions(player.hb).l) then
 		player.dx =-1 
 		player.x += player.dx
@@ -200,6 +223,7 @@ function move_player()
 		player.dy = 1
 		player.y += player.dy
 	end
+	
 end
 
 // update player
