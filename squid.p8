@@ -161,51 +161,38 @@ end
 function move_player()
  //debug
 	//print(collisions(player.x, player.y))
-	player.sprite = 2
 	// player change in distance 
 	player.dx = 0
 	player.dy = 0
-
+	speed = 1
+	if (btn(0) and not mapcollisions(player.hb).l) then
+  player.dx-=1
+	end
+	if (btn(1) and not mapcollisions(player.hb).r) then
+  player.dx+=1
+	end
+	if (btn(2) and not mapcollisions(player.hb).t) then
+  player.dy-=1
+	end
+	if (btn(3) and not mapcollisions(player.hb).b) then
+  player.dy+=1
+	end
+	
+	if (player.dx*player.dx+player.dy*player.dy>1) then
+  // movement vector is longer than 1 unit!
+  // normalize it:
+  dist=sqrt(player.dx*player.dx+player.dy*player.dy)
+  player.dx/=dist
+  player.dy/=dist
+	end
+	
+	player.x+=player.dx*speed
+	player.y+=player.dy*speed
 	// new movement calculations
 	// to make diags smooth
 
-	if ((btn(0) or btn(1)) and (not btn(2) and not btn(3))) then
-		if (btn(0) and not mapcollisions(player.hb).l ) then
-		 player.dx = -1
-			player.x += player.dx
-		end
-		if (btn(1) and not mapcollisions(player.hb).r ) then
-			player.dx = 1
-			player.x += player.dx
-		end
-	elseif ( ( btn(2) or btn(3) ) and ( not btn(0) and not btn(1) ) ) then
-		if(btn(2) and not mapcollisions(player.hb).t) then
-			player.dy = -1
-			player.y += player.dy
-		end
-		if(btn(3) and not mapcollisions(player.hb).b) then
-			player.dy = 1
-			player.y += player.dy
-		end
-		
- elseif (btn(0) and (btn(2) or btn(3))) then
- 	if (btn(0) and btn(2) and (not mapcollisions(player.hb).l or not mapcollisions(player.hb).t) or mapcollisions(player.hb).tl) then
-			local xo, yo = player.x, player.y
-			player.dx, player.dy = -.75, -.75
-			player.x += player.dx
-			player.y += player.dy
-			if abs(xo - player.x) > abs(yo - player.y) then
-				local tex = flr(player.x + 0.5)
-				local tey = flr((player.y + (tex - player.x) * player.dy / plater.dx)+0.5)
-				player.y = tey
-			elseif abs(xo - player.x) <= abs(yo - player.y) then
-				local tey = flr(player.y + 0.5)
-				local tex = flr((player.x + (tey - player.y) * player.dx / player.dy) + 0.5)
-			end
-		end	
-	end
-
---[[
+	
+ --[[
 	// runs check on left movement
 	// here, if the collisons and
 	// btn press are both true,
@@ -241,7 +228,8 @@ function move_player()
 		player.dy = 1
 		player.y += player.dy
 	end
---]]
+	--]]
+
 end
 
 // update player
