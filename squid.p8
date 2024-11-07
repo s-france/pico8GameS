@@ -197,7 +197,7 @@ function move_player()
 	// btn press are both true,
 	// the player can move
 	if(btn(3) and not mapcollisions(player.hb).b) then
-		player.dy =1
+		player.dy = 1
 		player.y += player.dy
 	end
 end
@@ -294,24 +294,6 @@ function draw_player()
 	pal()
 end
 
-// draw map
-//
-// draws map
-
-function draw_map()
-
-	map(player.mapposx * 16,player.mapposy * 16,0,0,16,16)
-
-end
-
-
-function sword()
-		for k,v in pairs(global_faces) do
-			if player.face == k then
-				add_partsys(player.x + v[3],player.y + v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13])
-			end
-		end
-end
 
 -->8
 -- npcs
@@ -828,9 +810,17 @@ function pickup_item(face)
 end
 -->8
 --sword physics
-function swordswing(face)
-	
-end	
+
+// sword()
+// draws sword swing! 
+// creates hitbox
+function sword()
+		for k,v in pairs(global_faces) do
+			if player.face == k then
+				add_partsys(player.x + v[3],player.y + v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13])
+			end
+		end
+end
 -->8
 --optimizations and development functions
 // first order of biznes
@@ -864,6 +854,16 @@ function bomb_animation()
 	end
 end
 
+
+// draw map
+//
+// draws map
+
+function draw_map()
+
+	map(player.mapposx * 16,player.mapposy * 16,0,0,16,16)
+
+end
 
 
 // collisions
@@ -936,80 +936,6 @@ function mapcollisions(hb)
 	
 	return cols
 end
-
-
---[[
---delete this and
---use mapcollisions() instead
-function collisions(obj)
- // local table collisions
-	local cols = {}
-	//list of collisions
-	cols.tl = false
-	cols.t = false
-	cols.tr = false
-	cols.l = false
-	cols.r = false
-	cols.bl = false
-	cols.b = false
-	cols.br = false
-	
-	--horizontal
-	if(obj.x%8 == 0) then
-		--left collision
-		cols.tl =fget(mget((obj.x/8)-1, (obj.y-obj.y%8)/8), 0)	
-	 cols.bl =fget(mget((obj.x/8)-1, (obj.y+8-obj.y%8)/8), 0)
-	 
-	 if cols.tl or cols.bl then
-	 	cols.l = true
-	 end
-	 
-	 --right collision
-	 cols.tr =fget(mget((obj.x/8)+1, (obj.y-obj.y%8)/8), 0)	
-	 cols.br =fget(mget((obj.x/8)+1, (obj.y+8-obj.y%8)/8), 0)
-	 
-	 if cols.tr or cols.br then
-	 	cols.r = true
-	 end
-	end
-	
-	--vertical
-	if(obj.y%8 ==0) then
-		--top collisions
-		cols.tl =fget(mget(((obj.x-obj.x%8)/8),(obj.y/8)-1),0)
-		cols.tr =fget(mget(((obj.x+8-obj.x%8)/8),(obj.y/8)-1),0)
-		
-		if cols.tl or cols.tr then
-			cols.t = true
-		end
-		
-		--bottom collisions
-		cols.bl =fget(mget(((obj.x-obj.x%8)/8),(obj.y/8)+1),0)
-		cols.br =fget(mget(((obj.x+8-obj.x%8)/8),(obj.y/8)+1),0)
-		
-		if cols.bl or cols.br then
-			cols.b = true
-		end
-	end
-	
-	--centered h+v
-	if(obj.x%8 == 0 and obj.y%8 ==0) then
-		cols.tl =fget(mget((obj.x/8)-1, (obj.y/8)-1), 0)
-		cols.tr =fget(mget((obj.x/8)+1, (obj.y/8)-1), 0)
-		cols.bl =fget(mget((obj.x/8)-1, (obj.y/8)+1), 0)
-		cols.br = fget(mget((obj.x/8)+1, (obj.y/8)+1), 0)
-		
-		cols.l =fget(mget((obj.x/8)-1, obj.y/8), 0)
-		cols.r =fget(mget((obj.x/8)+1, obj.y/8), 0)
-		cols.t =fget(mget(obj.x/8, (obj.y/8)-1), 0)
-		cols.b =fget(mget(obj.x/8, (obj.y/8)+1), 0)
-	end
-	
-	
-	return cols
-end
---]]
-
 
 function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
 	hitbox = {}
@@ -1413,8 +1339,8 @@ __sfx__
 611000001d0201d0201d0201d0201d0201d0201d0201d0201b0201b0201b0201b0201b0201b0251b0251b0251f0201d0201b020180201d0201b02018020110212102421025210222102021025210252102521025
 030700001064015640176301063017620136201761010610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 110700001364010640106301063010620106201061010610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-490c00000f645000000000000000000000000000000000001f5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-010c00002d6132d615000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+490c00000f655000000000000000000000000000000000001f5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+010c00002d6232d625000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0103000027610276102a6202c6332e6551a0001a0001a0001a0001a0001a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 011900002c624206152061314615206132061508035206152c645206452063520635206252062508615206152c623206152061320615206132061508035206152c62420615206152061508032080330803514135
 9119000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001c10000000181301b1301d1301f130
