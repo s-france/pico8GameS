@@ -63,6 +63,7 @@ function _update()
 		music(5)
 		music_var = 4
 	end 
+	mag = sqrt(player.dx^2 + player.dy^2)
 end
 
 
@@ -100,7 +101,7 @@ function _draw()
 	
 	
 	foreach(hitboxes, draw_hitbox)
-
+ print(mag)
 end
 -->8
 -- player info
@@ -167,16 +168,16 @@ function move_player()
 	player.diag = false
 	
 	if (btn(0) and not mapcollisions(player.hb).l) then
-  player.dx-=1.0
+  player.dx-=1.01
 	end
 	if (btn(1) and not mapcollisions(player.hb).r) then
-  player.dx+=1.0
+  player.dx+=1.01
 	end
 	if (btn(2) and not mapcollisions(player.hb).t) then
-  player.dy-=1.0
+  player.dy-=1.01
 	end
 	if (btn(3) and not mapcollisions(player.hb).b) then
-  player.dy+=1.0
+  player.dy+=1.01
 	end
 	
 	if (player.dx*player.dy != 0) then
