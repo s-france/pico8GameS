@@ -168,16 +168,16 @@ function move_player()
 	player.diag = false
 	
 	if (btn(0) and not mapcollisions(player.hb).l) then
-  player.dx-=1.01
+  player.dx-=1.001
 	end
 	if (btn(1) and not mapcollisions(player.hb).r) then
-  player.dx+=1.01
+  player.dx+=1.001
 	end
 	if (btn(2) and not mapcollisions(player.hb).t) then
-  player.dy-=1.01
+  player.dy-=1.001
 	end
 	if (btn(3) and not mapcollisions(player.hb).b) then
-  player.dy+=1.01
+  player.dy+=1.001
 	end
 	
 	if (player.dx*player.dy != 0) then
