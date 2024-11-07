@@ -165,57 +165,47 @@ function move_player()
 	// player change in distance 
 	player.dx = 0
 	player.dy = 0
---[[
+
 	// new movement calculations
 	// to make diags smooth
 
-	if (btn(0) or btn(1) or btn(2) or btn(3)) then
-		if (btn(0) and not mapcollisions(player.hb).l and not btn(2) and not btn(3)) then
-		 player.dx = -1.5
+	if ((btn(0) or btn(1)) and (not btn(2) and not btn(3))) then
+		if (btn(0) and not mapcollisions(player.hb).l ) then
+		 player.dx = -1
 			player.x += player.dx
-			player.xx = player.x
-		elseif (btn(1) and not mapcollisions(player.hb).r and not btn(2) and not btn(3)) then
-			player.dx = 1.5
-			player.x += player.dx
-			player.xx = player.x
-	 elseif (btn(2) and not mapcollisions(player.hb).t and not btn(0) and not btn(1)) then
-			player.dy = -1.5
-			player.y += player.dy
-			player.yy = player.y
-		elseif (btn(3) and not mapcollisions(player.hb).b and not btn(0) and not btn(1)) then
-			player.dy = 1.5
-			player.y += player.dy
-			player.yy = player.y
-		elseif (btn(0) and btn(2) and not ( mapcollisions(player.hb).l or mapcollisions(player.hb).t)) then
-			player.dx,player.dy = -1,-1
-			local xold, yold = player.x,player.y
-			local xf, xb, yf, yb
-			player.x += player.dx
-			player.y += player.dy
-			
-			if flr(player.x) ~= flr(xold) then
-				xf = true
-				xb = xold
-			end	
-			if flr(player.y) ~= flr(yold) then
-				yf = true
-				yb = yold
-			end
-			
-			if (xf and yf) then
-				xx = player.x
-				yy = player.y
-				xf = false
-				yf = false
-			elseif (xf)	then
-				xx = xb
-			elseif (yf) then
-				yy = yb
-			end
 		end
+		if (btn(1) and not mapcollisions(player.hb).r ) then
+			player.dx = 1
+			player.x += player.dx
+		end
+	elseif ( ( btn(2) or btn(3) ) and ( not btn(0) and not btn(1) ) ) then
+		if(btn(2) and not mapcollisions(player.hb).t) then
+			player.dy = -1
+			player.y += player.dy
+		end
+		if(btn(3) and not mapcollisions(player.hb).b) then
+			player.dy = 1
+			player.y += player.dy
+		end
+		
+ elseif (btn(0) and (btn(2) or btn(3))) then
+ 	if (btn(0) and btn(2) and (not mapcollisions(player.hb).l or not mapcollisions(player.hb).t) or mapcollisions(player.hb).tl) then
+			local xo, yo = player.x, player.y
+			player.dx, player.dy = -.75, -.75
+			player.x += player.dx
+			player.y += player.dy
+			if abs(xo - player.x) > abs(yo - player.y) then
+				local tex = flr(player.x + 0.5)
+				local tey = flr((player.y + (tex - player.x) * player.dy / plater.dx)+0.5)
+				player.y = tey
+			elseif abs(xo - player.x) <= abs(yo - player.y) then
+				local tey = flr(player.y + 0.5)
+				local tex = flr((player.x + (tey - player.y) * player.dx / player.dy) + 0.5)
+			end
+		end	
 	end
---]]
-	--[[
+
+--[[
 	// runs check on left movement
 	// here, if the collisons and
 	// btn press are both true,
@@ -251,7 +241,7 @@ function move_player()
 		player.dy = 1
 		player.y += player.dy
 	end
-	--]]
+--]]
 end
 
 // update player
@@ -340,7 +330,7 @@ function draw_player()
 	end	
 	palt(0, false)
 	palt(1, true)
-	spr(player.sprite, player.xx%128, player.yy%128)
+	spr(player.sprite, player.x%128, player.y%128)
 	pal()
 end
 
