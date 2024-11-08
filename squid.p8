@@ -81,11 +81,11 @@ function _draw()
 	//draw_npc(npc2)
 	
 	foreach(particles, draw_particle)
-	
+	print("♥♥♥",13*8,1,8)
 	// debug menu setup for
 	// debugging info within game
-// debug:
-	print(player.diag)
+	// debug:
+	print(player.diag,1, 1, 0)
 	--[[print("x: ")
 	print(player.mapposx)
 	print("y: ")
