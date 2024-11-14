@@ -37,11 +37,10 @@ function _init()
 	music_var = 4
 	music(11)
 	
-	menuitem(1,"inventory: ")
+	menuitem(1,"inventory: ", invmenu)
  menuitem(2," slot 1 - "..player.slots.s1[1], slot(1) )
- menuitem(3," slot 2 - ", print(player.slots.s2[1]) )
- menuitem(4," slot 3 - ", print(player.slots.s3[1]) )
-
+ menuitem(3," slot 2 - "..player.slots.s2[1] )
+ menuitem(4," slot 3 - "..player.slots.s3[1] )
 end
 
 // routine updates every frame
@@ -139,9 +138,9 @@ function make_player()
   ["arrows"] = {0},
   ["money"] = {0} }
  player.slots = {
-  ["s1"] = {},
-  ["s2"] = {},
-  ["s3"] = {}
+  ["s1"] = {"none"},
+  ["s2"] = {"none"},
+  ["s3"] = {"none"}
  }
 
 	
@@ -304,13 +303,14 @@ function draw_player()
 end
 
 function slot(b,slot_)
-	local invtable = {}
+	--[[
+	local invtable = {"none"}
 	for k,v in pairs(player.itempool) do
 		if (v[2] > 0 and k != "ice boots") then
 			add(k,invtable)
 		end
 	end
-	add("bombs",invtable)
+	
 	
 	diff = 1
 	if (b&1 > 0) then
@@ -326,9 +326,10 @@ function slot(b,slot_)
 	  diff = 1
 	 end
 	end
-	menuitem(1, ) )
+	menuitem(1, ""..invtable[1] )
 	
 	return true	
+	--]]
 end
 -->8
 -- npcs
