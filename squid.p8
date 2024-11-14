@@ -39,7 +39,7 @@ function _init()
 	
 	menuitem(1,"inventory: ")
 		menuitem(2)
-  menuitem(2," slot 1 - ", print(player.slots.s1[1]) )
+  menuitem(2," slot 1 - ", print(player.slots.s1[1])  )
   menuitem(3)
   menuitem(3," slot 2 - ", print(player.slots.s2[1]) )
   menuitem(4)
