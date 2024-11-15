@@ -38,7 +38,6 @@ function _init()
 	
 	music_var = 4
 	music(11)
-	
 	menuitem(1,"inventory", openinv)
 	menuitem(2,"save game", opensaveprompt)
 end
@@ -139,9 +138,9 @@ function make_player()
   ["arrows"] = {0},
   ["money"] = {0} }
  player.slots = {
-  ["s1"] = {"none"},
-  ["s2"] = {"none"},
-  ["s3"] = {"none"}
+  ["s1"] = "none",
+  ["s2"] = "none",
+  ["s3"] = "none"
  }
  player.working_inventory = {}
  player.slotflag = 0
@@ -678,8 +677,9 @@ end
 
 function closeinv(b)
 	clearmenu()
-		menuitem(1, "inventory",openinv)
-		menuitem(2, "save game", opensaveprompt)
+	player.slotflag = 0
+	menuitem(1, "inventory",openinv)
+	menuitem(2, "save game", opensaveprompt)
 	return true
 end
 
@@ -743,6 +743,11 @@ function displayitem(x)
 		end
 	end
 	return true
+end
+
+function additemtoslot(val)
+
+
 end
 -->8
 --player interaction functions
