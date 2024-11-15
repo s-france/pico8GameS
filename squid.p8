@@ -138,9 +138,9 @@ function make_player()
   ["arrows"] = {0},
   ["money"] = {0} }
  player.slots = {
-  ["s1"] = "none",
-  ["s2"] = "none",
-  ["s3"] = "none"
+  [1] = "none",
+  [2] = "none",
+  [3] = "none"
  }
  player.working_inventory = {}
  player.slotflag = 0
@@ -666,9 +666,9 @@ end
 function openinv(b)
  clearmenu()
 		menuitem(1,"close inventory", closeinv)
- 	menuitem(2," slot 1 - "..player.slots.s1[1], function() setslotflag(1) openslot(b) return true end )
- 	menuitem(3," slot 2 - "..player.slots.s2[1], function() setslotflag(2) openslot(b) return true end )
- 	menuitem(4," slot 3 - "..player.slots.s3[1], function() setslotflag(3) openslot(b) return true end )
+ 	menuitem(2," slot 1 - "..player.slots[1], function() setslotflag(1) openslot(b) return true end )
+ 	menuitem(3," slot 2 - "..player.slots[2], function() setslotflag(2) openslot(b) return true end )
+ 	menuitem(4," slot 3 - "..player.slots[3], function() setslotflag(3) openslot(b) return true end )
   menuitem(5," stats and info ")
  return true
 end
@@ -733,21 +733,26 @@ function displayitem(x)
 		if (player.working_inventory[x] == nil) then
 			menuitem(x+1, "empty")
 		else 
-			menuitem(x+1, ""..player.working_inventory[x])	
+			menuitem(x+1, ""..player.working_inventory[x],additemtoslot(x))	
 		end
 	elseif (x>=4) then
 		if (player.working_inventory[x] == nil) then
 			menuitem(x-2, "empty")
 		else 
-			menuitem(x-2, ""..player.working_inventory[x])	
+			menuitem(x-2, ""..player.working_inventory[x],additemtoslot(x))	
 		end
 	end
 	return true
 end
 
-function additemtoslot(val)
-
-
+function additemtoslot(x)
+	if (player.slotflag == 1) then
+		player.slots[1] = player.working_inventory[x]
+	elseif (player.slotflag == 2) then
+		player.slots[2] = player.working_inventory[x]
+	elseif (player.slotflag == 3) then
+	 player.slots[3] = player.working_inventory[x]
+	end
 end
 -->8
 --player interaction functions
