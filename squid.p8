@@ -34,13 +34,13 @@ function _init()
 	[6] = {0,1,10,12,0,1,4,4,-2,0,1,.5,.25},
 	[7] = {1,1,14,4,.5,.5,4,4,-2,2,.5,.5,.25} }
 	
+	// global inventory flags? maybe?
+	
 	music_var = 4
 	music(11)
 	
-	menuitem(1,"inventory: ", invmenu)
- menuitem(2," slot 1 - "..player.slots.s1[1], slot(1) )
- menuitem(3," slot 2 - "..player.slots.s2[1] )
- menuitem(4," slot 3 - "..player.slots.s3[1] )
+	menuitem(1,"inventory", openinv)
+	menuitem(2,"save game")
 end
 
 // routine updates every frame
@@ -96,8 +96,9 @@ function _draw()
 	print(player.resources.keys[1])
 	print("arrows")
 	print(player.resources.arrows[1])
-	
-	
+	print(player.working_inventory[1])
+	print(player.working_inventory[2])
+		print(player.working_inventory[3])
 	foreach(hitboxes, draw_hitbox)
  print(mag)
 end
@@ -142,6 +143,8 @@ function make_player()
   ["s2"] = {"none"},
   ["s3"] = {"none"}
  }
+ player.working_inventory = {}
+ player.slotflag = 0
 
 	
 	--player hurtbox, tag = 0 
@@ -302,35 +305,6 @@ function draw_player()
 	pal()
 end
 
-function slot(b,slot_)
-	--[[
-	local invtable = {"none"}
-	for k,v in pairs(player.itempool) do
-		if (v[2] > 0 and k != "ice boots") then
-			add(k,invtable)
-		end
-	end
-	
-	
-	diff = 1
-	if (b&1 > 0) then
-	 diff -= 1
-	 if (diff <= 0) then
-	 	diff = 5
-		end
-	end
-	
-	if (b&2 > 0) then
-	 diff += 1
-	 if (diff >= 5) then
-	  diff = 1
-	 end
-	end
-	menuitem(1, ""..invtable[1] )
-	
-	return true	
-	--]]
-end
 -->8
 -- npcs
 --[[
@@ -689,6 +663,65 @@ function replace_mapdata(x,y,w,h,data)
 	end
 end
 -->8
+--menu(inventory) code
+function openinv(b)
+ clearmenu()
+	if (b&32>0) then
+		menuitem(1,"close inventory", closeinv)
+ 	menuitem(2," slot 1 - "..player.slots.s1[1], function() setslotflag(1) openslot(b) return true end )
+ 	menuitem(3," slot 2 - "..player.slots.s2[1] )
+ 	menuitem(4," slot 3 - "..player.slots.s3[1] )
+  menuitem(5," stats and info ")
+ end
+ return true
+end
+
+
+
+function closeinv(b)
+	clearmenu()
+	if (b&32>0) then
+		menuitem(1, "inventory",openinv)
+		menuitem(2, "save game")
+	end
+	return true
+end
+
+
+
+
+function setslotflag(x)
+ player.slotflag = x
+ return true
+end
+
+function openslot(b)
+	clearmenu()
+	if (b&32>0) then
+		menuitem(1, "exit slot "..player.slotflag, openinv )
+		if (player.working_inventory[1] == nil) then
+			menuitem(2, "empty")
+		else 
+		 menuitem(2, ""..player.working_inventory[1])	
+		end
+		if (player.working_inventory[2] == nil) then
+			menuitem(3, "empty")
+		else
+			menuitem(3,""..player.working_inventory[2])
+		end
+	end
+	return true
+end
+
+function clearmenu()
+	menuitem(1)
+	menuitem(2)
+	menuitem(3)
+	menuitem(4)
+	menuitem(5)
+	return true
+end
+	
 
 -->8
 --player interaction functions
@@ -745,6 +778,9 @@ function update_chest(xtemp,ytemp,xpm,ypm)
   			 sfx(8)
   			 mset((xtemp+xpm),(ytemp+ypm),24)
   			 j[1] += v[2]
+  			 if (k=="bombs") then
+  			 	add(player.working_inventory,"bombs")
+  			 end
   			end	
   		end
   	end	
@@ -796,6 +832,9 @@ function pickup_item(face)
 	 			if (i == "bow") then
 	 				j[1] = 52
 	 			end 
+	 			if (i != "ice boots") then
+	 				add(player.working_inventory,i)
+	 			end
 	 			mset(xest(player.x/8+v[1]),yest(player.y/8+v[2]),0)
 				end
 			end
@@ -1426,7 +1465,7 @@ __map__
 0603030303030303060303030301010606030303030303030303030303030303000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030304040303030303030303030303030303030303030303030303030303030303030303030303030304040403030303030306
 0603030119030303062a010303012b0606010303030303030303030303030303000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303010303050409030303030606031a03080903030303010101010303000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-06030103030303030303050d0303030606030804070f03030301030303030103000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+0603010303030303033a050d0303030606030804070f03030301030303030103000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303030301030301030303030516040703030303030103030303030301000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0504040903030303030308040903030303030303030303030103030303030301000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0b0c0c0504090303080407080703030303030303030303030103030303030301000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
