@@ -669,7 +669,7 @@ function openinv(b)
 	if (b&32>0) then
 		menuitem(1,"close inventory", closeinv)
  	menuitem(2," slot 1 - "..player.slots.s1[1], function() setslotflag(1) openslot(b) return true end )
- 	menuitem(3," slot 2 - "..player.slots.s2[1] )
+ 	menuitem(3," slot 2 - "..player.slots.s2[1], function() setslotflag(2) openslot(b) return true end)
  	menuitem(4," slot 3 - "..player.slots.s3[1] )
   menuitem(5," stats and info ")
  end
@@ -709,9 +709,17 @@ function openslot(b)
 		else
 			menuitem(3,""..player.working_inventory[2])
 		end
+		if (player.working_inventory[3] == nil) then
+			menuitem(4, "empty")
+		else
+		 menuitem(4,""..player.working_inventory[3])
+		end
+		menuitem(5, "next page ->")
 	end
 	return true
 end
+
+
 
 function clearmenu()
 	menuitem(1)
