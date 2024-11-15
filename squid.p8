@@ -40,7 +40,7 @@ function _init()
 	music(11)
 	
 	menuitem(1,"inventory", openinv)
-	menuitem(2,"save game")
+	menuitem(2,"save game", opensaveprompt)
 end
 
 // routine updates every frame
@@ -666,13 +666,11 @@ end
 --menu(inventory) code
 function openinv(b)
  clearmenu()
-	if (b&32>0) then
 		menuitem(1,"close inventory", closeinv)
  	menuitem(2," slot 1 - "..player.slots.s1[1], function() setslotflag(1) openslot(b) return true end )
- 	menuitem(3," slot 2 - "..player.slots.s2[1], function() setslotflag(2) openslot(b) return true end)
- 	menuitem(4," slot 3 - "..player.slots.s3[1] )
+ 	menuitem(3," slot 2 - "..player.slots.s2[1], function() setslotflag(2) openslot(b) return true end )
+ 	menuitem(4," slot 3 - "..player.slots.s3[1], function() setslotflag(3) openslot(b) return true end )
   menuitem(5," stats and info ")
- end
  return true
 end
 
@@ -680,10 +678,8 @@ end
 
 function closeinv(b)
 	clearmenu()
-	if (b&32>0) then
 		menuitem(1, "inventory",openinv)
-		menuitem(2, "save game")
-	end
+		menuitem(2, "save game", opensaveprompt)
 	return true
 end
 
@@ -697,29 +693,31 @@ end
 
 function openslot(b)
 	clearmenu()
-	if (b&32>0) then
 		menuitem(1, "exit slot "..player.slotflag, openinv )
-		if (player.working_inventory[1] == nil) then
-			menuitem(2, "empty")
-		else 
-		 menuitem(2, ""..player.working_inventory[1])	
-		end
-		if (player.working_inventory[2] == nil) then
-			menuitem(3, "empty")
-		else
-			menuitem(3,""..player.working_inventory[2])
-		end
-		if (player.working_inventory[3] == nil) then
-			menuitem(4, "empty")
-		else
-		 menuitem(4,""..player.working_inventory[3])
-		end
-		menuitem(5, "next page ->")
-	end
+		displayitem(1)
+		displayitem(2)
+		displayitem(3)
+		menuitem(5, "next page ->", nextslotpage)
 	return true
 end
 
+function nextslotpage(b)
+	clearmenu()
+		menuitem(1, "exit slot "..player.slotflag, openinv )
+		displayitem(4)
+		displayitem(5)
+		menuitem(4, "<- prev page",openslot)
+	return true
+end
 
+function opensaveprompt(b)
+ clearmenu() 
+ 	menuitem(1, "are you sure you")
+ 	menuitem(2, "want to save?")
+ 	menuitem(3, " yes")
+ 	menuitem(4, " no", closeinv)
+	return true
+end
 
 function clearmenu()
 	menuitem(1)
@@ -730,7 +728,22 @@ function clearmenu()
 	return true
 end
 	
-
+function displayitem(x)
+	if (x<4) then
+		if (player.working_inventory[x] == nil) then
+			menuitem(x+1, "empty")
+		else 
+			menuitem(x+1, ""..player.working_inventory[x])	
+		end
+	elseif (x>=4) then
+		if (player.working_inventory[x] == nil) then
+			menuitem(x-2, "empty")
+		else 
+			menuitem(x-2, ""..player.working_inventory[x])	
+		end
+	end
+	return true
+end
 -->8
 --player interaction functions
 
@@ -837,12 +850,15 @@ function pickup_item(face)
 				if temp == j[1] then
 		 		player.interaction = true
 	 			j[2] += 1
-	 			if (i == "bow") then
-	 				j[1] = 52
-	 			end 
-	 			if (i != "ice boots") then
+	 			if((i == "bow") and (j[1] == 52)) then
+	 			
+	 			elseif (i != "ice boots" )  then
 	 				add(player.working_inventory,i)
 	 			end
+	 			if (i == "bow") then
+	 				j[1] = 52
+	 			end
+	 			
 	 			mset(xest(player.x/8+v[1]),yest(player.y/8+v[2]),0)
 				end
 			end
