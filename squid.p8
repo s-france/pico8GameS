@@ -1164,11 +1164,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	--left
 	if (player.face == 0 or player.face ==3 or player.face ==5) then
 		arrow.x = xpos + mapposx*128 - 8 // world space
-		arrow.dx = -2.0
+		arrow.dx = -2.01
 	--right
  elseif (player.face ==2 or player.face ==4 or player.face ==7) then
 	 arrow.x = xpos + mapposx*128 + 8 // world space
-		arrow.dx = 2.0
+		arrow.dx = 2.01
 	else
 		arrow.x = xpos + mapposx*128
 		arrow.dx = 0
@@ -1177,11 +1177,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	--up 
  if (player.face ==0 or player.face ==1 or player.face ==2) then
 		arrow.y = ypos + mapposy*128 - 8 // world space
-		arrow.dy = -2.0
+		arrow.dy = -2.01
 	--down
 	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
 		arrow.y = ypos + mapposy*128 + 8 // world space
-		arrow.dy = 2.0
+		arrow.dy = 2.01
 	else
 		arrow.y = ypos + mapposy*128
 		arrow.dy = 0
@@ -1196,8 +1196,8 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 		end
 	else 
 	 arrow.sprite = 40
-	 arrow.dx*=.83334
-	 arrow.dy*=.83334
+	 arrow.dx*=.7066
+	 arrow.dy*=.7066
 	end
 	
 	arrow.mapposx = mapposx
@@ -1215,6 +1215,11 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 		arrow.flipx = true
 	end
 	
+	if (arrow.sprite == 40) then
+	 arrow.x = flr(player.x)+0.5
+  arrow.y = flr(player.y)+0.5
+	end
+	
 	arrow.isalive = true
 	arrow.hb = add_hitbox(1,4,4,4,4,-1,arrow)
 	
@@ -1223,6 +1228,14 @@ end
 
 
 function update_arrow(arrow)
+ if ( mapcollisions(arrow.hb).r or mapcollisions(arrow.hb).l) then
+	 arrow.dx = 0 
+	 arrow.dy = 0
+	end
+	if ( mapcollisions(arrow.hb).t or mapcollisions(arrow.hb).b) then
+		arrow.dy = 0
+		arrow.dx = 0
+	end
 	if	arrow.sprite == 40 then
 	 if (arrow.dx ==0 or arrow.dy == 0) then
 			arrow.dx = 0
@@ -1232,12 +1245,6 @@ function update_arrow(arrow)
 			arrow.dx = 0
 			arrow.dy = 0
 		end
-	end
-	if ( mapcollisions(arrow.hb).r or mapcollisions(arrow.hb).l) then
-	 arrow.dx = 0 
-	end
-	if ( mapcollisions(arrow.hb).t or mapcollisions(arrow.hb).b) then
-		arrow.dy = 0
 	end
 
 	
