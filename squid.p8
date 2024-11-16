@@ -52,6 +52,7 @@ end
 // using designed update funcs.
 function _update()
 	//get_mapdata(0,0,31,31) 
+	initialmenu()
 	update_player()
 	foreach(bombpool,update_bomb)
 	foreach(explosions,update_explosion)
@@ -654,7 +655,7 @@ end
 function explode_tile(pair)
 	if fget(mget(pair.xcell,pair.ycell),1) then
 		if fget(mget(pair.xcell,pair.ycell),5) then
-		
+		 //pass
 		else
 		 sfx(7)
 			mset(pair.xcell, pair.ycell,20)
@@ -687,6 +688,13 @@ function replace_mapdata(x,y,w,h,data)
 end
 -->8
 --menu(inventory) code
+function initialmenu()
+ if (btnp(6) ) then
+  closeinv(b)
+  return true
+ end
+end
+
 function openinv(b)
  clearmenu()
 		menuitem(1,"close inventory", closeinv)
@@ -1228,14 +1236,6 @@ end
 
 
 function update_arrow(arrow)
- if ( mapcollisions(arrow.hb).r or mapcollisions(arrow.hb).l) then
-	 arrow.dx = 0 
-	 arrow.dy = 0
-	end
-	if ( mapcollisions(arrow.hb).t or mapcollisions(arrow.hb).b) then
-		arrow.dy = 0
-		arrow.dx = 0
-	end
 	if	arrow.sprite == 40 then
 	 if (arrow.dx ==0 or arrow.dy == 0) then
 			arrow.dx = 0
@@ -1246,6 +1246,15 @@ function update_arrow(arrow)
 			arrow.dy = 0
 		end
 	end
+	
+	if ( mapcollisions(arrow.hb).r or mapcollisions(arrow.hb).l) then
+	 arrow.dx = 0 
+	 arrow.dy = 0
+	end
+	if ( mapcollisions(arrow.hb).t or mapcollisions(arrow.hb).b) then
+		arrow.dy = 0
+		arrow.dx = 0
+	end
 
 	
 	--update mappos
@@ -1255,9 +1264,6 @@ function update_arrow(arrow)
 	 sfx(10)
 	 del(arrowpool,arrow)
 	 arrow.isalive = false
-	 
-	 
-
 	else
 	 arrow.x += arrow.dx
 		arrow.y += arrow.dy
