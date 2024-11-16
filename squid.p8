@@ -35,6 +35,12 @@ function _init()
 	[7] = {1,1,14,4,.5,.5,4,4,-2,2,.5,.5,.25} }
 	
 	// global inventory flags? maybe?
+	global_items = {
+	["bombs"] = {use = use_bomb},
+	["bow"] = {use = use_bow}
+	}
+	
+	
 	
 	music_var = 4
 	music(11)
@@ -96,8 +102,7 @@ function _draw()
 	print("arrows")
 	print(player.resources.arrows[1])
 	print(player.working_inventory[1])
-	print(player.working_inventory[2])
-		print(player.working_inventory[3])
+	print(player.slots[1])
 	foreach(hitboxes, draw_hitbox)
  print(mag)
 end
@@ -263,19 +268,18 @@ function update_player()
 	player.interaction = false
 	if ( btnp(5)) then
 		interact(player.face)
-		if ( player.interaction==false	 and player.resources.bombs[1]>0 ) then
-	 	player.resources.bombs[1] -= 1
-			add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128)
+		if ( player.interaction==false ) then
+	  use_item_in_slot(1)
  	end
  end
+ 
  //sword
 	if(btnp(4)) then
 		sword()
 	end
 	
-	if (btnp(0,1) and player.itempool.bow[2] >= 1 and player.resources.arrows[1] > 0)  then
-		add_arrow(player.mapposx,player.mapposy,player.x%128,player.y%128)
-		player.resources.arrows[1] -= 1
+	if (btnp(0,1) ) then
+		use_item_in_slot(3)
 	end
 end
 
@@ -303,6 +307,28 @@ function draw_player()
 	spr(player.sprite, player.x%128, player.y%128)
 	pal()
 end
+
+function use_item_in_slot(num)
+	for k,v in pairs(global_items) do
+	 if (k == player.slots[num]) then
+	 	global_items[k].use()
+	 end
+ end
+end
+
+function use_bomb()
+ if (player.resources.bombs[1]>0 ) then
+  add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128)
+  player.resources.bombs[1] -= 1
+	end
+end
+
+function use_bow()
+	if (player.itempool.bow[2] >= 1 and player.resources.arrows[1] > 0) then
+	 add_arrow(player.mapposx,player.mapposy,player.x%128,player.y%128)
+		player.resources.arrows[1] -= 1
+	end
+end	
 
 -->8
 -- npcs
@@ -673,8 +699,6 @@ function openinv(b)
  return true
 end
 
-
-
 function closeinv(b)
 	clearmenu()
 	player.slotflag = 0
@@ -682,9 +706,6 @@ function closeinv(b)
 	menuitem(2, "save game", opensaveprompt)
 	return true
 end
-
-
-
 
 function setslotflag(x)
  player.slotflag = x
@@ -732,28 +753,29 @@ function displayitem(x)
 	if (x<4) then
 		if (player.working_inventory[x] == nil) then
 			menuitem(x+1, "empty")
-		else 
-			menuitem(x+1, ""..player.working_inventory[x],additemtoslot(x))	
+		else
+			menuitem(x+1, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) end)	
 		end
 	elseif (x>=4) then
 		if (player.working_inventory[x] == nil) then
 			menuitem(x-2, "empty")
 		else 
-			menuitem(x-2, ""..player.working_inventory[x],additemtoslot(x))	
+			menuitem(x-2, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) end)	
 		end
 	end
 	return true
 end
 
 function additemtoslot(x)
-	if (player.slotflag == 1) then
-		player.slots[1] = player.working_inventory[x]
-	elseif (player.slotflag == 2) then
-		player.slots[2] = player.working_inventory[x]
-	elseif (player.slotflag == 3) then
-	 player.slots[3] = player.working_inventory[x]
-	end
+ for i = 1,3,1 do
+  if (player.slotflag == i) then
+   player.slots[i] = player.working_inventory[x]
+ 	end
+ end
 end
+
+
+
 -->8
 --player interaction functions
 
@@ -810,7 +832,9 @@ function update_chest(xtemp,ytemp,xpm,ypm)
   			 mset((xtemp+xpm),(ytemp+ypm),24)
   			 j[1] += v[2]
   			 if (k=="bombs") then
-  			 	add(player.working_inventory,"bombs")
+  			  if (not contains(player.working_inventory,"bombs")) then
+  			 	 add(player.working_inventory,"bombs")
+  			 	end
   			 end
   			end	
   		end
@@ -860,11 +884,12 @@ function pickup_item(face)
 				if temp == j[1] then
 		 		player.interaction = true
 	 			j[2] += 1
-	 			if((i == "bow") and (j[1] == 52)) then
-	 			
-	 			elseif (i != "ice boots" )  then
-	 				add(player.working_inventory,i)
-	 			end
+		 			
+	 		 if (i != "ice boots") then
+	 			 if (not contains(player.working_inventory,i)) then
+	 			  add(player.working_inventory,i)
+	 			 end
+	 			end  
 	 			if (i == "bow") then
 	 				j[1] = 52
 	 			end
@@ -1119,7 +1144,14 @@ function map_pos(x,y)
 	return mapposx, mapposy
 end
 
-
+function contains(table, element)
+  for key, value in pairs(table) do
+    if value == element then
+      return true
+    end
+  end
+  return false
+end
 -->8
 --arrows and bow
 // this tab contains code for
