@@ -101,8 +101,6 @@ function _draw()
 	print(player.resources.keys[1])
 	print("arrows")
 	print(player.resources.arrows[1])
-	print(player.working_inventory[1])
-	print(player.slots[1])
 	foreach(hitboxes, draw_hitbox)
  print(mag)
 end
@@ -741,11 +739,11 @@ function opensaveprompt(b)
 end
 
 function clearmenu()
-	menuitem(1)
-	menuitem(2)
-	menuitem(3)
-	menuitem(4)
-	menuitem(5)
+		menuitem(1)
+		menuitem(2)
+		menuitem(3)
+		menuitem(4)
+		menuitem(5)
 	return true
 end
 	
@@ -754,13 +752,13 @@ function displayitem(x)
 		if (player.working_inventory[x] == nil) then
 			menuitem(x+1, "empty")
 		else
-			menuitem(x+1, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) end)	
+			menuitem(x+1, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) return true end)	
 		end
 	elseif (x>=4) then
 		if (player.working_inventory[x] == nil) then
 			menuitem(x-2, "empty")
 		else 
-			menuitem(x-2, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) end)	
+			menuitem(x-2, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) return true end)	
 		end
 	end
 	return true
@@ -1188,7 +1186,6 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 		arrow.y = ypos + mapposy*128
 		arrow.dy = 0
 	end
-	
 	arrow.timer = 40
 	
 	if ((arrow.dx == 0) or (arrow.dy == 0)) then
@@ -1199,6 +1196,8 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 		end
 	else 
 	 arrow.sprite = 40
+	 arrow.dx*=.83334
+	 arrow.dy*=.83334
 	end
 	
 	arrow.mapposx = mapposx
