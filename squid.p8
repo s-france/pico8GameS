@@ -64,16 +64,7 @@ function _update()
 	foreach(particlesystems, update_partsys)
 	foreach(particles, update_particle)
 	foreach(hitboxes, update_hitbox)
- for k,v in pairs(hitboxes) do
-  for i,j in pairs(hitboxes) do
-  	if j != v then
-   	local hbtempflag = hbcollision(v.left, v.right, v.top, v.bot, j.left, j.right, j.top, j.bot)
-   	if hbtempflag then
-     hbtestflag = true
-   	end
-   end
-  end
- end
+	hbtestflag = collisiontest2()
 	--[[
 	if ((player.mapposx > 1 and player.mapposx < 4) and music_var !=0) then
 		music_var = 0
@@ -113,6 +104,7 @@ function _draw()
 	print("arrows")
 	print(player.resources.arrows[1])
 	print(hbtestflag)
+	print(player.hb.left)
 	foreach(hitboxes, draw_hitbox)
 	print(hitboxes[1].x)
 	print(hitboxes[2].x)
@@ -356,16 +348,16 @@ function makenpc()
 	npc.mapposy = 0
 	npc.sprite = 10
  npc.isalive = true
-	npc.hb = add_hitbox(0,4, 4, 4,4, -1, npc)
+	npc.hb = add_hitbox(0,4, 4, 6,6, -1, npc)
 end
 
 
 
-function hbcollision(h1left, h1right, h1top, h1bot, h2left, h2right, h2top, h2bot)
- 	local c1 = h1top >= h2bot
- 	local c2 = h1bot <= h2top
- 	local c3 = h1left <= h2right
- 	local c4 = h1right >= h2left
+function hbcollision(updhb, othhb)
+ 	local c1 = updhb.top >= othhb.bot
+ 	local c2 = updhb.bot <= othhb.top
+ 	local c3 = updhb.left <= othhb.right
+ 	local c4 = updhb.right >= othhb.left
 		if c1 and c2 and c3 and c4 then
 	 	return true
 		else 
@@ -373,6 +365,18 @@ function hbcollision(h1left, h1right, h1top, h1bot, h2left, h2right, h2top, h2bo
 		end
 end
 
+
+function collisiontest2()
+	local c1 = player.hb.top >= npc.hb.bot
+ local c2 = player.hb.bot <= npc.hb.top
+ local c3 = player.hb.left <= npc.hb.right
+ local c4 = player.hb.right >= npc.hb.left
+	if (c1 and c2 and c3 and c4) then
+	 return true
+	else 
+	 return false
+	end
+end
 -- npcs
 --[[
 // tab 2 contains information
@@ -1086,11 +1090,14 @@ function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
 	hitbox.xlen = xlen
 	hitbox.ylen = ylen
 
+	--[[
 	--coordinates of the hb edges
 	hitbox.left = hitbox.x-(.5*hitbox.xlen)	
 	hitbox.right = hitbox.x+(.5*hitbox.xlen)	
 	hitbox.top = hitbox.y-(.5*hitbox.ylen)
 	hitbox.bot = hitbox.y+(.5*hitbox.ylen)
+	--]]
+	
 	
 	--lifetime of hb
 	---set duration = -1
@@ -1140,7 +1147,7 @@ function update_hitbox(hb)
 		 del(hitboxes, hb)
 		end
 	end
-	
+		
 	--update mappos
 	hb.mapposx, hb.mapposy = map_pos(hb.x,hb.y)
 	if hb.parent != nil then
@@ -1157,8 +1164,17 @@ function update_hitbox(hb)
 		hb.bot = hb.y+(.5*hb.ylen)
 	end
 	
-	
+	--[[
 	--add oncollision function here!!!
+ 	for i,j in pairs(hitboxes) do
+		if j != hb then
+		 local flag = not hbcollision(hb,j)
+		 if flag == false then
+			end 
+		end
+	end	
+	--]]
+	
 end
 
 --for debug purposes only
