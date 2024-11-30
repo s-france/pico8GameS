@@ -365,11 +365,11 @@ end
 
 
 function hbcollision(updhb, othhb)
- 	local c1 = updhb.top >= othhb.bot
- 	local c2 = updhb.bot <= othhb.top
+ 	local c1 = updhb.top <= othhb.bot
+ 	local c2 = updhb.bot >= othhb.top
  	local c3 = updhb.left <= othhb.right
  	local c4 = updhb.right >= othhb.left
-		if c1 and c2 and c3 and c4 then
+		if (c1 and c2 and c3 and c4) then
 	 	return true
 		else 
 	 	return false
@@ -378,8 +378,8 @@ end
 
 
 function collisiontest2()
-	local c1 = player.hb.top >= npc.hb.bot
- local c2 = player.hb.bot <= npc.hb.top
+	local c1 = player.hb.top <= npc.hb.bot
+ local c2 = player.hb.bot >= npc.hb.top
  local c3 = player.hb.left <= npc.hb.right
  local c4 = player.hb.right >= npc.hb.left
 	if (c1 and c2 and c3 and c4) then
