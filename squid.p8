@@ -64,7 +64,7 @@ function _update()
 	foreach(particlesystems, update_partsys)
 	foreach(particles, update_particle)
 	foreach(hitboxes, update_hitbox)
-	hbtestflag = collisiontest2()
+	//collisiontest2()
 	--[[
 	if ((player.mapposx > 1 and player.mapposx < 4) and music_var !=0) then
 		music_var = 0
@@ -95,6 +95,7 @@ function _draw()
 	
 	foreach(particles, draw_particle)
 	//print("♥♥♥",13*8,1,8)
+	--[[
 	print("player.itempool",1, 1, 0)
 	print(player.itempool.bow[2])
 	print("bombs")
@@ -105,9 +106,19 @@ function _draw()
 	print(player.resources.arrows[1])
 	print(hbtestflag)
 	print(player.hb.left)
+	--]]
 	foreach(hitboxes, draw_hitbox)
-	print(hitboxes[1].x)
-	print(hitboxes[2].x)
+	print(hitboxes[1].left)
+	print(hitboxes[1].right)
+	print(hitboxes[1].top)
+	print(hitboxes[1].bot)
+	print(hitboxes[2].left)
+	print(hitboxes[2].right)
+	print(hitboxes[2].top)
+	print(hitboxes[2].bot)
+	print(hbtestflag)
+	print(collisiontest2())
+	
  //print(mag)
 end
 -->8
@@ -1164,16 +1175,16 @@ function update_hitbox(hb)
 		hb.bot = hb.y+(.5*hb.ylen)
 	end
 	
-	--[[
 	--add oncollision function here!!!
- 	for i,j in pairs(hitboxes) do
+ for i,j in pairs(hitboxes) do
 		if j != hb then
-		 local flag = not hbcollision(hb,j)
-		 if flag == false then
+		 hbtestflag = hbcollision(hb,j)
+		 if hbtestflag == true then
+		 	break
 			end 
 		end
 	end	
-	--]]
+
 	
 end
 
