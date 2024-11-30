@@ -223,6 +223,7 @@ function move_player()
   player.y = flr(player.y)+0.5
  end
  
+ 
  // move player by dx and dy
  // (this is why .75 is better)
 	player.x+=player.dx
@@ -1165,8 +1166,8 @@ function update_hitbox(hb)
 		hb.mapposx = hb.parent.mapposx
 		hb.mapposy = hb.parent.mapposy
 		
-		hb.x = hb.xoff+hb.parent.x
- 	hb.y = hb.yoff+hb.parent.y
+		hb.x = flr(hb.xoff+hb.parent.x)
+ 	hb.y = flr(hb.yoff+hb.parent.y)
 		
 		--coordinates of the hb edges
 		hb.left = hb.x-(.5*hb.xlen)	
