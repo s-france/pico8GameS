@@ -1217,17 +1217,7 @@ function update_hitbox(hb)
 		 	   elseif (hb.parent.timer < j.parent.timer) then
 		 	    j.parent.timer = hb.parent.timer
 		 	   end
-		 			end
-		 	--[[
-		 		if (j.parent == nil) then
-		 	
-		 		elseif (j.tag == 1) then
-		 		 hb.parent.dx = j.parent.dx
-		 			hb.parent.dy = j.parent.dy
-		 		
-		 		end
-		 		--]]
-		 		
+		 			end		
 		 	end
 			end 
 		end
