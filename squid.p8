@@ -122,7 +122,7 @@ function _draw()
 	--]]
 	
 	
-	foreach(hitboxes, draw_hitbox)
+	//foreach(hitboxes, draw_hitbox)
 	--[[
 	print(hitboxes[1].left)
 	print(hitboxes[1].right)
