@@ -9,6 +9,34 @@ __lua__
 // date created ~ sept. 2024
 // release log:
 // v 0.0.1 - basic structure
+//
+// this engine is being designed
+// for the mountain of carols,
+// but support for the engine
+// itself will continue seperate
+// from the project as optimizations
+// and features are introduced.
+
+// tabs are meant to read in 
+// subsequent order, as each 
+// tabs' information will be 
+// used later on throughout the
+// file. the main goal of this
+// project is to display what
+// we were able to come up with
+// as solutions to the issues of
+// balancing memory within 
+// pico-8. as a result, code may
+// appear abstract and unintuitive
+// without proper reading order 
+// throughout the engine.
+// 
+//	this engine is mainly meant
+// to provide independent devs/
+// modders of mountain of carols
+// with an easy to use tool kit
+// that they can pick up and use
+// near immediately.
 
 
 
@@ -130,8 +158,7 @@ function make_player()
   ["arrows"] = {0} }
  player.slots = {
   [1] = "none",
-  [2] = "none",
-  [3] = "none"
+  [2] = "none"
   
  }
  player.working_inventory = {}
@@ -205,7 +232,6 @@ function move_player()
 	// set new previous face for
 	// the next frame
  player.prev_face = player.face
-	// end!
 end
 
 
@@ -273,7 +299,6 @@ end
 // draw player
 //
 // draws player
-
 function draw_player()
  local table = {
  [6] = {2},
@@ -406,22 +431,20 @@ function update_partsys(partsys)
 															partsys.y-partsys.yrange + rnd(partsys.yrange*2),
 															partsys.pduration,
 															partsys.dx-partsys.dxrange + rnd(partsys.dxrange*2),
-															partsys.dy-partsys.dyrange + rnd(partsys.dyrange*2))
+															partsys.dy-partsys.dyrange + rnd(partsys.dyrange*2) )
 	end
 	
 end
 
 --creates a single particle
 --from particle system
-function add_particle(x,y, duration, dx, dy)
+function add_particle(x,y, duration, dx, dy, purpose)
 	part = {}
 	part.x = x
 	part.y = y
 	part.duration = duration
 	part.dx = dx
 	part.dy = dy
-	
-	
 	add(particles, part)
 end
 
@@ -430,6 +453,7 @@ function update_particle(part)
 	part.duration -=1
 	--delete if done
 	if part.duration < 0 then
+		part.isalive = false
 		del(particles, part)
 	end
 	
@@ -1166,12 +1190,12 @@ function update_bomb(bomb)
 	 bomb.isalive = false
 	 del(bombpool,bomb)
 	 
-	 add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
+	 //add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
 	 
  	local explosion = {}
  		explosion.x = bomb.x
  		explosion.y = bomb.y
- 		explosion.hb = add_hitbox(1, explosion.x+4,explosion.y+4, 24,24, 3, explosion)
+ 		explosion.hb = add_hitbox(1, explosion.x+4,explosion.y+4, 24,24, 3)
  		add(explosions, explosion)
 	else
 	 bomb.x += bomb.dx
@@ -1615,8 +1639,8 @@ __sfx__
 0118000009855139001c9001c9251c9250c8001c9251c90009855139001c925000001c925098551c9251c90009855139001c9001c9251c9250c8001c9251c90009855139001c925000001c9250c8001c9251b400
 4f18000002050020000000000050020500000000000000500205000000000000005002050000000000005050070500000000000050500705000000000000505007050000000000005050070501f4001d40005053
 7f1800000e0520e0520e0520e0520e0520e0520e0520e0520e0520f0520e0520f0520c0520c0550c0000b0000905209052090520905209052090520905209052090520a052090520a05207052070550700007000
-1b1800001a5001a5001a5001a5001a5001a5001a5001a5001a5001b5001a5001b50018500185001a1001d1001f10018100181001d1001f10018100181001d100261352413526131271311e1351f1351b1351b135
-031800001a1351b1001d100181351a1351810018100181351a1351a1351a135181301a135181351a1351d1321f13535400374001d1321f135294002b4001d1321f1351f1351f1351d1301f1351d1321f13222135
+031800001a1001a1001a1001a1001a1001a1001a1001a1001a1001b1001a1001b10018100181001a1001d1001f10018100181001d1001f10018100181001d100261352413526131271311e1351f1351b1351b135
+031800001a1351b1001d100181351a1351810018100181351a1351a1351a135181301a135181351a1351d1321f13535100371001d1321f135291002b1001d1321f1351f1351f1351d1301f1351d1321f13222135
 4f180000020520205202052020520205202052020520205202052030520205203052000520005503015070250905209052090520905209052090520905209052090520a052090520a05207052070550502503015
 4f180000020500e0451a04500050020500e0451a0450005002050020250202500050020500000000000050500705000000000000505007050130251f025050500705000000000000505007050354353743535435
 031800001a1351a1353e115181351a1353c1153e115181351a1351a1351a135181301a135181351a1351d1321f13535435374351d1321f135294352b4351d1321f1351f1351f135351303713535132371323a135
