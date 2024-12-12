@@ -78,7 +78,6 @@ function _draw()
 	foreach(bombpool,draw_bomb)
 	foreach(particles, draw_particle)
 	foreach(hitboxes, draw_hitbox)
-	
 
 end
 -->8
@@ -150,10 +149,9 @@ end
 //
 // move player is self explanatory
 // the function uses our mapcollions
-// function (tab 9)
+// function (collisions tab)
 // to restrict movement against
-// walls and objects with the
-// flag #0.
+// walls and objects.
 
 function move_player()
 	// initialize dx, dy and diag
