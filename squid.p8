@@ -1,19 +1,15 @@
 pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
- -- main functions
+-- read me
 // project: pico-8 engine
 // by frank bubbico and
 // same france
 //
 // date created ~ sept. 2024
 // release log:
-// v 0.0.1 - 
+// v 0.0.1 - basic structure
 
-
-// tab 0 contains:
-// - all main functions
-//   (init, update, draw)
 
 
 
@@ -45,10 +41,9 @@ function _init()
 	global_items = {
 	["bombs"] = {use = use_bomb},
 	["bow"] = {use = use_bow},
-	["sword"] = {use = sword}
+	["bat"] = {use = use_bat}
 	}
-	menuitem(1,"inventory", openinv)
-	menuitem(2,"save game", opensaveprompt)
+	initialmenu()
 end
 
 // routine updates every frame
@@ -78,7 +73,6 @@ function _draw()
 	foreach(bombpool,draw_bomb)
 	foreach(particles, draw_particle)
 	foreach(hitboxes, draw_hitbox)
-
 end
 -->8
 -- low level object example
@@ -128,7 +122,7 @@ function make_player()
  // player items
  player.itempool = {
   ["bow"] = {42, 0, 0},
- 	["sword"] = {59, 0} }
+ 	["bat"] = {59, 0} }
  	
  player.resources = {
   ["bombs"] = {0, 0},
@@ -136,7 +130,9 @@ function make_player()
   ["arrows"] = {0} }
  player.slots = {
   [1] = "none",
-  [2] = "none"
+  [2] = "none",
+  [3] = "none"
+  
  }
  player.working_inventory = {}
  player.slotflag = 0
@@ -164,15 +160,19 @@ function move_player()
 	if (btn(0) and not mapcollisions(player.hb).l) then
   player.dx-=1.001
 	end
+	
 	if (btn(1) and not mapcollisions(player.hb).r) then
   player.dx+=1.001
 	end
+	
 	if (btn(2) and not mapcollisions(player.hb).t) then
   player.dy-=1.001
 	end
+	
 	if (btn(3) and not mapcollisions(player.hb).b) then
   player.dy+=1.001
 	end
+	
 	
 	// diagonal check
 	if (player.dx*player.dy != 0) then
@@ -207,6 +207,7 @@ function move_player()
  player.prev_face = player.face
 	// end!
 end
+
 
 // update player
 //
@@ -288,10 +289,6 @@ function draw_player()
 		 player.sprite = v[1]
 		end
 	end	
-	if (player.invis) then
-		player.sprite = 3
-	end	
-	
 	palt(0, false)
 	palt(1, true)
 	spr(player.sprite, player.x%128, player.y%128)
@@ -320,6 +317,13 @@ function use_bow()
 	end
 end	
 
+function use_bat()
+		for k,v in pairs(global_faces) do
+			if player.face == k then
+				add_partsys(player.x + v[3],player.y + v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13])
+			end
+		end
+end
 -->8
 -- particle system
 
@@ -444,7 +448,15 @@ end
 -->8
 -- levels and map
 
---copy mapdata string to clipboard
+-- the following can be used
+-- to store mapdata as strings.
+-- these functions may be 
+-- removed for final release,
+-- assuming maps are sound with
+-- developer.
+
+// copy mapdata string 
+// to clipboard
 function get_mapdata(x,y,w,h)
 	local reserve=""
 	for i=0,w*h-1 do
@@ -453,124 +465,331 @@ function get_mapdata(x,y,w,h)
 	printh(reserve,"@clip")
 end
 
---convert mapdata to memory data
+// convert mapdata to 
+// memory data
 function num2hex(v)
 	return sub(tostr(v,true),5,6)
 end
 
---replace mapdata with hex
+-- this function is necessary
+-- iff. the developer is using
+-- strings of map data.
+
+// replace mapdata with hex data
 function replace_mapdata(x,y,w,h,data)
 	for i=1,#data,2 do
 		mset(x+i\2%w,y+i\2\w,"0x"..sub(data,i,i+1))
 	end
 end
 -->8
--- menu(inventory) code
-function initialmenu()
- if (btnp(6) ) then
-  closeinv(b)
-  return true
- end
+-- optimizations and helper functions
+
+// rounds the value
+// of a given input
+function xest(x)
+	return flr(x+0.5)
 end
 
-function clearmenu()
-		menuitem(1)
-		menuitem(2)
-		menuitem(3)
-		menuitem(4)
-		menuitem(5)
-	return true
+// map cell
+//
+// returns the map cell
+// containing x,y
+function map_cell(x,y)
+	local mapx = (x-(x%8))/8
+	local mapy = (y-(y%8))/8
+	
+	return mapx, mapy
 end
 
-function openinv(b)
- clearmenu()
-		menuitem(1,"close inventory", closeinv)
- 	menuitem(2," slot 1 - "..player.slots[1], function() setslotflag(1) openslot(b) return true end )
- 	menuitem(3," slot 2 - "..player.slots[2], function() setslotflag(2) openslot(b) return true end )
-  menuitem(4," health/quant."  )
- return true
+// map pos
+// 
+// calculates the mappos x,y of
+// a given x and y.
+function map_pos(x,y)
+	local mapx = (x-(x%8))/8
+	local mapy = (y-(y%8))/8
+	local mapposx = (mapx-(mapx%16)) / 16
+	local mapposy = (mapy-(mapy%16)) / 16
+	return mapposx, mapposy
 end
 
-function closeinv(b)
-	clearmenu() 
-	player.slotflag = 0
-	menuitem(1, "inventory",openinv)
-	return true
+// contains
+//
+// a trivial function which
+// determines if a table contains
+// a certain element, object, etc.
+function contains(table, element)
+  for key, value in pairs(table) do
+    if value == element then
+      return true
+    end
+  end
+  return false
 end
 
-function setslotflag(x)
- player.slotflag = x
- return true
+
+
+-->8
+-- hitbox funcs and collisions
+
+// add hitbox
+// 
+// adds a hitbox to the hitbox
+// pool. hitboxes interact with
+// eachother through tags 
+// that represent their intention.
+function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
+	hitbox = {}
+	
+	hitbox.tag = tag
+	hitbox.x = x
+	hitbox.y = y
+	hitbox.xlen = xlen
+	hitbox.ylen = ylen
+
+	--[[
+	--coordinates of the hb edges
+	hitbox.left = hitbox.x-(.5*hitbox.xlen)	
+	hitbox.right = hitbox.x+(.5*hitbox.xlen)	
+	hitbox.top = hitbox.y-(.5*hitbox.ylen)
+	hitbox.bot = hitbox.y+(.5*hitbox.ylen)
+	--]]
+	
+	
+	--lifetime of hb
+	---set duration = -1
+	---for parent-based lifetime
+	hitbox.duration = duration
+	
+	local mapx = (hitbox.x-(hitbox.x%8))/8
+	local mapy = (hitbox.y-(hitbox.y%8))/8
+	hitbox.mapposx = (mapx-(mapx%16)) / 16
+	hitbox.mapposy = (mapy-(mapy%16)) / 16
+	
+	if parent != nil then
+		hitbox.parent = parent
+		hitbox.mapposx = parent.mapposx
+		hitbox.mapposy = parent.mapposy
+		
+		--hb pos offset from parent x,y pos
+		hitbox.xoff = x
+		hitbox.yoff = y
+		
+ 	hitbox.x = hitbox.xoff+hitbox.parent.x
+ 	hitbox.y = hitbox.yoff+hitbox.parent.y
+	end
+	
+	--coordinates of the hb edges
+	hitbox.left = hitbox.x-(.5*hitbox.xlen)	
+	hitbox.right = hitbox.x+(.5*hitbox.xlen)	
+	hitbox.top = hitbox.y-(.5*hitbox.ylen)
+	hitbox.bot = hitbox.y+(.5*hitbox.ylen)
+	
+	add(hitboxes, hitbox)
+	return hitbox
 end
 
-function openslot(b)
-	clearmenu()
-		menuitem(1, "exit slot "..player.slotflag, openinv )
-		displayitem(1)
-		displayitem(2)
-		menuitem(5, "next page ->", nextslotpage)
-	return true
-end
+// update hitbox
+//
+// updates the hitboxes' info
+// and handles hitbox on hitbox
+// collisions as well as map 
+// collisions.
 
-function displayitem(x)
-	if (x<4) then
-		if (player.working_inventory[x] == nil) then
-			menuitem(x+1, "empty")
-		else
-			menuitem(x+1, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) return true end)	
+function update_hitbox(hb)
+	--track lifetime
+	--lifetime based on duration
+	if hb.duration != -1 then
+		hb.duration -= 1
+		if hb.duration == 0 then
+			del(hitboxes, hb)
+		end
+	--lifetime based on parent
+	else
+		if hb.parent.isalive == false then
+		 del(hitboxes, hb)
 		end
 	end
-	return true
-end
-
-function additemtoslot(x)
- for i = 1,2,1 do
-  if (player.slotflag == i) then
-   player.slots[i] = player.working_inventory[x]
- 	end
- end
-end
-
--- extras:
--- in the event a slot requires
--- a second page, here's an impl.
--- for that
---[[
-
-// this should be added to see
-// second page, a better func.
-// can be developed for subs.
-// pages of items.
-
-function nextslotpage(b)
-	clearmenu()
-		menuitem(1, "exit slot "..player.slotflag, openinv )
-		displayitem(4)
-		displayitem(5)
-		menuitem(4, "<- prev page",openslot)
-	return true
-end
-
-// example displayitem function
-// with the second page.
-function displayitem(x)
-	if (x<4) then
-		if (player.working_inventory[x] == nil) then
-			menuitem(x+1, "empty")
-		else
-			menuitem(x+1, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) return true end)	
+		
+	--update mappos
+	hb.mapposx, hb.mapposy = map_pos(hb.x,hb.y)
+	if hb.parent != nil then
+		hb.mapposx = hb.parent.mapposx
+		hb.mapposy = hb.parent.mapposy
+		
+		hb.x = flr(hb.xoff+hb.parent.x)
+ 	hb.y = flr(hb.yoff+hb.parent.y)
+		
+		--coordinates of the hb edges
+		hb.left = hb.x-(.5*hb.xlen)	
+		hb.right = hb.x+(.5*hb.xlen)	
+		hb.top = hb.y-(.5*hb.ylen)
+		hb.bot = hb.y+(.5*hb.ylen)
+	end
+	
+	--add oncollision function here!!!
+ for i,j in pairs(hitboxes) do
+		if j != hb then
+		 -- arrows
+		 if (hbcollision(hb,j)) and (hb.tag == 2) then
+		 	if (j.tag == 1 and j.parent != nil) then
+		 	 hb.parent.dx = j.parent.dx
+		 	 hb.parent.dy = j.parent.dy
+		 	 if (hb.parent.timer >= j.parent.timer) then
+		 	  hb.parent.timer = j.parent.timer
+		 	 elseif (hb.parent.timer < j.parent.timer) then
+		 	  j.parent.timer = hb.parent.timer
+		 	 end
+		 	end		
+			end 
 		end
-	elseif (x>=4) then
-		if (player.working_inventory[x] == nil) then
-			menuitem(x-2, "empty")
+	end	
+end
+
+-- for debugging purposes only
+-- a finished game does not
+-- require this function.
+
+// draw hitbox
+// 
+// draws a hitbox on which
+// this function is called.
+// hitboxes in the hitboxes pool
+// are drawn automatically when
+// 'foreach(hitboxes, 
+// draw_hitbox)' is called in
+// the main draw loop.
+
+function draw_hitbox(hb)	
+	if (player.mapposx == hb.mapposx and player.mapposy == hb.mapposy) then
+		rect(hb.left%128,
+							hb.top%128,
+							hb.right%128,
+							hb.bot%128, 8)
+	end
+end
+
+// map collisions
+//
+// reads map collions around an 
+// object for all 8 surrounding
+// map cells, returns
+// cell information
+
+function mapcollisions(hb)
+	// local table collisions
+	local cols = {}
+	//list of collisions to check
+	cols.tl = false
+	cols.t = false
+	cols.tr = false
+	cols.l = false
+	cols.r = false
+	cols.bl = false
+	cols.b = false
+	cols.br = false
+	
+	
+	--left collisions
+	local topx, topy = map_cell(hb.left-1,hb.top)		
+	local botx, boty = map_cell(hb.left-1,hb.bot)
+	
+	for y=boty, topy, -1 do
+		if fget(mget(topx, y), 0) then
+			cols.l = true
+		end
+	end
+ 
+ --right collisions
+	local topx, topy = map_cell(hb.right+1,hb.top)		
+	local botx, boty = map_cell(hb.right+1,hb.bot)
+	
+	for y=boty, topy, -1 do
+		if fget(mget(topx, y), 0) then
+			cols.r = true
+		end
+	end
+	
+	--top collisions
+	local leftx, lefty = map_cell(hb.left,hb.top-1)		
+	local rightx, righty = map_cell(hb.right,hb.top-1)
+	
+	for x=rightx, leftx, -1 do
+		if fget(mget(x, lefty), 0) then
+			cols.t = true
+		end
+	end
+	
+	--bottom collisions
+	local leftx, lefty = map_cell(hb.left,hb.bot+1)		
+	local rightx, righty = map_cell(hb.right,hb.bot+1)
+	
+	for x=rightx, leftx, -1 do
+		if fget(mget(x, lefty), 0) then
+			cols.b = true
+		end
+	end
+	 
+	--diagonals (in development)
+	local tlx, tly = map_cell(hb.left-1,hb.top-1)		
+	local trx, try = map_cell(hb.right+1,hb.top-1)
+	local blx, bly = map_cell(hb.left-1,hb.bot+1)
+	local brx, bry = map_cell(hb.right+1,hb.bot+1)
+	
+	
+	return cols
+end
+
+// hb collision
+//
+// checks collision between two
+// hitboxes. this can be used
+// on the hitbox pool to script
+// events, deal damage, and the
+// like.
+
+function hbcollision(updhb, othhb)
+ 	local c1 = updhb.top <= othhb.bot
+ 	local c2 = updhb.bot >= othhb.top
+ 	local c3 = updhb.left <= othhb.right
+ 	local c4 = updhb.right >= othhb.left
+		if (c1 and c2 and c3 and c4) then
+	 	return true
 		else 
-			menuitem(x-2, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) return true end)	
+	 	return false
 		end
-	end
-	return true
+end
+-->8
+-- specific draw/uptate funcs.
+
+// draw map
+//
+// draws the currently loaded
+// 16x16 grid of map data around
+// the player using the player's
+// mapposx,y.
+function draw_map()
+
+	map(player.mapposx * 16,player.mapposy * 16,0,0,16,16)
+
 end
 
---]]
+// bomb animation
+//
+// updates the bomb sprite to
+// set a specific pixel on fuse
+// to appear ignited. 
+//
+// in a later patch, a better
+// animation system will be 
+// designed.
+function bomb_animation()
+	if (sget(22,8) == 8) then
+		sset(22,8,6)
+	else
+		sset(22,8,8)
+	end
+end
 -->8
 -- player interaction functions
 
@@ -689,318 +908,206 @@ function pickup_item(face)
 	end
 end
 -->8
--- sword physics
+-- menu(example: inventory) code
 
-// sword()
-// draws sword swing! 
-// creates hitbox
-function sword()
-		for k,v in pairs(global_faces) do
-			if player.face == k then
-				add_partsys(player.x + v[3],player.y + v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13])
-			end
-		end
-end
--->8
--- optimizations and development functions
-// first order of biznes
-// make world coordinate to
-// map cell function and vice
-// versa?
-
-// make cell estimator function
-// for universal cell estimation
-
-// cook any other code opt.
-
-
-// we are going to make an x,y
-// estimator function for opening
-// shit/the explosion function
-
-function xest(x)
-	return flr(x+0.5)
+function initialmenu()
+ if (btnp(6) ) then
+  closeinv(b)
+  return true
+ end
 end
 
-function bomb_animation()
-	if (sget(22,8) == 8) then
-		sset(22,8,6)
-	else
-		sset(22,8,8)
-	end
+function clearmenu()
+		menuitem(1)
+		menuitem(2)
+		menuitem(3)
+		menuitem(4)
+		menuitem(5)
+	return true
 end
 
-
-// draw map
-//
-// draws map
-
-function draw_map()
-
-	map(player.mapposx * 16,player.mapposy * 16,0,0,16,16)
-
+function openinv(b)
+ clearmenu()
+		menuitem(1,"close inventory", closeinv)
+ 	menuitem(2," slot 1 - "..player.slots[1], function() setslotflag(1) openslot(b) return true end )
+ 	menuitem(3," slot 2 - "..player.slots[2], function() setslotflag(2) openslot(b) return true end )
+  menuitem(4," health/quant."  )
+ return true
 end
 
+function closeinv(b)
+	clearmenu() 
+	player.slotflag = 0
+	menuitem(1, "inventory",openinv)
+	return true
+end
 
-// collisions
-//
-// reads map collions around an object
-// for all 8 surrounding map cells,
-// returns cell information
+function setslotflag(x)
+ player.slotflag = x
+ return true
+end
 
-function mapcollisions(hb)
-	// local table collisions
-	local cols = {}
-	//list of collisions to check
-	cols.tl = false
-	cols.t = false
-	cols.tr = false
-	cols.l = false
-	cols.r = false
-	cols.bl = false
-	cols.b = false
-	cols.br = false
-	
-	
-	--left collisions
-	local topx, topy = map_cell(hb.left-1,hb.top)		
-	local botx, boty = map_cell(hb.left-1,hb.bot)
-	
-	for y=boty, topy, -1 do
-		if fget(mget(topx, y), 0) then
-			cols.l = true
+function openslot(b)
+	clearmenu()
+		menuitem(1, "exit slot "..player.slotflag, openinv )
+		displayitem(1)
+		displayitem(2)
+		displayitem(3)
+		// see below for use of line below
+		// menuitem(5, "next page ->", nextslotpage)
+	return true
+end
+
+function displayitem(x)
+	if (x<4) then
+		if (player.working_inventory[x] == nil) then
+			menuitem(x+1, "empty")
+		else
+			menuitem(x+1, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) return true end)	
 		end
 	end
- 
- --right collisions
-	local topx, topy = map_cell(hb.right+1,hb.top)		
-	local botx, boty = map_cell(hb.right+1,hb.bot)
-	
-	for y=boty, topy, -1 do
-		if fget(mget(topx, y), 0) then
-			cols.r = true
+	return true
+end
+
+function additemtoslot(x)
+ for i = 1,2,1 do
+  if (player.slotflag == i) then
+   player.slots[i] = player.working_inventory[x]
+ 	end
+ end
+end
+
+-- extras:
+-- in the event a slot requires
+-- a second page, here's an impl.
+-- for that
+--[[
+
+// this should be added to see
+// second page, a better func.
+// can be developed for subs.
+// pages of items.
+
+function nextslotpage(b)
+	clearmenu()
+		menuitem(1, "exit slot "..player.slotflag, openinv )
+		displayitem(4)
+		displayitem(5)
+		menuitem(4, "<- prev page",openslot)
+	return true
+end
+
+// example displayitem function
+// with the second page.
+function displayitem(x)
+	if (x<4) then
+		if (player.working_inventory[x] == nil) then
+			menuitem(x+1, "empty")
+		else
+			menuitem(x+1, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) return true end)	
 		end
-	end
-	
-	--top collisions
-	local leftx, lefty = map_cell(hb.left,hb.top-1)		
-	local rightx, righty = map_cell(hb.right,hb.top-1)
-	
-	for x=rightx, leftx, -1 do
-		if fget(mget(x, lefty), 0) then
-			cols.t = true
-		end
-	end
-	
-	--bottom collisions
-	local leftx, lefty = map_cell(hb.left,hb.bot+1)		
-	local rightx, righty = map_cell(hb.right,hb.bot+1)
-	
-	for x=rightx, leftx, -1 do
-		if fget(mget(x, lefty), 0) then
-			cols.b = true
-		end
-	end
-	 
-	--diagonals
-	--sam finish this!!!!!
-	local tlx, tly = map_cell(hb.left-1,hb.top-1)		
-	local trx, try = map_cell(hb.right+1,hb.top-1)
-	local blx, bly = map_cell(hb.left-1,hb.bot+1)
-	local brx, bry = map_cell(hb.right+1,hb.bot+1)
-	
-	
-	return cols
-end
-
-function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
-	hitbox = {}
-	
-	hitbox.tag = tag
-	hitbox.x = x
-	hitbox.y = y
-	hitbox.xlen = xlen
-	hitbox.ylen = ylen
-
-	--[[
-	--coordinates of the hb edges
-	hitbox.left = hitbox.x-(.5*hitbox.xlen)	
-	hitbox.right = hitbox.x+(.5*hitbox.xlen)	
-	hitbox.top = hitbox.y-(.5*hitbox.ylen)
-	hitbox.bot = hitbox.y+(.5*hitbox.ylen)
-	--]]
-	
-	
-	--lifetime of hb
-	---set duration = -1
-	---for parent-based lifetime
-	hitbox.duration = duration
-	
-	local mapx = (hitbox.x-(hitbox.x%8))/8
-	local mapy = (hitbox.y-(hitbox.y%8))/8
-	hitbox.mapposx = (mapx-(mapx%16)) / 16
-	hitbox.mapposy = (mapy-(mapy%16)) / 16
-	
-	if parent != nil then
-		hitbox.parent = parent
-		hitbox.mapposx = parent.mapposx
-		hitbox.mapposy = parent.mapposy
-		
-		--hb pos offset from parent x,y pos
-		hitbox.xoff = x
-		hitbox.yoff = y
-		
- 	hitbox.x = hitbox.xoff+hitbox.parent.x
- 	hitbox.y = hitbox.yoff+hitbox.parent.y
-	end
-	
-	--coordinates of the hb edges
-	hitbox.left = hitbox.x-(.5*hitbox.xlen)	
-	hitbox.right = hitbox.x+(.5*hitbox.xlen)	
-	hitbox.top = hitbox.y-(.5*hitbox.ylen)
-	hitbox.bot = hitbox.y+(.5*hitbox.ylen)
-	
-	add(hitboxes, hitbox)
-	return hitbox
-end
-
-
-function update_hitbox(hb)
-	--track lifetime
-	--lifetime based on duration
-	if hb.duration != -1 then
-		hb.duration -= 1
-		if hb.duration == 0 then
-			del(hitboxes, hb)
-		end
-	--lifetime based on parent
-	else
-		if hb.parent.isalive == false then
-		 del(hitboxes, hb)
-		end
-	end
-		
-	--update mappos
-	hb.mapposx, hb.mapposy = map_pos(hb.x,hb.y)
-	if hb.parent != nil then
-		hb.mapposx = hb.parent.mapposx
-		hb.mapposy = hb.parent.mapposy
-		
-		hb.x = flr(hb.xoff+hb.parent.x)
- 	hb.y = flr(hb.yoff+hb.parent.y)
-		
-		--coordinates of the hb edges
-		hb.left = hb.x-(.5*hb.xlen)	
-		hb.right = hb.x+(.5*hb.xlen)	
-		hb.top = hb.y-(.5*hb.ylen)
-		hb.bot = hb.y+(.5*hb.ylen)
-	end
-	
-	--add oncollision function here!!!
- for i,j in pairs(hitboxes) do
-		if j != hb then
-		 -- arrows
-		 if (hbcollision(hb,j)) and (hb.tag == 2) then
-		 	if (j.tag == 1 and j.parent != nil) then
-		 	 hb.parent.dx = j.parent.dx
-		 	 hb.parent.dy = j.parent.dy
-		 	 if (hb.parent.timer >= j.parent.timer) then
-		 	  hb.parent.timer = j.parent.timer
-		 	 elseif (hb.parent.timer < j.parent.timer) then
-		 	  j.parent.timer = hb.parent.timer
-		 	 end
-		 	end		
-			end 
-		end
-	end	
-
-	
-end
-
---for debug purposes only
-function draw_hitbox(hb)	
-	if (player.mapposx == hb.mapposx and player.mapposy == hb.mapposy) then
-		rect(hb.left%128,
-							hb.top%128,
-							hb.right%128,
-							hb.bot%128, 8)
-	end
-end
-
-
---returns the map cell containing x,y
-function map_cell(x,y)
-	local mapx = (x-(x%8))/8
-	local mapy = (y-(y%8))/8
-	
-	return mapx, mapy
-end
-
-function map_pos(x,y)
-	local mapx = (x-(x%8))/8
-	local mapy = (y-(y%8))/8
-	local mapposx = (mapx-(mapx%16)) / 16
-	local mapposy = (mapy-(mapy%16)) / 16
-	return mapposx, mapposy
-end
-
-function contains(table, element)
-  for key, value in pairs(table) do
-    if value == element then
-      return true
-    end
-  end
-  return false
-end
-
-function hbcollision(updhb, othhb)
- 	local c1 = updhb.top <= othhb.bot
- 	local c2 = updhb.bot >= othhb.top
- 	local c3 = updhb.left <= othhb.right
- 	local c4 = updhb.right >= othhb.left
-		if (c1 and c2 and c3 and c4) then
-	 	return true
+	elseif (x>=4) then
+		if (player.working_inventory[x] == nil) then
+			menuitem(x-2, "empty")
 		else 
-	 	return false
+			menuitem(x-2, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) return true end)	
 		end
+	end
+	return true
 end
 
+--]]
 -->8
--- arrows and bow
-// this tab contains code for
-// the arrows utilized in bow
-// combat. if a "combat" tab
-// is formalized later, this 
-// code will be moved there.
+-- higher level use of objects
+-- the purpose of this section
+-- is to demonstrate how objects
+-- can be used efficiently!
+--
+-- below, we have two examples
+-- of objects, with varrying
+-- complexity and functionality
 
+// below, we are using a function
+// titled "set_movement_
+// from_face", which sets 
+// movement info of these two
+// objects from the face of it's
+// parent. in the case of the
+// bomb, it's only parent is the
+// player, and thus is not 
+// explicitly defined, as the
+// call of our bomb is on the
+// player's positional info.
+// this differs from the arrow.
+//
+// this function is defined below:
 
-function add_arrow(parent)
-	local arrow = add_object(parent.mapposx,parent.mapposy,parent.x%128,parent.y%128)
-	--left
-	if (parent.face == 0 or parent.face ==3 or parent.face ==5) then
-		arrow.x += (arrow.mapposx*128 - 8) // world space
-		arrow.dx = -2.002
+function set_movement_from_face(object,
+																																input_face,
+																																speed)
+	if (input_face == 0 or input_face ==3 or input_face ==5) then
+		object.x += (object.mapposx*128 - 8) // world space
+		object.dx = -(speed)
 	--right
- elseif (parent.face ==2 or parent.face ==4 or parent.face ==7) then
-	 arrow.x += (arrow.mapposx*128 + 8) // world space
-		arrow.dx = 2.002
+ elseif (input_face ==2 or input_face ==4 or input_face ==7) then
+	 object.x += (object.mapposx*128 + 8) // world space
+		object.dx = speed
 	else
-		arrow.x += arrow.mapposx*128
-		arrow.dx = 0
+		object.x += object.mapposx*128
+		object.dx = 0
 	end
 	
 	--up 
- if (parent.face ==0 or parent.face ==1 or parent.face ==2) then
-		arrow.y += arrow.mapposy*128 - 8 // world space
-		arrow.dy = -2.002
+ if (input_face ==0 or input_face ==1 or input_face ==2) then
+		object.y += object.mapposy*128 - 8 // world space
+		object.dy = -(speed)
 	--down
-	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
-		arrow.y += (arrow.mapposy*128 + 8) // world space
-		arrow.dy = 2.002
+	elseif (input_face ==5 or input_face ==6 or input_face ==7) then
+		object.y += (object.mapposy*128 + 8) // world space
+		object.dy = speed
 	else
-		arrow.y += arrow.mapposy*128
-		arrow.dy = 0
-	end
+		object.y += object.mapposy*128
+		object.dy = 0
+	end																													
+end
+
+
+// now, to begin our defs:
+//
+// add_bomb
+// 
+// adds a bomb upon call to 
+// the bomb table (called in 
+// update player) with contained
+// information for further use
+function add_bomb(mapposx,mapposy,xpos,ypos)
+	local bomb = add_object(mapposx,mapposy,xpos,ypos)
+	local input_face = player.face
+	
+	set_movement_from_face(bomb,input_face,0)
+	
+	bomb.timer = 100
+	bomb.sprite = 18
+	bomb.hb = add_hitbox(2,4,5,5,5,-1,bomb)
+	add(bombpool,bomb)
+end
+
+// add arrow
+//
+// adds an arrow object to an
+// arrowpool, arrows are spawned
+// from parents, and have similar
+// structure to bombs, yet their
+// sprites are altered by direction,
+// and they're obviously not 
+// restricted to use by the player
+// like the bomb.
+function add_arrow(parent)
+	local arrow = add_object(parent.mapposx,parent.mapposy,parent.x%128,parent.y%128)
+	local input_face = parent.face
+	
+	set_movement_from_face(arrow,input_face,2.002)
+	
 	arrow.timer = 40
 	
 	if ((arrow.dx == 0) or (arrow.dy == 0)) then
@@ -1040,94 +1147,13 @@ function add_arrow(parent)
 end
 
 
-function update_arrow(arrow)
-	if	arrow.sprite == 40 then
-	 if (arrow.dx ==0 or arrow.dy == 0) then
-			arrow.dx = 0
-			arrow.dy = 0
-			arrow.timer = 0
-	 elseif (mapcollisions(arrow.hb).tr or mapcollisions(arrow.hb).tl 
-	or mapcollisions(arrow.hb).bl or mapcollisions(arrow.hb).br) then	
-			arrow.dx = 0
-			arrow.dy = 0
-			arrow.timer = 0
-		end
-	end
-	
-	if ( mapcollisions(arrow.hb).r or mapcollisions(arrow.hb).l) then
-	 arrow.dx = 0 
-	 arrow.dy = 0
-	 arrow.timer = 0
-	end
-	if ( mapcollisions(arrow.hb).t or mapcollisions(arrow.hb).b) then
-		arrow.dy = 0
-		arrow.dx = 0
-		arrow.timer = 0
-	end
-
-	
-	--update mappos
-	arrow.mapposx, arrow.mapposy = map_pos(arrow.x, arrow.y)
-	
-	if (arrow.timer == 0 or (arrow.dx == 0 and arrow.dy == 0) ) then 
-	 sfx(10)
-	 del(arrowpool,arrow)
-	 arrow.isalive = false
-	else
-	 arrow.x += arrow.dx
-		arrow.y += arrow.dy
-		arrow.timer -= 1
-	end
-end
-
-function draw_arrow(arrow)
-	if (player.mapposx == arrow.mapposx and player.mapposy == arrow.mapposy) then
-		spr(arrow.sprite,arrow.x%128,arrow.y%128,1.0,1.0,arrow.flipx,arrow.flipy)
- end
-end
 -->8
--- temp
--- bombs
-// tab 4 handles bomb functions
-// and potenitally other future
-// item functions
+-- continuation of bombs
+// this section handles bomb 
+// functions and drawing,
+// as well as explosions
 //
-// add_bomb
-// 
-// adds a bomb upon call to 
-// the bomb table (called in 
-// update player) with contained
-// information for further use
-
-function add_bomb(mapposx,mapposy,xpos,ypos)
-	local bomb = add_object(mapposx,mapposy,xpos,ypos)
-	
-	--left
-	if (player.face == 0 or player.face ==3 or player.face ==5) then
-		bomb.x = xpos + mapposx*128 - 8 // world space
-	--right
- elseif (player.face ==2 or player.face ==4 or player.face ==7) then
-	 bomb.x = xpos + mapposx*128 + 8 // world space
-	else
-		bomb.x = xpos + mapposx*128
-	end
-	
-	--up 
- if (player.face ==0 or player.face ==1 or player.face ==2) then
-		bomb.y = ypos + mapposy*128 - 8 // world space
-	--down
-	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
-		bomb.y = ypos + mapposy*128 + 8 // world space
-	else
-		bomb.y = ypos + mapposy*128
-	end
-	
-	bomb.timer = 100
-	bomb.sprite = 18
-	bomb.hb = add_hitbox(2,4,5,5,5,-1,bomb)
-	add(bombpool,bomb)
-end
-
+//
 // update_bomb
 // 
 // updated the local information
@@ -1145,6 +1171,7 @@ function update_bomb(bomb)
  	local explosion = {}
  		explosion.x = bomb.x
  		explosion.y = bomb.y
+ 		explosion.hb = add_hitbox(1, explosion.x+4,explosion.y+4, 24,24, 3, explosion)
  		add(explosions, explosion)
 	else
 	 bomb.x += bomb.dx
@@ -1153,7 +1180,7 @@ function update_bomb(bomb)
  end
  
  
- 	--update mappos	
+ --update mappos	
 	bomb.mapposx, bomb.mapposy = map_pos(bomb.x,bomb.y)
 end
 
@@ -1201,6 +1228,60 @@ function explode_tile(pair)
 	end
 	del(pair)
 end
+-->8
+-- continuation of arrows 
+// this tab contains code for
+// the arrows utilized in bow
+// combat. if a "combat" tab
+// is formalized later, this 
+// code will be moved there.
+
+
+function update_arrow(arrow)
+	if	arrow.sprite == 40 then
+	 if (arrow.dx ==0 or arrow.dy == 0) then
+			arrow.dx = 0
+			arrow.dy = 0
+			arrow.timer = 0
+	 elseif (mapcollisions(arrow.hb).tr or mapcollisions(arrow.hb).tl 
+	or mapcollisions(arrow.hb).bl or mapcollisions(arrow.hb).br) then	
+			arrow.dx = 0
+			arrow.dy = 0
+			arrow.timer = 0
+		end
+	end
+	
+	if ( mapcollisions(arrow.hb).r or mapcollisions(arrow.hb).l) then
+	 arrow.dx = 0 
+	 arrow.dy = 0
+	 arrow.timer = 0
+	end
+	if ( mapcollisions(arrow.hb).t or mapcollisions(arrow.hb).b) then
+		arrow.dy = 0
+		arrow.dx = 0
+		arrow.timer = 0
+	end
+
+	
+	--update mappos
+	arrow.mapposx, arrow.mapposy = map_pos(arrow.x, arrow.y)
+	
+	if (arrow.timer == 0 or (arrow.dx == 0 and arrow.dy == 0) ) then 
+	 sfx(10)
+	 del(arrowpool,arrow)
+	 arrow.isalive = false
+	else
+	 arrow.x += arrow.dx
+		arrow.y += arrow.dy
+		arrow.timer -= 1
+	end
+end
+
+function draw_arrow(arrow)
+	if (player.mapposx == arrow.mapposx and player.mapposy == arrow.mapposy) then
+		spr(arrow.sprite,arrow.x%128,arrow.y%128,1.0,1.0,arrow.flipx,arrow.flipy)
+ end
+end
 __gfx__
 00000000000000001111111111111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
 0000000000005500111cc11111111111222222222f7ff22222ff22222222fff22222222222222222000880002ff222222f62222222ffff22222222222ffff6f2
@@ -1226,14 +1307,14 @@ f77ffff20000000005111150ffffffff60000000cc676cccf6ff2fff2ffef6ff400aa004444aa444
 1ccccc411cccc4c11ccdccc11cdcccc114cdccc11ccccc411ccccc410000f00000000f7000000000007000400000000000000000000000000000000050000005
 11cc144111c1c41111c1cc1114c11c1114cc1c1111cc1c4111c1c4410007f700000007f700000000007004000000000000000000000000000000000050000005
 11c11c1111c11c1111c11c1111c11c1111c11c1111c11c1111c11c11000707000000007000000000005440000000000000000000000000000000000050000005
-f544445f00000000000000000555d550000000000222200000022222022222000000000000000000000000000000006600000000000000000000000000000000
-55ffff550099990000999900555d5555000000000022220000222220000222200000000000000000000000000000067600000000000000000000000000000000
-f444444f0975579009999990555d5555000000000027270000727200000272700000000000000000000000000000676000000000000000000000000000000000
-f444444f97755779999559995555d555000000000320f030030f023000330f000000000000000000000000000006760000000000000000000000000000000000
-f444444f977557799955559955555dd500000000033333300333333000f333300000000000000000000000009067600000000000000000000000000000000000
-f444444f0975579009999990555dd55d000000000f3334f00f3334f000f333400000000000000000000000000996000000000000000000000000000000000000
-55ffff55009999000099990055d55555000000000f5555f00f5555f0000555000000000000000000000000000590000000000000000000000000000000000000
-f544445f00000000000000000d555550000000000050050000500500000505000000000000000000000000005009000000000000000000000000000000000000
+f544445f00000000000000000555d550000000000222200000022222022222000000000000000000000000000000004000000000000000000000000000000000
+55ffff550099990000999900555d5555000000000022220000222220000222200000000000000000000000000000044400000000000000000000000000000000
+f444444f0975579009999990555d5555000000000027270000727200000272700000000000000000000000000000444000000000000000000000000000000000
+f444444f97755779999559995555d555000000000320f030030f023000330f000000000000000000000000000004440000000000000000000000000000000000
+f444444f977557799955559955555dd500000000033333300333333000f333300000000000000000000000000004400000000000000000000000000000000000
+f444444f0975579009999990555dd55d000000000f3334f00f3334f000f3334000000000000000000000000000f0000000000000000000000000000000000000
+55ffff55009999000099990055d55555000000000f5555f00f5555f0000555000000000000000000000000004500000000000000000000000000000000000000
+f544445f00000000000000000d555550000000000050050000500500000505000000000000000000000000000400000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -1497,7 +1578,7 @@ __map__
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303060101010000000000000000000000060000000000000000000000000000000003030303030303030303030303030306
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303050404040404090000080404040404070000000000000000000000000000000003030303030303030303030303030306
 __sfx__
-480104000d0730807003070010750d0001f0001f0001d0001d0001d0001d0001d0001d0001d0001d000210001f000210001f000210002100021000210001f0001f0001f0001f0001f0001f0001f0001f00000000
+490104000d0730807003070010750d0001f0001f0001d0001d0001d0001d0001d0001d0001d0001d000210001f000210001f000210002100021000210001f0001f0001f0001f0001f0001f0001f0001f00000000
 150308003f6433f6303f6203361033610336151b0001b0001b0001b0001b0001b0001b0001b0001f0001f0001d0001f000220002200022000220001d0001d0001d0001d0001d0001d0001d0001d0000000000000
 011800100700013000136001360007000130001360013000070001300013000130001360011000136001100007000000001460016600070000000014600166000700000000070001460014600146001460000000
 011000100500011000116001360005000130001360011000050000000000000000001360011000136001100000000000000000000000000000000000000000000000000000000000000000000000000000000000
