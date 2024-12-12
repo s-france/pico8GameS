@@ -91,9 +91,9 @@ function _draw()
 	bomb_animation()
 	draw_map()
 	draw_player()
-	if (player.mapposx == 0 and player.mapposy == 0) then
-	 spr(npc.sprite, npc.x%128, npc.y%128)
-	end
+	//if (player.mapposx == 0 and player.mapposy == 0) then
+	 //spr(npc.sprite, npc.x%128, npc.y%128)
+	//end
 	foreach(arrowpool,draw_arrow)
 	foreach(bombpool,draw_bomb)
 
@@ -145,8 +145,10 @@ end
 function make_player()
 	player = {}
 	//player stats
-	player.x =87*8+4
-	player.y =24*8-4
+	player.x =100
+	player.y =60
+	//player.x =87*8+4
+	//player.y =24*8-4
 	player.dx =0
 	player.dy =0
 	player.diag = false
@@ -302,7 +304,7 @@ function update_player()
  
  //sword
 	if(btnp(4)) then
-		sword()
+		use_item_in_slot(2)
 		--[[
 		if (player.invis == true) then
 			player.invis = false
