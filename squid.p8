@@ -82,7 +82,248 @@ function _draw()
 
 end
 -->8
--- particle effects
+-- low level object example
+// the purpose of this tab
+// is to show how objects will
+// be used in the engine,
+// mainly to make enemies, 
+// projectiles, items, and the
+// like. also provides the user
+// with a good sense of scripting
+// their game with ease.
+function add_object(mapposx,
+																				mapposy,
+																				xpos,
+																				ypos)
+	local obj = {}
+	obj.x = xpos
+	obj.y = ypos
+	obj.dx = 0
+	obj.dy = 0
+	obj.mapposx = mapposx
+	obj.mapposy = mapposy
+	obj.isalive = true
+	return obj
+end
+-->8
+-- example player
+// make player
+//
+// make player generates our
+// player when called in _init
+// it contains a ton of info 
+// that we're gonna use to
+// handle the gameplay, like 
+// the inventory of the player,
+// the player's face, and screen
+// information
+
+function make_player()
+	player = add_object(0,0,110,70)
+	//player stats
+	player.diag = false
+	player.prev_face = 0
+ player.sprite = 2
+ player.face = 6
+ player.interaction = false
+ // player items
+ player.itempool = {
+  ["bow"] = {42, 0, 0},
+ 	["sword"] = {59, 0} }
+ 	
+ player.resources = {
+  ["bombs"] = {0, 0},
+  ["keys"] = {0},
+  ["arrows"] = {0} }
+ player.slots = {
+  [1] = "none",
+  [2] = "none"
+ }
+ player.working_inventory = {}
+ player.slotflag = 0
+
+	--player hurtbox, tag = 0 
+ player.hb = add_hitbox(0, 4,4, 6,6, -1, player)
+end
+
+// move player
+//
+// move player is self explanatory
+// the function uses our mapcollions
+// function (tab 9)
+// to restrict movement against
+// walls and objects with the
+// flag #0.
+
+function move_player()
+	// initialize dx, dy and diag
+	player.dx = 0
+	player.dy = 0
+	player.diag = false
+	
+	// alter dx, dy based on btn input
+	// check mapcollisions on hb
+	if (btn(0) and not mapcollisions(player.hb).l) then
+  player.dx-=1.001
+	end
+	if (btn(1) and not mapcollisions(player.hb).r) then
+  player.dx+=1.001
+	end
+	if (btn(2) and not mapcollisions(player.hb).t) then
+  player.dy-=1.001
+	end
+	if (btn(3) and not mapcollisions(player.hb).b) then
+  player.dy+=1.001
+	end
+	
+	// diagonal check
+	if (player.dx*player.dy != 0) then
+  // roughly normalize movement
+  // values. using .75 here for
+  // fluidity and smoothness.
+  player.dx*=.75
+  player.dy*=.75
+  // set diag to true
+  player.diag = true
+	end
+	
+	// smoothness functions for
+	// diagonal movement. these set
+	// x and y to the center of each
+	// pixel. only happens on first
+	// frame of diag movement.
+
+	if (player.diag and not (player.face != player.prev_face)) then
+  player.x = flr(player.x)+0.5
+  player.y = flr(player.y)+0.5
+ end
+ 
+ 
+ // move player by dx and dy
+ // (this is why .75 is better)
+	player.x+=player.dx
+	player.y+=player.dy
+	
+	// set new previous face for
+	// the next frame
+ player.prev_face = player.face
+	// end!
+end
+
+// update player
+//
+// update player does a variety
+// of things, including use items,
+// update map position, and move
+// the player when called
+
+function update_player()
+	
+	--update player face direction
+	
+ local prev = player.face
+	
+	if btn(1) then
+		player.face = 5
+	elseif btn(0) then
+		player.face = 3
+	else
+		player.face = 4
+	end
+	
+	if btn(3) then
+		player.face +=3
+	elseif btn(2) then
+	 player.face -=3
+	end
+	
+	if player.face == 4 then
+		player.face = prev
+	elseif player.face >4 then
+		player.face -=1
+	end
+	
+	--process input, update world pos
+	// called from above
+	move_player()
+	
+
+	
+	--update mappos
+	player.mapposx, player.mapposy = map_pos(player.x,player.y)	
+
+
+ 	// check for if bomb has been placed
+-- if ( btnp(5) then	
+-- 	readinfo(player.face) end
+	player.interaction = false
+	if ( btnp(5)) then
+		interact(player.face)
+		if ( player.interaction==false ) then
+	  use_item_in_slot(1)
+ 	end
+ end
+ 
+ //sword
+	if(btnp(4)) then
+		use_item_in_slot(2)
+	end
+	
+end
+
+// draw player
+//
+// draws player
+
+function draw_player()
+ local table = {
+ [6] = {2},
+ [1] = {35},
+ [7] = {37},
+ [5] = {38},
+ [2] = {34},
+ [0] = {36}, 
+ [3] = {33}, 
+ [4] = {32} }
+ for k,v in pairs(table) do
+		if player.face == k then
+		 player.sprite = v[1]
+		end
+	end	
+	if (player.invis) then
+		player.sprite = 3
+	end	
+	
+	palt(0, false)
+	palt(1, true)
+	spr(player.sprite, player.x%128, player.y%128)
+	pal()
+end
+
+function use_item_in_slot(num)
+	for k,v in pairs(global_items) do
+	 if (k == player.slots[num]) then
+	 	global_items[k].use()
+	 end
+ end
+end
+
+function use_bomb()
+ if (player.resources.bombs[1]>0 ) then
+  add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128)
+  player.resources.bombs[1] -= 1
+	end
+end
+
+function use_bow()
+	if (player.itempool.bow[2] == 1 and player.resources.arrows[1] > 0) then
+	 add_arrow(player)
+		player.resources.arrows[1] -= 1
+	end
+end	
+
+-->8
+-- particle system
 
 --particle system prefabs:
 ---explosion: add_partsys(x,y,1,1, 2,5, 0,0, 2,2, 0.0625)
@@ -203,150 +444,6 @@ function draw_particle(part)
 	end
 end
 -->8
--- object example
-
-function add_object(mapposx,
-																				mapposy,
-																				xpos,
-																				ypos,
-																				obj_type,
-																				parent)
-	local obj = {}
-	obj.x = xpos
-	obj.y = ypos
-	obj.dx = 0
-	obj.dy = 0
-	obj.mapposx = mapposx
-	obj.mapposy = mapposy
-	obj.isalive = true
-	if obj_type = "bomb" then
-		
-																	
-				
-																				
-end
-
--->8
--- bombs
-// tab 4 handles bomb functions
-// and potenitally other future
-// item functions
-//
-// add_bomb
-// 
-// adds a bomb upon call to 
-// the bomb table (called in 
-// update player) with contained
-// information for further use
-
-function add_bomb(mapposx,mapposy,xpos,ypos)
-	local bomb = {}
-	
-	--left
-	if (player.face == 0 or player.face ==3 or player.face ==5) then
-		bomb.x = xpos + mapposx*128 - 8 // world space
-	--right
- elseif (player.face ==2 or player.face ==4 or player.face ==7) then
-	 bomb.x = xpos + mapposx*128 + 8 // world space
-	else
-		bomb.x = xpos + mapposx*128
-	end
-	
-	--up 
- if (player.face ==0 or player.face ==1 or player.face ==2) then
-		bomb.y = ypos + mapposy*128 - 8 // world space
-	--down
-	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
-		bomb.y = ypos + mapposy*128 + 8 // world space
-	else
-		bomb.y = ypos + mapposy*128
-	end
-	
-	bomb.dx = 0
-	bomb.dy = 0
-	bomb.timer = 100
-	bomb.sprite = 18
-	bomb.mapposx = mapposx
-	bomb.mapposy = mapposy
-	bomb.hb = add_hitbox(2,4,5,5,5,-1,bomb)
-	bomb.isalive = true
-	add(bombpool,bomb)
-end
-
-// update_bomb
-// 
-// updated the local information
-// of a given bomb until timer 
-// hits 0, which triggers an
-// explosion (aka bomb.sprite = 0)
-function update_bomb(bomb)
-	if (bomb.timer == 0) then
-	 add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
-	 bomb.isalive = false
-	 del(bombpool,bomb)
-	 
-	 add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
-	 
- 	local explosion = {}
- 		explosion.x = bomb.x
- 		explosion.y = bomb.y
- 		add(explosions, explosion)
-	else
-	 bomb.x += bomb.dx
-	 bomb.y += bomb.dy
-  bomb.timer -= 1
- end
- 
- 
- 	--update mappos	
-	bomb.mapposx, bomb.mapposy = map_pos(bomb.x,bomb.y)
-end
-
-// draw_bomb
-//
-// draws a bomb when called on
-// a given bomb, or stops drawing
-// and removes a bomb from the
-// pool when bomb.sprite == 0.
-
-function draw_bomb(bomb)
-  if (player.mapposx == bomb.mapposx and player.mapposy == bomb.mapposy) then
-   spr(bomb.sprite,bomb.x%128,bomb.y%128)
-  end
-end
-
-
-function update_explosion(explosion)
-	local xcell = xest(explosion.x/8)
-	local ycell = xest(explosion.y/8)
-	local cells = {}
-	for i =-1,1 do
-	 for j = -1,1 do
-	  local xtemp = i + xcell
-	  local ytemp = j + ycell
-	  local pair = {}
-	  pair.xcell = xtemp
-	  pair.ycell = ytemp
-	  add(cells, pair)
-	 end
-	end
-	foreach(cells,explode_tile)
-	del(explosions,explosion)
-	sfx(6)
-end
-
-function explode_tile(pair)
-	if fget(mget(pair.xcell,pair.ycell),1) then
-		if fget(mget(pair.xcell,pair.ycell),5) then
-		 //pass
-		else
-		 sfx(7)
-			mset(pair.xcell, pair.ycell,20)
-	 end
-	end
-	del(pair)
-end
--->8
 -- levels and map
 
 --copy mapdata string to clipboard
@@ -413,10 +510,39 @@ function openslot(b)
 		menuitem(1, "exit slot "..player.slotflag, openinv )
 		displayitem(1)
 		displayitem(2)
-		displayitem(3)
 		menuitem(5, "next page ->", nextslotpage)
 	return true
 end
+
+function displayitem(x)
+	if (x<4) then
+		if (player.working_inventory[x] == nil) then
+			menuitem(x+1, "empty")
+		else
+			menuitem(x+1, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) return true end)	
+		end
+	end
+	return true
+end
+
+function additemtoslot(x)
+ for i = 1,2,1 do
+  if (player.slotflag == i) then
+   player.slots[i] = player.working_inventory[x]
+ 	end
+ end
+end
+
+-- extras:
+-- in the event a slot requires
+-- a second page, here's an impl.
+-- for that
+--[[
+
+// this should be added to see
+// second page, a better func.
+// can be developed for subs.
+// pages of items.
 
 function nextslotpage(b)
 	clearmenu()
@@ -426,13 +552,13 @@ function nextslotpage(b)
 		menuitem(4, "<- prev page",openslot)
 	return true
 end
-	
+
+// example displayitem function
+// with the second page.
 function displayitem(x)
 	if (x<4) then
 		if (player.working_inventory[x] == nil) then
 			menuitem(x+1, "empty")
-		//elseif(player.working_inventory[x] == "satchel")
-		
 		else
 			menuitem(x+1, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) return true end)	
 		end
@@ -446,13 +572,7 @@ function displayitem(x)
 	return true
 end
 
-function additemtoslot(x)
- for i = 1,2,1 do
-  if (player.slotflag == i) then
-   player.slots[i] = player.working_inventory[x]
- 	end
- end
-end
+--]]
 -->8
 -- player interaction functions
 
@@ -560,17 +680,10 @@ function pickup_item(face)
 			for i,j in pairs(player.itempool) do
 				if temp == j[1] then
 		 		player.interaction = true
-	 			j[2] += 1
-		 			
-	 		 if (i != "ice boots") then
-	 			 if (not contains(player.working_inventory,i)) then
-	 			  add(player.working_inventory,i)
-	 			 end
-	 			end  
-	 			if (i == "bow") then
-	 				j[1] = 52
-	 			end
-	 			
+	 			j[2] += 1	
+	 			if (not contains(player.working_inventory,i)) then
+	 			 add(player.working_inventory,i)
+	 			end 
 	 			mset(xest(player.x/8+v[1]),xest(player.y/8+v[2]),0)
 				end
 			end
@@ -863,31 +976,31 @@ end
 // code will be moved there.
 
 
-function add_arrow(mapposx,mapposy,xpos,ypos)
-	local arrow = {}
+function add_arrow(parent)
+	local arrow = add_object(parent.mapposx,parent.mapposy,parent.x%128,parent.y%128)
 	--left
-	if (player.face == 0 or player.face ==3 or player.face ==5) then
-		arrow.x = xpos + mapposx*128 - 8 // world space
+	if (parent.face == 0 or parent.face ==3 or parent.face ==5) then
+		arrow.x += (arrow.mapposx*128 - 8) // world space
 		arrow.dx = -2.002
 	--right
- elseif (player.face ==2 or player.face ==4 or player.face ==7) then
-	 arrow.x = xpos + mapposx*128 + 8 // world space
+ elseif (parent.face ==2 or parent.face ==4 or parent.face ==7) then
+	 arrow.x += (arrow.mapposx*128 + 8) // world space
 		arrow.dx = 2.002
 	else
-		arrow.x = xpos + mapposx*128
+		arrow.x += arrow.mapposx*128
 		arrow.dx = 0
 	end
 	
 	--up 
- if (player.face ==0 or player.face ==1 or player.face ==2) then
-		arrow.y = ypos + mapposy*128 - 8 // world space
+ if (parent.face ==0 or parent.face ==1 or parent.face ==2) then
+		arrow.y += arrow.mapposy*128 - 8 // world space
 		arrow.dy = -2.002
 	--down
 	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
-		arrow.y = ypos + mapposy*128 + 8 // world space
+		arrow.y += (arrow.mapposy*128 + 8) // world space
 		arrow.dy = 2.002
 	else
-		arrow.y = ypos + mapposy*128
+		arrow.y += arrow.mapposy*128
 		arrow.dy = 0
 	end
 	arrow.timer = 40
@@ -906,9 +1019,6 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	 arrow.dy*=.75
 	end
 	
-	arrow.mapposx = mapposx
-	arrow.mapposy = mapposy
-	
 	arrow.flipx = false
 	arrow.flipy = false
 	
@@ -926,7 +1036,6 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
   arrow.y = flr(player.y)+0.5
 	end
 	
-	arrow.isalive = true
 	arrow.hb = add_hitbox(1,4,4,4,4,-1,arrow)
 	
 	add(arrowpool, arrow)
@@ -979,237 +1088,121 @@ function draw_arrow(arrow)
  end
 end
 -->8
---temp
-
--- player info
-// the collions function, and
-// map info/functions
+-- temp
+-- bombs
+// tab 4 handles bomb functions
+// and potenitally other future
+// item functions
 //
-// make player
-//
-// make player generates our
-// player when called in _init
-// it contains a ton of info 
-// that we're gonna use
+// add_bomb
+// 
+// adds a bomb upon call to 
+// the bomb table (called in 
+// update player) with contained
+// information for further use
 
-function make_player()
-	player = {}
-	//player stats
-	player.x = 110
-	player.y = 70
-	//player.x =87*8+4
-	//player.y =24*8-4
-	player.dx =0
-	player.dy =0
-	player.diag = false
-	player.prev_face = 0
-	player.mapposx = 0
-	player.mapposy = 0
- player.sprite = 2
- player.face = 6
- player.isalive = true
- player.interaction = false
- // player items
- player.itempool = {
-  ["bow"] = {42, 0, 0},
- 	["ice boots"] = {43, 0}, 
- 	["satchel"] = {58, 0 },
- 	["magnet"] = {17, 0},
- 	["sword"] = {59, 0} }
- player.resources = {
-  ["bombs"] = {0, 0},
-  ["keys"] = {0},
-  ["arrows"] = {0},
-  ["money"] = {0} }
- player.slots = {
-  [1] = "none",
-  [2] = "none",
-  [3] = "none"
- }
- player.working_inventory = {}
- player.slotflag = 0
-
-	player.invis = false
-	--player hurtbox, tag = 0 
- player.hb = add_hitbox(0, 4,4, 6,6, -1, player)
-end
-
-// move player
-//
-// move player is self explanatory
-// the function uses our mapcollions
-// function (tab 9)
-// to restrict movement against
-// walls and objects with the
-// flag #0.
-
-function move_player()
-	// initialize dx, dy and diag
-	player.dx = 0
-	player.dy = 0
-	player.diag = false
+function add_bomb(mapposx,mapposy,xpos,ypos)
+	local bomb = add_object(mapposx,mapposy,xpos,ypos)
 	
-	// alter dx, dy based on btn input
-	// check mapcollisions on hb
-	if (btn(0) and not mapcollisions(player.hb).l) then
-  player.dx-=1.001
-	end
-	if (btn(1) and not mapcollisions(player.hb).r) then
-  player.dx+=1.001
-	end
-	if (btn(2) and not mapcollisions(player.hb).t) then
-  player.dy-=1.001
-	end
-	if (btn(3) and not mapcollisions(player.hb).b) then
-  player.dy+=1.001
-	end
-	
-	// diagonal check
-	if (player.dx*player.dy != 0) then
-  // roughly normalize movement
-  // values. using .75 here for
-  // fluidity and smoothness.
-  player.dx*=.75
-  player.dy*=.75
-  // set diag to true
-  player.diag = true
-	end
-	
-	// smoothness functions for
-	// diagonal movement. these set
-	// x and y to the center of each
-	// pixel. only happens on first
-	// frame of diag movement.
-
-	if (player.diag and not (player.face != player.prev_face)) then
-  player.x = flr(player.x)+0.5
-  player.y = flr(player.y)+0.5
- end
- 
- 
- // move player by dx and dy
- // (this is why .75 is better)
-	player.x+=player.dx
-	player.y+=player.dy
-	
-	// set new previous face for
-	// the next frame
- player.prev_face = player.face
-	// end!
-end
-
-// update player
-//
-// update player does a variety
-// of things, including use items,
-// update map position, and move
-// the player when called
-
-function update_player()
-	
-	--update player face direction
-	
- local prev = player.face
-	
-	if btn(1) then
-		player.face = 5
-	elseif btn(0) then
-		player.face = 3
+	--left
+	if (player.face == 0 or player.face ==3 or player.face ==5) then
+		bomb.x = xpos + mapposx*128 - 8 // world space
+	--right
+ elseif (player.face ==2 or player.face ==4 or player.face ==7) then
+	 bomb.x = xpos + mapposx*128 + 8 // world space
 	else
-		player.face = 4
+		bomb.x = xpos + mapposx*128
 	end
 	
-	if btn(3) then
-		player.face +=3
-	elseif btn(2) then
-	 player.face -=3
+	--up 
+ if (player.face ==0 or player.face ==1 or player.face ==2) then
+		bomb.y = ypos + mapposy*128 - 8 // world space
+	--down
+	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
+		bomb.y = ypos + mapposy*128 + 8 // world space
+	else
+		bomb.y = ypos + mapposy*128
 	end
 	
-	if player.face == 4 then
-		player.face = prev
-	elseif player.face >4 then
-		player.face -=1
-	end
-	
-	--process input, update world pos
-	// called from above
-	move_player()
-	
+	bomb.timer = 100
+	bomb.sprite = 18
+	bomb.hb = add_hitbox(2,4,5,5,5,-1,bomb)
+	add(bombpool,bomb)
+end
 
-	
-	--update mappos
-	player.mapposx, player.mapposy = map_pos(player.x,player.y)	
-
-
- 	// check for if bomb has been placed
--- if ( btnp(5) then	
--- 	readinfo(player.face) end
-	player.interaction = false
-	if ( btnp(5)) then
-		interact(player.face)
-		if ( player.interaction==false ) then
-	  use_item_in_slot(1)
- 	end
+// update_bomb
+// 
+// updated the local information
+// of a given bomb until timer 
+// hits 0, which triggers an
+// explosion (aka bomb.sprite = 0)
+function update_bomb(bomb)
+	if (bomb.timer == 0) then
+	 add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
+	 bomb.isalive = false
+	 del(bombpool,bomb)
+	 
+	 add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
+	 
+ 	local explosion = {}
+ 		explosion.x = bomb.x
+ 		explosion.y = bomb.y
+ 		add(explosions, explosion)
+	else
+	 bomb.x += bomb.dx
+	 bomb.y += bomb.dy
+  bomb.timer -= 1
  end
  
- //sword
-	if(btnp(4)) then
-		use_item_in_slot(2)
-	end
-	
+ 
+ 	--update mappos	
+	bomb.mapposx, bomb.mapposy = map_pos(bomb.x,bomb.y)
 end
 
-// draw player
+// draw_bomb
 //
-// draws player
+// draws a bomb when called on
+// a given bomb, or stops drawing
+// and removes a bomb from the
+// pool when bomb.sprite == 0.
 
-function draw_player()
- local table = {
- [6] = {2},
- [1] = {35},
- [7] = {37},
- [5] = {38},
- [2] = {34},
- [0] = {36}, 
- [3] = {33}, 
- [4] = {32} }
- for k,v in pairs(table) do
-		if player.face == k then
-		 player.sprite = v[1]
-		end
-	end	
-	if (player.invis) then
-		player.sprite = 3
-	end	
-	
-	palt(0, false)
-	palt(1, true)
-	spr(player.sprite, player.x%128, player.y%128)
-	pal()
+function draw_bomb(bomb)
+  if (player.mapposx == bomb.mapposx and player.mapposy == bomb.mapposy) then
+   spr(bomb.sprite,bomb.x%128,bomb.y%128)
+  end
 end
 
-function use_item_in_slot(num)
-	for k,v in pairs(global_items) do
-	 if (k == player.slots[num]) then
-	 	global_items[k].use()
+
+function update_explosion(explosion)
+	local xcell = xest(explosion.x/8)
+	local ycell = xest(explosion.y/8)
+	local cells = {}
+	for i =-1,1 do
+	 for j = -1,1 do
+	  local xtemp = i + xcell
+	  local ytemp = j + ycell
+	  local pair = {}
+	  pair.xcell = xtemp
+	  pair.ycell = ytemp
+	  add(cells, pair)
 	 end
- end
+	end
+	foreach(cells,explode_tile)
+	del(explosions,explosion)
+	sfx(6)
 end
 
-function use_bomb()
- if (player.resources.bombs[1]>0 ) then
-  add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128)
-  player.resources.bombs[1] -= 1
+function explode_tile(pair)
+	if fget(mget(pair.xcell,pair.ycell),1) then
+		if fget(mget(pair.xcell,pair.ycell),5) then
+		 //pass
+		else
+		 sfx(7)
+			mset(pair.xcell, pair.ycell,20)
+	 end
 	end
+	del(pair)
 end
-
-function use_bow()
-	if (player.itempool.bow[2] >= 1 and player.resources.arrows[1] > 0) then
-	 add_arrow(player.mapposx,player.mapposy,player.x%128,player.y%128)
-		player.resources.arrows[1] -= 1
-	end
-end	
-
 __gfx__
 00000000000000001111111111111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
 0000000000005500111cc11111111111222222222f7ff22222ff22222222fff22222222222222222000880002ff222222f62222222ffff22222222222ffff6f2
@@ -1219,30 +1212,30 @@ __gfx__
 007007000056dd501ccccc4111111111222ff222222222ff222ff22222f222222222f7f22f7622220888888022f7f22222fffff22fffff222ffef222222fef22
 000000000055555011c1144111111111222222222222222222ff2222222222222222ff222f6ff2220080080022ff2222222fff22222222222fcff2222222ff22
 000000000000000011c11c111111111122222222222222222ff7f22222222222222f7f222ffff222008008002222222222222ff22222222222ff222222222222
-22222222880000cc00000780fff777ff06000006cccccccc2ff7f222222222220000000000000000000000000000000000000000454444544544445445444454
-22222222880000cc00007000ffffff7f60d06060cccccc6c2f7ff222222222220000000005455450054554500545545005455450555555555555555555555555
-222222ffdd0000dd00077000ffdfffff06006d00cc6ccc7622ffff2f22fffff20444444045455454454554544545545445455454454444544566665445444454
-fff22f7fdd0000dd00555500ffffffff00d006d0cc76ccc7f22fefff2ffffeff50000005555aa555555aa555555aa555555aa5555555aa254566665445444454
-f77ffff2dd0000dd05111150ffffffff60000000cc676cccf6ff2fff2ffef6ff400aa004444aa444444aa444444aa444444aa4444544aa244566665445444454
-2ffff7f2add00dda05111150ffffffff0006d060ccc67cccfff222ff2ffcfff25445544554455445544554455445544554455445454444544566665445444454
-222fff220dddddd005111150ffdfffff600000006ccccccc6f22222222ffff225445544554455445544554455445544554455445555555555555555555555555
-222f7f2200adda0000555500ffffffff06d60060c6cccccc22222222222222225445544554455445544554455445544554455445454444544544445445444454
+222222220000000000000780fff777ff06000006cccccccc2ff7f222222222220000000000000000000000000000000000000000454444544544445445444454
+222222220000000000007000ffffff7f60d06060cccccc6c2f7ff222222222220000000005455450054554500545545005455450555555555555555555555555
+222222ff0000000000077000ffdfffff06006d00cc6ccc7622ffff2f22fffff20444444045455454454554544545545445455454454444544566665445444454
+fff22f7f0000000000555500ffffffff00d006d0cc76ccc7f22fefff2ffffeff50000005555aa555555aa555555aa555555aa5555555aa254566665445444454
+f77ffff20000000005111150ffffffff60000000cc676cccf6ff2fff2ffef6ff400aa004444aa444444aa444444aa444444aa4444544aa244566665445444454
+2ffff7f20000000005111150ffffffff0006d060ccc67cccfff222ff2ffcfff25445544554455445544554455445544554455445454444544566665445444454
+222fff220000000005111150ffdfffff600000006ccccccc6f22222222ffff225445544554455445544554455445544554455445555555555555555555555555
+222f7f220000000000555500ffffffff06d60060c6cccccc22222222222222225445544554455445544554455445544554455445454444544544445445444454
 11111111111111111111111111111111111111111111111111111111000040000000000000000000005440000000000000000000000000000000000055555555
 111cc111111cc111111cc111111cc111111cc111111cc111111cc111000444000440000000000000007004000000000000000000000000000000000050000005
-11cccc1111cccc1111ccdc1111cdcc1111ccdc1111cccc1111cccc110000f00004f00000040000770070004006400000000bb000000000000000000050000005
-1cc7cc7117cc7cc111ccdc7111cdcc1117ccdc111c7cc711117cc7c10000f000000f000044fffff0007000906446000000bbbb00000bb0000000000050000005
-1cc0cc0110cc0cc11ccdcc011cdcccc110cdccc11c0cc0c11c0cc0c10000f0000000f0000400007700700040644466000b7bb7b00bbbbbb0000bb00050000005
-1ccccc411cccc4c11ccdccc11cdcccc114cdccc11ccccc411ccccc410000f00000000f700000000000700040644444670bbbbbb0b7bbbb7b0bbbbbb050000005
-11cc144111c1c41111c1cc1114c11c1114cc1c1111cc1c4111c1c4410007f700000007f70000000000700400644c4cc70bbbbbb0bbbbbbbbb7bbbb7b50000005
-11c11c1111c11c1111c11c1111c11c1111c11c1111c11c1111c11c110007070000000070000000000054400007c7c77000bbbb0000bbbb000bbbbbb050000005
-f544445f00000000000000000555d55000a660000222200000022222000222200222220000e007e0000000000000006600000000000000000000000000000000
-55ffff550099990000999900555d555500700600002222000022222000222200000222200e3e73700444000000000676000bb000000000000000000000000000
-f444444f0975579009999990555d55550070006000272700007272000072270000027270e3333337004460000000676000bbbb00000000000000000000000000
-f444444f97755779999559995555d555007000a00320f030030f0230030ff03000330f00073993700006640000067600007bb700000000000000000000000000
-f444444f977557799955559955555dd50070006003333330033333300333333000f333300e39933e004e3e40906760000bbbbbb0000000000000000000000000
-f444444f0975579009999990555dd55d007000600f3334f00f3334f00f3334f000f333400733333704439340099600000bbbbbb0000000000000000000000000
-55ffff55009999000099990055d55555007006000f5555f00f5555f00f5555f000055500733776e000433740059000000bbbbbb0000000000000000000000000
-f544445f00000000000000000d55555000a660000050050000500500005005000005050007e00000000444005009000000bbbb00000000000000000000000000
+11cccc1111cccc1111ccdc1111cdcc1111ccdc1111cccc1111cccc110000f00004f0000004000077007000400000000000000000000000000000000050000005
+1cc7cc7117cc7cc111ccdc7111cdcc1117ccdc111c7cc711117cc7c10000f000000f000044fffff0007000900000000000000000000000000000000050000005
+1cc0cc0110cc0cc11ccdcc011cdcccc110cdccc11c0cc0c11c0cc0c10000f0000000f00004000077007000400000000000000000000000000000000050000005
+1ccccc411cccc4c11ccdccc11cdcccc114cdccc11ccccc411ccccc410000f00000000f7000000000007000400000000000000000000000000000000050000005
+11cc144111c1c41111c1cc1114c11c1114cc1c1111cc1c4111c1c4410007f700000007f700000000007004000000000000000000000000000000000050000005
+11c11c1111c11c1111c11c1111c11c1111c11c1111c11c1111c11c11000707000000007000000000005440000000000000000000000000000000000050000005
+f544445f00000000000000000555d550000000000222200000022222022222000000000000000000000000000000006600000000000000000000000000000000
+55ffff550099990000999900555d5555000000000022220000222220000222200000000000000000000000000000067600000000000000000000000000000000
+f444444f0975579009999990555d5555000000000027270000727200000272700000000000000000000000000000676000000000000000000000000000000000
+f444444f97755779999559995555d555000000000320f030030f023000330f000000000000000000000000000006760000000000000000000000000000000000
+f444444f977557799955559955555dd500000000033333300333333000f333300000000000000000000000009067600000000000000000000000000000000000
+f444444f0975579009999990555dd55d000000000f3334f00f3334f000f333400000000000000000000000000996000000000000000000000000000000000000
+55ffff55009999000099990055d55555000000000f5555f00f5555f0000555000000000000000000000000000590000000000000000000000000000000000000
+f544445f00000000000000000d555550000000000050050000500500000505000000000000000000000000005009000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -1470,12 +1463,12 @@ __label__
 88888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 
 __gff__
-0003000001010101010100010101010101010000000101010123252931050101000000000000000000000101000000000100000901000000000001010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0003000001010101010100010101010101010000000101010123252931050101000000000000000000000100000000000100000900000000000001010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0804040404040404100404040404041010040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040408040404040404040404040404040409040404040404040404040404040404040404040404040404040404040404040404040404040404040404040404040409
 0603030303030303060303030301010606030303030303030303030303030303000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030306040303030303030303030303030303030303030303030303030303030303030303030303030304040403030303030306
-0603030119030303062a010303012b0606010303030303030303030303030303000000000000000000000000000000000000000000000000000000000000000003151515030303030303030303030306030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+0603030119031b2a0603010303012b0606010303030303030303030303030303000000000000000000000000000000000000000000000000000000000000000003151515030303030303030303030306030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303010303050409030303030606031a03080903030303010101010303000000000000000000000000000000000000000000000000000000000000000003151503031503030303030303030306030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603010303030303033a050d0303030606030804070f03030301030303030103000000000000000000000000000000000000000000000000000000000000000003030303150303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303030301030303030303030516040703030303030103030303030301000000000000000000000000000000000000000000000000000000000000000003031515030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
@@ -1506,7 +1499,7 @@ __map__
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303060101010000000000000000000000060000000000000000000000000000000003030303030303030303030303030306
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303050404040404090000080404040404070000000000000000000000000000000003030303030303030303030303030306
 __sfx__
-490104000d0730807003070010750d0001f0001f0001d0001d0001d0001d0001d0001d0001d0001d000210001f000210001f000210002100021000210001f0001f0001f0001f0001f0001f0001f0001f00000000
+480104000d0730807003070010750d0001f0001f0001d0001d0001d0001d0001d0001d0001d0001d000210001f000210001f000210002100021000210001f0001f0001f0001f0001f0001f0001f0001f00000000
 150308003f6433f6303f6203361033610336151b0001b0001b0001b0001b0001b0001b0001b0001f0001f0001d0001f000220002200022000220001d0001d0001d0001d0001d0001d0001d0001d0000000000000
 011800100700013000136001360007000130001360013000070001300013000130001360011000136001100007000000001460016600070000000014600166000700000000070001460014600146001460000000
 011000100500011000116001360005000130001360011000050000000000000000001360011000136001100000000000000000000000000000000000000000000000000000000000000000000000000000000000
