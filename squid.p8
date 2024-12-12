@@ -87,48 +87,16 @@ end
 // routine updates every frame
 // using designed update funcs.
 function _draw()
-	cls(1)
+	cls(0)
 	bomb_animation()
 	draw_map()
 	draw_player()
-	if (player.mapposx == 0 and player.mapposy == 0) then
-	 spr(npc.sprite, npc.x%128, npc.y%128)
-	end
 	foreach(arrowpool,draw_arrow)
 	foreach(bombpool,draw_bomb)
-
-	
 	foreach(particles, draw_particle)
-	//print("♥♥♥",13*8,1,8)
+	foreach(hitboxes, draw_hitbox)
+	
 
-	--[[
-	print("player.itempool",1, 1, 0)
-	print(player.itempool.bow[2])
-	print("bombs")
-	print(player.resources.bombs[1])
-	print("keys")
-	print(player.resources.keys[1])
-	print("arrows")
-	print(player.resources.arrows[1])
-	print(hbtestflag)
-	print(player.hb.left)
-	--]]
-	
-	
-	//foreach(hitboxes, draw_hitbox)
-	
-	--[[
-	print(hitboxes[1].left)
-	print(hitboxes[1].right)
-	print(hitboxes[1].top)
-	print(hitboxes[1].bot)
-	print(hitboxes[2].left)
-	print(hitboxes[2].right)
-	print(hitboxes[2].top)
-	print(hitboxes[2].bot)
-	--]]
-	
- //print(mag)
 end
 -->8
 -- player info
@@ -145,8 +113,10 @@ end
 function make_player()
 	player = {}
 	//player stats
-	player.x =87*8+4
-	player.y =24*8-4
+	player.x = 110
+	player.y = 70
+	//player.x =87*8+4
+	//player.y =24*8-4
 	player.dx =0
 	player.dy =0
 	player.diag = false
@@ -302,19 +272,9 @@ function update_player()
  
  //sword
 	if(btnp(4)) then
-		sword()
-		--[[
-		if (player.invis == true) then
-			player.invis = false
-		else
-			player.invis = true
-		end	
-		--]]
+		use_item_in_slot(2)
 	end
 	
-	if (btnp(0,1) ) then
-		use_item_in_slot(3)
-	end
 end
 
 // draw player
@@ -367,23 +327,6 @@ function use_bow()
 		player.resources.arrows[1] -= 1
 	end
 end	
-
--->8
--- npcs
---[[
-function makenpc()
- npc = {}
-	npc.x = 60
-	npc.y = 104
-	npc.mapposx = 0
-	npc.mapposy = 0
-	npc.sprite = 10
- npc.isalive = true
-	npc.hb = add_hitbox(0,4, 4, 6,6, -1, npc)
-end
---]]
-
-
 
 -->8
 -- particle effects
@@ -506,6 +449,9 @@ function draw_particle(part)
 			pset(part.x%128, part.y%128, 7)
 	end
 end
+-->8
+-- object example
+
 -->8
 -- bombs
 // tab 4 handles bomb functions
