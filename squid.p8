@@ -513,36 +513,14 @@ end
 // information for further use
 
 function add_bomb(mapposx,mapposy,xpos,ypos)
-	local bomb = {}
+	local bomb = add_object(mapposx,mapposy,xpos,ypos)
+	local input_face = player.face
 	
-	--left
-	if (player.face == 0 or player.face ==3 or player.face ==5) then
-		bomb.x = xpos + mapposx*128 - 8 // world space
-	--right
- elseif (player.face ==2 or player.face ==4 or player.face ==7) then
-	 bomb.x = xpos + mapposx*128 + 8 // world space
-	else
-		bomb.x = xpos + mapposx*128
-	end
+	set_movement_from_face(bomb,input_face,0)
 	
-	--up 
- if (player.face ==0 or player.face ==1 or player.face ==2) then
-		bomb.y = ypos + mapposy*128 - 8 // world space
-	--down
-	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
-		bomb.y = ypos + mapposy*128 + 8 // world space
-	else
-		bomb.y = ypos + mapposy*128
-	end
-	
-	bomb.dx = 0
-	bomb.dy = 0
 	bomb.timer = 100
 	bomb.sprite = 18
-	bomb.mapposx = mapposx
-	bomb.mapposy = mapposy
 	bomb.hb = add_hitbox(2,4,5,5,5,-1,bomb)
-	bomb.isalive = true
 	add(bombpool,bomb)
 end
 
@@ -558,20 +536,19 @@ function update_bomb(bomb)
 	 bomb.isalive = false
 	 del(bombpool,bomb)
 	 
-	 add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
+	 //add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
 	 
  	local explosion = {}
  		explosion.x = bomb.x
  		explosion.y = bomb.y
+ 		explosion.hb = add_hitbox(1, explosion.x+4,explosion.y+4, 24,24, 3)
  		add(explosions, explosion)
 	else
 	 bomb.x += bomb.dx
 	 bomb.y += bomb.dy
   bomb.timer -= 1
  end
- 
- 
- 	--update mappos	
+ --update mappos	
 	bomb.mapposx, bomb.mapposy = map_pos(bomb.x,bomb.y)
 end
 
@@ -1152,6 +1129,35 @@ function add_object(mapposx,
 	obj.isalive = true
 	return obj
 end
+
+function set_movement_from_face(object,
+																																input_face,
+																																speed)
+	if (input_face == 0 or input_face ==3 or input_face ==5) then
+		object.x += (object.mapposx*128 - 8) // world space
+		object.dx = -(speed)
+	--right
+ elseif (input_face ==2 or input_face ==4 or input_face ==7) then
+	 object.x += (object.mapposx*128 + 8) // world space
+		object.dx = speed
+	else
+		object.x += object.mapposx*128
+		object.dx = 0
+	end
+	
+	--up 
+ if (input_face ==0 or input_face ==1 or input_face ==2) then
+		object.y += object.mapposy*128 - 8 // world space
+		object.dy = -(speed)
+	--down
+	elseif (input_face ==5 or input_face ==6 or input_face ==7) then
+		object.y += (object.mapposy*128 + 8) // world space
+		object.dy = speed
+	else
+		object.y += object.mapposy*128
+		object.dy = 0
+	end																													
+end
 -->8
 -- arrows and bow
 // this tab contains code for
@@ -1161,33 +1167,12 @@ end
 // code will be moved there.
 
 
-function add_arrow(mapposx,mapposy,xpos,ypos)
-	local arrow = {}
-	--left
-	if (player.face == 0 or player.face ==3 or player.face ==5) then
-		arrow.x = xpos + mapposx*128 - 8 // world space
-		arrow.dx = -2.002
-	--right
- elseif (player.face ==2 or player.face ==4 or player.face ==7) then
-	 arrow.x = xpos + mapposx*128 + 8 // world space
-		arrow.dx = 2.002
-	else
-		arrow.x = xpos + mapposx*128
-		arrow.dx = 0
-	end
+function add_arrow(parent)
+	local arrow = add_object(parent.mapposx,parent.mapposy,parent.x%128,parent.y%128)
+	local input_face = parent.face
 	
-	--up 
- if (player.face ==0 or player.face ==1 or player.face ==2) then
-		arrow.y = ypos + mapposy*128 - 8 // world space
-		arrow.dy = -2.002
-	--down
-	elseif (player.face ==5 or player.face ==6 or player.face ==7) then
-		arrow.y = ypos + mapposy*128 + 8 // world space
-		arrow.dy = 2.002
-	else
-		arrow.y = ypos + mapposy*128
-		arrow.dy = 0
-	end
+	set_movement_from_face(arrow,input_face,2.002)
+	
 	arrow.timer = 40
 	
 	if ((arrow.dx == 0) or (arrow.dy == 0)) then
@@ -1203,9 +1188,6 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
 	 arrow.dx*=.75
 	 arrow.dy*=.75
 	end
-	
-	arrow.mapposx = mapposx
-	arrow.mapposy = mapposy
 	
 	arrow.flipx = false
 	arrow.flipy = false
@@ -1224,7 +1206,6 @@ function add_arrow(mapposx,mapposy,xpos,ypos)
   arrow.y = flr(player.y)+0.5
 	end
 	
-	arrow.isalive = true
 	arrow.hb = add_hitbox(1,4,4,4,4,-1,arrow)
 	
 	add(arrowpool, arrow)
