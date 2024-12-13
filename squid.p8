@@ -356,7 +356,7 @@ end
 
 function use_bow()
 	if (player.itempool.bow[2] >= 1 and player.resources.arrows[1] > 0) then
-	 add_arrow(player.mapposx,player.mapposy,player.x%128,player.y%128)
+	 add_arrow(player)
 		player.resources.arrows[1] -= 1
 	end
 end	
