@@ -141,21 +141,14 @@ end
 // that we're gonna use
 
 function make_player()
-	player = {}
+	player = add_object(0,0,100,60)
 	//player stats
-	player.x =100
-	player.y =60
 	//player.x =87*8+4
 	//player.y =24*8-4
-	player.dx =0
-	player.dy =0
 	player.diag = false
 	player.prev_face = 0
-	player.mapposx = 0
-	player.mapposy = 0
  player.sprite = 2
  player.face = 6
- player.isalive = true
  player.interaction = false
  // player items
  player.itempool = {
@@ -1145,6 +1138,20 @@ function hbcollision(updhb, othhb)
 		end
 end
 
+function add_object(mapposx,
+																				mapposy,
+																				xpos,
+																				ypos)
+	local obj = {}
+	obj.x = xpos
+	obj.y = ypos
+	obj.dx = 0
+	obj.dy = 0
+	obj.mapposx = mapposx
+	obj.mapposy = mapposy
+	obj.isalive = true
+	return obj
+end
 -->8
 -- arrows and bow
 // this tab contains code for
