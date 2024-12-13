@@ -25,8 +25,6 @@ function _init()
 	
 //	makenpc()
 
-	
-	
 	particlesystems = {}
 	particles = {}
 	
