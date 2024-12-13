@@ -46,9 +46,6 @@ function _init()
 	["sword"] = {use = sword}
 	}
 	
-	
-	
-	music_var = 4
 	music(11)
 	menuitem(1,"inventory", openinv)
 	menuitem(2,"save game", opensaveprompt)
@@ -1218,11 +1215,13 @@ function update_arrow(arrow)
 			arrow.dx = 0
 			arrow.dy = 0
 			arrow.timer = 0
+		--[[	
 	 elseif (mapcollisions(arrow.hb).tr or mapcollisions(arrow.hb).tl 
 	or mapcollisions(arrow.hb).bl or mapcollisions(arrow.hb).br) then	
 			arrow.dx = 0
 			arrow.dy = 0
 			arrow.timer = 0
+			--]]
 		end
 	end
 	
