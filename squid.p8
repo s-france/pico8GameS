@@ -940,9 +940,6 @@ function initialmenu()
  end
 end
 
-for i = 1,5,1 do
-	menuitem(i)
-end	
 
 function clearmenu()
 	for i = 1,5,1 do
