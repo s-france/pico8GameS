@@ -138,7 +138,7 @@ end
 // that we're gonna use
 
 function make_player()
-	player = add_object(0,0,100,60)
+	player = add_object(0,0,110,60)
 	//player stats
 	//player.x =87*8+4
 	//player.y =24*8-4
@@ -325,7 +325,7 @@ function draw_player()
 		if player.face == k then
 		 player.sprite = v[1]
 		end
-	end	
+	end
 	if (player.invis) then
 		player.sprite = 3
 	end	
