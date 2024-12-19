@@ -159,7 +159,6 @@ function make_player()
  player.slots = {
   [1] = "none",
   [2] = "none"
-  
  }
  player.working_inventory = {}
  player.slotflag = 0
@@ -1142,8 +1141,6 @@ function add_arrow(parent)
 		end
 	else 
 	 arrow.sprite = 40
-	 arrow.x = flr(arrow.x)
-  arrow.y = flr(arrow.y)
 	 arrow.dx*=.75
 	 arrow.dy*=.75
 	end
@@ -1161,8 +1158,8 @@ function add_arrow(parent)
 	end
 	
 	if (arrow.sprite == 40) then
-	 arrow.x = flr(player.x)+0.5
-  arrow.y = flr(player.y)+0.5
+	 arrow.x = flr(arrow.x)
+  arrow.y = flr(arrow.y)
 	end
 	
 	arrow.hb = add_hitbox(1,4,4,4,4,-1,arrow)
