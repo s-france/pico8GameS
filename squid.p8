@@ -95,7 +95,7 @@ function _draw()
 	
 	foreach(particles, draw_particle)
 	//print("♥♥♥",13*8,1,8)
-
+	pal({128, 129, 130, 131, 132, 133, 134, 7, 132, 9, 10, 11, 134, 13, 14, 15}, 1)
 	--[[
 	print("player.itempool",1, 1, 0)
 	print(player.itempool.bow[2])
@@ -138,9 +138,9 @@ end
 // that we're gonna use
 
 function make_player()
-	//player = add_object(0,0,110,60)
+	player = add_object(0,0,110,60)
 	//player stats
-	player = add_object(6,1,87*8+4,24*8-4)
+	//player = add_object(6,1,87*8+4,24*8-4)
 	//player.x =87*8+4
 	//player.y =24*8-4
 	player.diag = false
