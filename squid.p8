@@ -121,8 +121,8 @@ function _draw()
 	print(player.hb.left)
 	--]]
 	
-	//hitbox debug
-	foreach(hitboxes, draw_hitbox)
+	
+	//foreach(hitboxes, draw_hitbox)
 	
 	pal(level_slots["pallete"],1)
 	
