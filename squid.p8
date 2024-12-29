@@ -117,22 +117,6 @@ function _draw()
 
 	
 	foreach(particles, draw_particle)
-	//print("♥♥♥",13*8,1,8)
-	//pal({128, 131, 0, 132, 131, 133, 134, 7, 138, 9, 10, 11, 140, 13, 14, 15}, 1)
-	--[[
-	print("player.itempool",1, 1, 0)
-	print(player.itempool.bow[2])
-	print("bombs")
-	print(player.resources.bombs[1])
-	print("keys")
-	print(player.resources.keys[1])
-	print("arrows")
-	print(player.resources.arrows[1])
-	print(hbtestflag)
-	print(player.hb.left)
-	--]]
-	
-	//hitbox debug
 	foreach(hitboxes, draw_hitbox)
 	
 	pal(level_slots["pallete"],1)
