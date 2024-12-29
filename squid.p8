@@ -949,7 +949,7 @@ function sword()
 					--add_hitbox(4, 0, 0, 1,1, 0, sword_oncollision))
 					
 				add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false,
-					add_hitbox(4, 0, 0, 1,1, 0, sword_oncollision))
+					add_hitbox(4, 0, 0, 0,0, 0, sword_oncollision))
 			end
 		end
 end
