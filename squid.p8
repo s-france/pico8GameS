@@ -408,7 +408,8 @@ function add_partsys(x,y,
 																					dxrange,
 																					dyrange,
 																					freq,
-																					parent)
+																					parent,
+																					hb)
 	local partsys = {}
 	--world position of
 	--particle system
@@ -440,6 +441,11 @@ function add_partsys(x,y,
 		partsys.x = parent.x
 		partsys.y = parent.y
 	end
+	
+	if hb != nil then
+		partsys.hb = hb
+		--hb.parent = partsys
+	end
 		
 	add(particlesystems, partsys)
 end
@@ -449,6 +455,7 @@ function update_partsys(partsys)
 	--track sys lifetime
 	partsys.sduration -= 1
 	if partsys.sduration < 0 then
+		del(hitboxes, partsys.hb)
 		del(particlesystems,partsys)
 	end
 	
@@ -465,28 +472,43 @@ function update_partsys(partsys)
 															partsys.y-partsys.yrange + rnd(partsys.yrange*2),
 															partsys.pduration,
 															partsys.dx-partsys.dxrange + rnd(partsys.dxrange*2),
-															partsys.dy-partsys.dyrange + rnd(partsys.dyrange*2))
+															partsys.dy-partsys.dyrange + rnd(partsys.dyrange*2),
+															partsys.hb)
 		end
 	elseif partsys.sduration % partsys.freq == 0 then
 		add_particle(partsys.x-partsys.xrange + rnd(partsys.xrange*2),
 															partsys.y-partsys.yrange + rnd(partsys.yrange*2),
 															partsys.pduration,
 															partsys.dx-partsys.dxrange + rnd(partsys.dxrange*2),
-															partsys.dy-partsys.dyrange + rnd(partsys.dyrange*2))
+															partsys.dy-partsys.dyrange + rnd(partsys.dyrange*2),
+															partsys.hb)
 	end
 	
 end
 
 --creates a single particle
 --from particle system
-function add_particle(x,y, duration, dx, dy)
+function add_particle(x,y,
+																						duration,
+																						dx,dy,
+																						hb)
 	part = {}
 	part.x = x
 	part.y = y
 	part.duration = duration
 	part.dx = dx
 	part.dy = dy
+	part.isalive = true
 	
+	if hb != nil then
+		part.hb = add_hitbox(hb.tag,
+																					hb.x,hb.y,
+																					hb.xlen,
+																					hb.ylen,
+																					-1,
+																					hb.oncollision,
+																					part)
+	end
 	
 	add(particles, part)
 end
@@ -496,6 +518,7 @@ function update_particle(part)
 	part.duration -=1
 	--delete if done
 	if part.duration < 0 then
+		part.isalive = false
 		del(particles, part)
 	end
 	
@@ -894,7 +917,7 @@ function pickup_item(face)
 	end
 end
 -->8
--- sword physics
+-- sword
 
 // sword()
 // draws sword swing
@@ -902,13 +925,19 @@ end
 function sword()
 		for k,v in pairs(global_faces) do
 			if player.face == k then
-				//sword particle visuals
-				add_partsys(player.x + v[3],player.y + v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13])
-				//sword hitbox
 				
+				//sword hitbox
+				//add_hitbox(0, player.x, player.y, 1,1, v[7]+v[8], sword_oncollision)
+			
+				//sword particle visuals
+				add_partsys(player.x + v[3],player.y + v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], nil, add_hitbox(4, 0, 0, 1,1, 0, sword_oncollision))
 				
 			end
 		end
+end
+
+function sword_oncollision()
+
 end
 -->8
 -- optimizations and development functions
@@ -1024,14 +1053,6 @@ function add_hitbox(tag,
 	hitbox.xlen = xlen
 	hitbox.ylen = ylen
 	
-	--[[
-	--coordinates of the hb edges
-	hitbox.left = hitbox.x-(.5*hitbox.xlen)	
-	hitbox.right = hitbox.x+(.5*hitbox.xlen)	
-	hitbox.top = hitbox.y-(.5*hitbox.ylen)
-	hitbox.bot = hitbox.y+(.5*hitbox.ylen)
-	--]]
-	
 	
 	--lifetime of hb
 	---set duration = -1
@@ -1074,23 +1095,23 @@ end
 function update_hitbox(hb)
 	--track lifetime
 	--lifetime based on duration
-	if hb.duration != -1 then
+	if hb.duration > 0 then
 		hb.duration -= 1
-		if hb.duration == 0 then
+	--lifetime based on parent
+	elseif hb.duration == -1 then
+		if hb.parent.isalive == false then
 			del(hitboxes, hb)
 		end
-	--lifetime based on parent
-	else
-		if hb.parent.isalive == false then
-		 del(hitboxes, hb)
-		end
+	else //hb.duration == 0
+		del(hitboxes, hb)
 	end
+	
 		
 	--update mappos
 	hb.mapposx, hb.mapposy = map_pos(hb.x,hb.y)
 	if hb.parent != nil then
-		hb.mapposx = hb.parent.mapposx
-		hb.mapposy = hb.parent.mapposy
+		//hb.mapposx = hb.parent.mapposx
+		//hb.mapposy = hb.parent.mapposy
 		
 		hb.x = flr(hb.xoff+hb.parent.x)
  	hb.y = flr(hb.yoff+hb.parent.y)
@@ -1104,21 +1125,6 @@ function update_hitbox(hb)
 	
 	--add oncollision function here!!!
  for i,j in pairs(hitboxes) do
-		--if j != hb then
-		 -- arrows
-		 --if (hbcollision(hb,j)) an
-		 	--if (j.tag == 1 and j.parent != nil) then
-		 	 --hb.parent.dx = j.parent.dx
-		 	 --hb.parent.dy = j.parent.dy
-		 	 --if (hb.parent.timer >= j.parent.timer) then
-		 	  --hb.parent.timer = j.parent.timer
-		 	 --elseif (hb.parent.timer < j.parent.timer) then
-		 	  --j.parent.timer = hb.parent.timer
-		 	 --end
-		 	--end		
-			--end
-		--end
-		
 			//check for collision
 			if j != hb and (hbcollision(hb,j)) then
 				//run oncollision function
