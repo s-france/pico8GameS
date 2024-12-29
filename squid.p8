@@ -86,10 +86,10 @@ function _update()
 		music_var = 4
 	end 
 	--]]
-	if (xest(player.x) == 16 and xest(player.y) == 16 and ) then
+	if (xest(player.x) == 16 and xest(player.y) == 16 and level_slots["loaded"] == "overworld") then
 	 load_level("testing")
 	end
-	if (xest(player.x) == 56 and xest(player.y) == 16) then
+	if (xest(player.x) == 56 and xest(player.y) == 16 and level_slots["loaded"] == "testing") then
 	 load_level("firstcave")
 	end
 	if (level_slots["prevmusic"] != level_slots["curmusic"]) then
