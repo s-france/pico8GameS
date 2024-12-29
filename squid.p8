@@ -2,7 +2,6 @@ pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
  -- main functions
- //test test
 // project squidgame
 // by sam france, frank bubbico
 // and lucas diloreto
