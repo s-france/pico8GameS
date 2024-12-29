@@ -109,8 +109,8 @@ function _draw()
 	print(player.hb.left)
 	--]]
 	
-	
-	//foreach(hitboxes, draw_hitbox)
+	//hitbox debug
+	foreach(hitboxes, draw_hitbox)
 	
 	--[[
 	print(hitboxes[1].left)
@@ -170,7 +170,7 @@ function make_player()
 
 	player.invis = false
 	--player hurtbox, tag = 0 
- player.hb = add_hitbox(0, 4,4, 6,6, -1, player)
+ player.hb = add_hitbox(0, 4,4, 6,6, -1, player_oncollision, player)
 end
 
 // move player
@@ -337,6 +337,13 @@ function draw_player()
 	spr(player.sprite, player.x%128, player.y%128)
 	pal()
 end
+
+
+function player_oncollision(playerhb, otherhb)
+	//add hb collision behavior here
+
+end
+
 
 function use_item_in_slot(num)
 	for k,v in pairs(global_items) do
@@ -519,7 +526,7 @@ function add_bomb(mapposx,mapposy,xpos,ypos)
 	
 	bomb.timer = 100
 	bomb.sprite = 18
-	bomb.hb = add_hitbox(2,4,5,5,5,-1,bomb)
+	bomb.hb = add_hitbox(2,4,5,5,5,-1, bomb_oncollision, bomb)
 	add(bombpool,bomb)
 end
 
@@ -531,17 +538,7 @@ end
 // explosion (aka bomb.sprite = 0)
 function update_bomb(bomb)
 	if (bomb.timer == 0) then
-	 add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
-	 bomb.isalive = false
-	 del(bombpool,bomb)
-	 
-	 //add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
-	 
- 	local explosion = {}
- 		explosion.x = bomb.x
- 		explosion.y = bomb.y
- 		explosion.hb = add_hitbox(1, explosion.x+4,explosion.y+4, 24,24, 3)
- 		add(explosions, explosion)
+	 explode(bomb)
 	else
 	 bomb.x += bomb.dx
 	 bomb.y += bomb.dy
@@ -562,6 +559,21 @@ function draw_bomb(bomb)
   if (player.mapposx == bomb.mapposx and player.mapposy == bomb.mapposy) then
    spr(bomb.sprite,bomb.x%128,bomb.y%128)
   end
+end
+
+function explode(bomb)
+	add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
+ bomb.isalive = false
+ del(bombpool,bomb)
+ 
+ //add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
+ 
+	local explosion = {}
+		explosion.x = bomb.x
+		explosion.y = bomb.y
+		explosion.hb = add_hitbox(1, explosion.x+4,explosion.y+4, 24,24, 3, explo_oncollision)
+		add(explosions, explosion)
+
 end
 
 
@@ -594,6 +606,35 @@ function explode_tile(pair)
 	 end
 	end
 	del(pair)
+end
+
+
+//bomb oncollision() function
+function bomb_oncollision(bombhb, otherhb)
+ 	--arrows
+	 if (otherhb.tag == 1 and otherhb.parent != nil) then
+		 //match speed to arrow
+		 bombhb.parent.dx = otherhb.parent.dx
+		 bombhb.parent.dy = otherhb.parent.dy
+		 
+		 //explode if arrow is gone
+		 if (otherhb.parent.timer <= 0) then
+		 	explode(bombhb.parent)
+		 end
+		 
+		 //match timers to bomb
+		 otherhb.parent.timer = bombhb.parent.timer
+		 //^^^could move this to arrow.oncollision()
+	 end
+	 
+	 //add other collision behavior here
+	 
+end
+
+
+function explo_oncollision(explohb, otherhb)
+	//behavior for explosion hb colliding
+
 end
 -->8
 -- levels and map
@@ -841,31 +882,22 @@ end
 -- sword physics
 
 // sword()
-// draws sword swing! 
+// draws sword swing
 // creates hitbox
 function sword()
 		for k,v in pairs(global_faces) do
 			if player.face == k then
+				//sword particle visuals
 				add_partsys(player.x + v[3],player.y + v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13])
+				//sword hitbox
+				
+				
 			end
 		end
 end
 -->8
 -- optimizations and development functions
-// first order of biznes
-// make world coordinate to
-// map cell function and vice
-// versa?
-
-// make cell estimator function
-// for universal cell estimation
-
 // cook any other code opt.
-
-
-// we are going to make an x,y
-// estimator function for opening
-// shit/the explosion function
 
 function xest(x)
 	return flr(x+0.5)
@@ -953,7 +985,7 @@ function mapcollisions(hb)
 	 
 	--diagonals
 	--sam finish this!!!!!
-	local tlx, tly = map_cell(hb.left-1,hb.top-1)		
+	local tlx, tly = map_cell(hb.left-1,hb.top-1)
 	local trx, try = map_cell(hb.right+1,hb.top-1)
 	local blx, bly = map_cell(hb.left-1,hb.bot+1)
 	local brx, bry = map_cell(hb.right+1,hb.bot+1)
@@ -962,7 +994,13 @@ function mapcollisions(hb)
 	return cols
 end
 
-function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
+function add_hitbox(tag,
+																				x,y, //position
+																				xlen, //length
+																				ylen,	//height
+																				duration,
+																				oncolfunc, //oncollision function
+																				parent)
 	hitbox = {}
 	
 	hitbox.tag = tag
@@ -970,7 +1008,7 @@ function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
 	hitbox.y = y
 	hitbox.xlen = xlen
 	hitbox.ylen = ylen
-
+	
 	--[[
 	--coordinates of the hb edges
 	hitbox.left = hitbox.x-(.5*hitbox.xlen)	
@@ -984,6 +1022,10 @@ function add_hitbox(tag, x,y, xlen,ylen, duration, parent)
 	---set duration = -1
 	---for parent-based lifetime
 	hitbox.duration = duration
+	
+	//oncollision() function
+	//runs on all currently colliding hbs
+	hitbox.oncollision = oncolfunc
 	
 	local mapx = (hitbox.x-(hitbox.x%8))/8
 	local mapy = (hitbox.y-(hitbox.y%8))/8
@@ -1047,23 +1089,28 @@ function update_hitbox(hb)
 	
 	--add oncollision function here!!!
  for i,j in pairs(hitboxes) do
-		if j != hb then
+		--if j != hb then
 		 -- arrows
-		 if (hbcollision(hb,j)) and (hb.tag == 2) then
-		 	if (j.tag == 1 and j.parent != nil) then
-		 	 hb.parent.dx = j.parent.dx
-		 	 hb.parent.dy = j.parent.dy
-		 	 if (hb.parent.timer >= j.parent.timer) then
-		 	  hb.parent.timer = j.parent.timer
-		 	 elseif (hb.parent.timer < j.parent.timer) then
-		 	  j.parent.timer = hb.parent.timer
-		 	 end
-		 	end		
-			end 
-		end
+		 --if (hbcollision(hb,j)) an
+		 	--if (j.tag == 1 and j.parent != nil) then
+		 	 --hb.parent.dx = j.parent.dx
+		 	 --hb.parent.dy = j.parent.dy
+		 	 --if (hb.parent.timer >= j.parent.timer) then
+		 	  --hb.parent.timer = j.parent.timer
+		 	 --elseif (hb.parent.timer < j.parent.timer) then
+		 	  --j.parent.timer = hb.parent.timer
+		 	 --end
+		 	--end		
+			--end
+		--end
+		
+			//check for collision
+			if j != hb and (hbcollision(hb,j)) then
+				//run oncollision function
+				hb.oncollision(hb, j)
+			end
 	end	
 
-	
 end
 
 --for debug purposes only
@@ -1205,7 +1252,7 @@ function add_arrow(parent)
   arrow.y = flr(player.y)+0.5
 	end
 	
-	arrow.hb = add_hitbox(1,4,4,4,4,-1,arrow)
+	arrow.hb = add_hitbox(1,4,4,4,4,-1, arrow_oncollision, arrow)
 	
 	add(arrowpool, arrow)
 end
@@ -1257,6 +1304,13 @@ function draw_arrow(arrow)
 	if (player.mapposx == arrow.mapposx and player.mapposy == arrow.mapposy) then
 		spr(arrow.sprite,arrow.x%128,arrow.y%128,1.0,1.0,arrow.flipx,arrow.flipy)
  end
+end
+
+function arrow_oncollision(arrowhb, otherhb)
+	//add hb collision behavior here!
+
+	
+
 end
 __gfx__
 00000000000000001111111111111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
