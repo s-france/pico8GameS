@@ -55,10 +55,10 @@ function _init()
 	level_slots = {
 	["loaded"] = "overworld",
 	["pallete"] = {},
-	["music"] = 11
+	["curmusic"] = 11,
+	["prevmusic"] = 0
 	}
 	
-	music(level_slots)
 	menuitem(1,"inventory", openinv)
 	menuitem(2,"save game", opensaveprompt)
 end
@@ -91,6 +91,10 @@ function _update()
 	end
 	if btnp(2,1) then
 	 load_level("firstcave")
+	end
+	if (level_slots["prevmusic"] != level_slots["curmusic"]) then
+		music(level_slots["curmusic"])
+		level_slots["prevmusic"] = level_slots["curmusic"]
 	end
 	//mag = sqrt(player.dx^2 + player.dy^2)
 end
@@ -615,14 +619,16 @@ function explode_tile(pair)
 end
 -->8
 -- levels and map
+
 function load_level(level_name)
 	set_mapdata(0,0,levels[level_name][1],levels[level_name][2],levels[level_name][3])
  level_slots["loaded"] = level_name
  level_slots["pallete"] = levels[level_name][4]
-	level_slots["music"] = levels[level_name][5]
+	level_slots["curmusic"] = levels[level_name][5]
 	player.x = levels[level_name][6]
  player.y = levels[level_name][7]
 end
+
 --copy mapdata string to clipboard
 function get_mapdata(x,y,w,h)
 	local reserve=""
