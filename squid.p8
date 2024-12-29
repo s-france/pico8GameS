@@ -86,10 +86,10 @@ function _update()
 		music_var = 4
 	end 
 	--]]
-	if btnp(1,1) then
+	if (xest(player.x) == 16 and xest(player.y) == 16 and ) then
 	 load_level("testing")
 	end
-	if btnp(2,1) then
+	if (xest(player.x) == 56 and xest(player.y) == 16) then
 	 load_level("firstcave")
 	end
 	if (level_slots["prevmusic"] != level_slots["curmusic"]) then
@@ -133,7 +133,8 @@ function _draw()
 	pal(level_slots["pallete"],1)
 	
 	//foreach(hitboxes, draw_hitbox)
-	
+	print(player.x)
+	print(player.y)
 	--[[
 	print(hitboxes[1].left)
 	print(hitboxes[1].right)
