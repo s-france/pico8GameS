@@ -63,6 +63,7 @@ function _update()
 	foreach(particlesystems, update_partsys)
 	foreach(particles, update_particle)
 	foreach(hitboxes, update_hitbox)
+	
 	//collisiontest2()
 	--[[
 	if ((player.mapposx > 1 and player.mapposx < 4) and music_var !=0) then
@@ -74,6 +75,7 @@ function _update()
 		music_var = 4
 	end 
 	--]]
+	
 	if (flr(player.x/8) == 1 and flr(player.y/8) == 1 and level_slots["loaded"] == "overworld") then
 	 load_level("testing")
 	end
