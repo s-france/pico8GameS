@@ -655,7 +655,6 @@ function bomb_oncollision(bombhb, otherhb)
 	 end
 	 
 	 //add other collision behavior here
-	 
 end
 
 
