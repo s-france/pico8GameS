@@ -409,6 +409,7 @@ function add_partsys(x,y,
 																					dyrange,
 																					freq,
 																					parent,
+																					isglobal,
 																					hb)
 	local partsys = {}
 	--world position of
@@ -434,12 +435,18 @@ function add_partsys(x,y,
  --frequency of particle spawns
  --spawns every freq frames
  partsys.freq =freq
-	
+	--particles move in global/local space 
+ partsys.isglobal = isglobal
+
 	--parent obj of particle system
 	if parent != nil then
 		partsys.parent = parent
-		partsys.x = parent.x
-		partsys.y = parent.y
+		
+		partsys.xoff = x
+		partsys.yoff = y
+		
+		partsys.x = parent.x + partsys.xoff
+		partsys.y = parent.y + partsys.yoff
 	end
 	
 	if hb != nil then
@@ -461,8 +468,8 @@ function update_partsys(partsys)
 	
 	--not sure if this is needed...
 	if partsys.parent != nil then
-		partsys.x = partsys.parent.x
-		partsys.y = partsys.parent.y
+		partsys.x = partsys.parent.x + partsys.xoff
+		partsys.y = partsys.parent.y + partsys.yoff
 	end
 	
 	--spawn particle
@@ -473,6 +480,8 @@ function update_partsys(partsys)
 															partsys.pduration,
 															partsys.dx-partsys.dxrange + rnd(partsys.dxrange*2),
 															partsys.dy-partsys.dyrange + rnd(partsys.dyrange*2),
+															partsys.parent,
+															partsys.isglobal,
 															partsys.hb)
 		end
 	elseif partsys.sduration % partsys.freq == 0 then
@@ -481,6 +490,8 @@ function update_partsys(partsys)
 															partsys.pduration,
 															partsys.dx-partsys.dxrange + rnd(partsys.dxrange*2),
 															partsys.dy-partsys.dyrange + rnd(partsys.dyrange*2),
+															partsys.parent,
+															partsys.isglobal,
 															partsys.hb)
 	end
 	
@@ -491,6 +502,8 @@ end
 function add_particle(x,y,
 																						duration,
 																						dx,dy,
+																						parent,
+																						isglobal,
 																						hb)
 	part = {}
 	part.x = x
@@ -498,7 +511,9 @@ function add_particle(x,y,
 	part.duration = duration
 	part.dx = dx
 	part.dy = dy
+	part.parent = parent
 	part.isalive = true
+	part.isglobal = isglobal
 	
 	if hb != nil then
 		part.hb = add_hitbox(hb.tag,
@@ -523,8 +538,12 @@ function update_particle(part)
 	end
 	
 	--update position
-	part.x += part.dx
-	part.y += part.dy
+	part.x += part.dx 
+	part.y += part.dy	
+	if part.isglobal == false then
+		part.x += part.parent.dx
+		part.y += part.parent.dy
+	end
 	
 end
 
@@ -925,13 +944,12 @@ end
 function sword()
 		for k,v in pairs(global_faces) do
 			if player.face == k then
-				
-				//sword hitbox
-				//add_hitbox(0, player.x, player.y, 1,1, v[7]+v[8], sword_oncollision)
-			
-				//sword particle visuals
-				add_partsys(player.x + v[3],player.y + v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], nil, add_hitbox(4, 0, 0, 1,1, 0, sword_oncollision))
-				
+				//sword particle + hitbox
+				--add_partsys(player.x + v[3],player.y + v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], nil,
+					--add_hitbox(4, 0, 0, 1,1, 0, sword_oncollision))
+					
+				add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false,
+					add_hitbox(4, 0, 0, 1,1, 0, sword_oncollision))
 			end
 		end
 end
