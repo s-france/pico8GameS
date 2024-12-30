@@ -794,11 +794,9 @@ function opensaveprompt(b)
 end
 
 function clearmenu()
-		menuitem(1)
-		menuitem(2)
-		menuitem(3)
-		menuitem(4)
-		menuitem(5)
+	for i = 1,5,1 do
+		menuitem(i)
+	end
 	return true
 end
 --[[
