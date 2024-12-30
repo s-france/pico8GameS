@@ -199,16 +199,17 @@ function move_player()
 	
 	// alter dx, dy based on btn input
 	// check mapcollisions on hb
-	if (btn(0) and not mapcollisions(player.hb).l) then
+	if (btn(0) and not searchmapcols(player.hb, 0b1, 0,1, -(player.hb.right-player.hb.left),-1)) then
   player.dx-=1.001
 	end
-	if (btn(1) and not mapcollisions(player.hb).r) then
+	if (btn(1) and not searchmapcols(player.hb, 0b1, (player.hb.right-player.hb.left),1, 0,-1)) then
   player.dx+=1.001
 	end
-	if (btn(2) and not mapcollisions(player.hb).t) then
+	--if (btn(2) and not mapcollisions(player.hb).t) then
+	if (btn(2) and not searchmapcols(player.hb, 0b1, 1,0, -1,-(player.hb.bot-player.hb.top))) then
   player.dy-=1.001
 	end
-	if (btn(3) and not mapcollisions(player.hb).b) then
+	if (btn(3) and not searchmapcols(player.hb, 0b1, 1,(player.hb.bot-player.hb.top), -1,0)) then
   player.dy+=1.001
 	end
 	
@@ -1105,6 +1106,22 @@ end
 --]]
 
 
+function searchmapcols(hb, flags, tlxoff,tlyoff, brxoff,bryoff)
+	local tleftx, tlefty = map_cell(hb.left-1 +tlxoff,hb.top-1 +tlyoff)
+	local brightx, brighty = map_cell(hb.right+1 +brxoff,hb.bot+1 +bryoff)
+	
+	for x=tleftx, brightx, 1 do
+		for y=tlefty, brighty, 1 do
+			if (flags & fget(mget(x,y))) == flags then
+				return true
+			end
+		end
+	end
+	
+	return false
+end
+
+
 function add_hitbox(tag,
 																				x,y, //position
 																				xlen, //length
@@ -1402,10 +1419,10 @@ end
 __gfx__
 00000000000000001111111111111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
 0000000000005500111cc11111111111222222222f7ff22222ff22222222fff22222222222222222000880002ff222222f62222222ffff22222222222ffff6f2
-007007000005550011cccc11111111112ff2222222ffff2f222ff222222ff7f2222222ffff22222200888800222f7ff2226fff222fffcff22222fff222ff6ff2
+007007000005550011cccc1111111111ff22222222ffff2f222ff222222ff7f2222222ffff22222200888800222f7ff2226fff222fffcff22222fff222ff6ff2
 0007700000056550117cc71111111111ffffffff2222ffff222ff222ffff7f2222222f7ffef222220078870022ff67f222ffffe2ff6feff222fffff222ffff22
-000770000055d6501c0cc0c111111111f22fffff22222fff222ff222ff7ff2222222fff2ffff22220808808022f7cf2222fefff2ffeffff222fcff2222f6f222
-007007000056dd501ccccc4111111111222ff222222222ff222ff22222f222222222f7f22f7622220888888022f7f22222fffff22fffff222ffef222222fef22
+000770000055d6501c0cc0c11111111122ffffff22222fff222ff222ff7ff2222222fff2ffff22220808808022f7cf2222fefff2ffeffff222fcff2222f6f222
+007007000056dd501ccccc411111111122ff2222222222ff222ff22222f222222222f7f22f7622220888888022f7f22222fffff22fffff222ffef222222fef22
 000000000055555011c1144111111111222222222222222222ff2222222222222222ff222f6ff2220080080022ff2222222fff22222222222fcff2222222ff22
 000000000000000011c11c111111111122222222222222222ff7f22222222222222f7f222ffff222008008002222222222222ff22222222222ff222222222222
 22222222880000cc00000780fff777ff06000006cccccccc2ff7f222222222220000000000000000000000000000000000000000454444544544445445444454
