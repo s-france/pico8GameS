@@ -131,7 +131,6 @@ function _draw()
 	print(hitboxes[2].bot)
 	--]]
 	
-	print(mapcols(player.hb)[#mapcols(player.hb)][#mapcols(player.hb)[1]])
 	
  //print(mag)
 end
@@ -199,17 +198,17 @@ function move_player()
 	
 	// alter dx, dy based on btn input
 	// check mapcollisions on hb
-	if (btn(0) and not searchmapcols(player.hb, 0b1, 0,1, -(player.hb.right-player.hb.left),-1)) then
+	if (btn(0) and 0 == #searchmapcols(player.hb, 0b1, 0,1, -(player.hb.right-player.hb.left),-1)) then
   player.dx-=1.001
 	end
-	if (btn(1) and not searchmapcols(player.hb, 0b1, (player.hb.right-player.hb.left),1, 0,-1)) then
+	if (btn(1) and 0 == #searchmapcols(player.hb, 0b1, (player.hb.right-player.hb.left),1, 0,-1)) then
   player.dx+=1.001
 	end
 	--if (btn(2) and not mapcollisions(player.hb).t) then
-	if (btn(2) and not searchmapcols(player.hb, 0b1, 1,0, -1,-(player.hb.bot-player.hb.top))) then
+	if (btn(2) and 0 == #searchmapcols(player.hb, 0b1, 1,0, -1,-(player.hb.bot-player.hb.top))) then
   player.dy-=1.001
 	end
-	if (btn(3) and not searchmapcols(player.hb, 0b1, 1,(player.hb.bot-player.hb.top), -1,0)) then
+	if (btn(3) and 0 == #searchmapcols(player.hb, 0b1, 1,(player.hb.bot-player.hb.top), -1,0)) then
   player.dy+=1.001
 	end
 	
@@ -1082,43 +1081,24 @@ function mapcollisions(hb)
 end
 
 
----[[ new hb+map collision
-function mapcols(hb)
-
-	--top left
-	local tleftx, tlefty = map_cell(hb.left-1,hb.top-1)		
-	--bottom right
-	local brightx, brighty = map_cell(hb.right+1,hb.bot+1)
-	
-	//iterate from tleft to bright
-	local rows = {}
-	for x=tleftx, brightx, 1 do
-		local col = {}
-		for y=tlefty, brighty, 1 do
-			add(col, fget(mget(x,y)))			
-		end
-		add(rows, col)
-	end
-	
-//return 2d sequence of mapcol flags
-return rows
-end
---]]
-
 
 function searchmapcols(hb, flags, tlxoff,tlyoff, brxoff,bryoff)
 	local tleftx, tlefty = map_cell(hb.left-1 +tlxoff,hb.top-1 +tlyoff)
 	local brightx, brighty = map_cell(hb.right+1 +brxoff,hb.bot+1 +bryoff)
 	
+	local results = {}
+	
 	for x=tleftx, brightx, 1 do
 		for y=tlefty, brighty, 1 do
 			if (flags & fget(mget(x,y))) == flags then
-				return true
+				local point = {x=x, y=y}
+				add(results, point)
+				--return true
 			end
 		end
 	end
 	
-	return false
+	return results
 end
 
 
