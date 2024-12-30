@@ -810,11 +810,9 @@ function opensaveprompt(b)
 end
 
 function clearmenu()
-		menuitem(1)
-		menuitem(2)
-		menuitem(3)
-		menuitem(4)
-		menuitem(5)
+	for i = 1,5,1 do
+		menuitem(i)
+	end
 	return true
 end
 --[[
@@ -1383,12 +1381,12 @@ function update_arrow(arrow)
 		end
 	end
 	
-	if ( searchmapcols(arrow.hb, 0b1, (arrow.hb.right-arrow.hb.left),1, 0,-1) or 	searchmapcols(arrow.hb, 0b1, 0,1, -(arrow.hb.right-arrow.hb.left),-1)) then
+	if ( (0 != #searchmapcols(arrow.hb, 0b1, 0,1, -(arrow.hb.right-arrow.hb.left),-1)) or 	(0 != #searchmapcols(arrow.hb, 0b1, (arrow.hb.right-arrow.hb.left),1, 0,-1)) ) then
 	 arrow.dx = 0 
 	 arrow.dy = 0
 	 arrow.timer = 0
 	end
-	if ( mapcollisions(arrow.hb).t or mapcollisions(arrow.hb).b) then
+	if ( (0 != #searchmapcols(arrow.hb, 0b1, 1,0, -1,-(arrow.hb.bot-arrow.hb.top))) or (0 != #searchmapcols(player.hb, 0b1, 1,(player.hb.bot-player.hb.top), -1,0))) then
 		arrow.dy = 0
 		arrow.dx = 0
 		arrow.timer = 0
