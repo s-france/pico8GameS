@@ -1293,7 +1293,7 @@ function add_arrow(parent)
   arrow.y = flr(player.y)+0.5
 	end
 	
-	arrow.hb = add_hitbox(1,4,4,4,4,-1, arrow_oncollision, arrow_onmapcollision, arrow)
+	arrow.hb = add_hitbox(1,4,4,3,3,-1, arrow_oncollision, arrow_onmapcollision, arrow)
 	
 	add(arrowpool, arrow)
 end
@@ -1307,7 +1307,7 @@ function update_arrow(arrow)
 	 arrow.timer = 0
 	end
 
-	if (arrow.timer == 0 ) then 
+	if (arrow.timer == 0) then 
 	 sfx(10)
 	 del(arrowpool,arrow)
 	 arrow.isalive = false
