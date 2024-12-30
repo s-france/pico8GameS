@@ -134,6 +134,12 @@ function _draw()
 	
  //print(mag)
 end
+
+//empty function
+//do not put anything here
+function empty()
+	//do not!!
+end
 -->8
 -- player info
 // the collions function, and
@@ -178,7 +184,7 @@ function make_player()
  player.slotflag = 0
 	player.invis = false
 	--player hurtbox, tag = 0 
- player.hb = add_hitbox(0, 4,4, 6,6, -1, player_oncollision, player)
+ player.hb = add_hitbox(0, 4,4, 6,6, -1, player_oncollision, player_onmapcollision, player)
 end
 
 // move player
@@ -350,6 +356,11 @@ end
 function player_oncollision(playerhb, otherhb)
 	//add hb collision behavior here
 
+end
+
+function player_onmapcollision(playerhb)
+	//add hb+map collision behavior here!!
+	
 end
 
 
@@ -535,6 +546,7 @@ function add_particle(x,y,
 																					hb.ylen,
 																					-1,
 																					hb.oncollision,
+																					hb.onmapcollision,
 																					part)
 	end
 	
@@ -587,7 +599,7 @@ function add_bomb(mapposx,mapposy,xpos,ypos)
 	
 	bomb.timer = 100
 	bomb.sprite = 18
-	bomb.hb = add_hitbox(2,4,5,5,5,-1, bomb_oncollision, bomb)
+	bomb.hb = add_hitbox(2,4,5,5,5,-1, bomb_oncollision, nil, bomb)
 	add(bombpool,bomb)
 end
 
@@ -632,7 +644,7 @@ function explode(bomb)
 	local explosion = {}
 		explosion.x = bomb.x
 		explosion.y = bomb.y
-		explosion.hb = add_hitbox(1, explosion.x+4,explosion.y+4, 24,24, 3, explo_oncollision)
+		explosion.hb = add_hitbox(1, explosion.x+4,explosion.y+4, 24,24, 3, explo_oncollision, explo_onmapcollision)
 		add(explosions, explosion)
 
 end
@@ -699,6 +711,10 @@ end
 function explo_oncollision(explohb, otherhb)
 	//behavior for explosion hb colliding
 
+end
+
+function explo_onmapcollision(explohb)
+	
 end
 -->8
 -- levels and map
@@ -972,13 +988,17 @@ function sword()
 			if player.face == k then
 				//sword particle + hitbox					
 				add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false,
-					add_hitbox(4, 0, 0, 0,0, 0, sword_oncollision))
+					add_hitbox(4, 0, 0, 0,0, 0, sword_oncollision, sword_onmapcollision))
 			
 			end
 		end
 end
 
-function sword_oncollision()
+function sword_oncollision(swordhb, otherhb)
+	
+end
+
+function sword_onmapcollision(swordhb)
 
 end
 -->8
@@ -1108,6 +1128,7 @@ function add_hitbox(tag,
 																				ylen,	//height
 																				duration,
 																				oncolfunc, //oncollision function
+																				onmapcolfunc, //onmapcollision function
 																				parent)
 	hitbox = {}
 	
@@ -1124,8 +1145,14 @@ function add_hitbox(tag,
 	hitbox.duration = duration
 	
 	//oncollision() function
-	//runs on all currently colliding hbs
-	hitbox.oncollision = oncolfunc
+	if oncolfunc != nil then
+		//runs on all currently colliding hbs
+		hitbox.oncollision = oncolfunc
+	end
+	if onmapcolfunc != nil then
+		//runs on all currently colliding map cells
+		hitbox.onmapcollision = onmapcolfunc
+	end
 	
 	local mapx = (hitbox.x-(hitbox.x%8))/8
 	local mapy = (hitbox.y-(hitbox.y%8))/8
@@ -1187,13 +1214,18 @@ function update_hitbox(hb)
 		hb.bot = hb.y+(.5*hb.ylen)
 	end
 	
-	--add oncollision function here!!!
+	--oncollision function
  for i,j in pairs(hitboxes) do
 			//check for collision
-			if j != hb and (hbcollision(hb,j)) then
+			if j != hb and (hbcollision(hb,j)) and hb.oncollision != nil then
 				//run oncollision function
 				hb.oncollision(hb, j)
 			end
+	end
+	
+	if hb.onmapcollision != nil then
+		--onmapcollision function
+		hb.onmapcollision(hb)
 	end
 
 end
@@ -1336,7 +1368,7 @@ function add_arrow(parent)
   arrow.y = flr(player.y)+0.5
 	end
 	
-	arrow.hb = add_hitbox(1,4,4,4,4,-1, arrow_oncollision, arrow)
+	arrow.hb = add_hitbox(1,4,4,4,4,-1, arrow_oncollision, arrow_onmapcollision, arrow)
 	
 	add(arrowpool, arrow)
 end
@@ -1387,6 +1419,9 @@ function arrow_oncollision(arrowhb, otherhb)
 	//add hb collision behavior here!
 
 	
+end
+
+function arrow_onmapcollision(arrowhb, otherhb)
 
 end
 __gfx__
