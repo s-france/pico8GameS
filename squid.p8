@@ -1307,7 +1307,7 @@ function update_arrow(arrow)
 			arrow.timer = 0
 		end
 	end
-	
+	--[[
 	if ( (0 != #searchmapcols(arrow.hb, 0b1, 0,1, -(arrow.hb.right-arrow.hb.left),-1)) or 	(0 != #searchmapcols(arrow.hb, 0b1, (arrow.hb.right-arrow.hb.left),1, 0,-1)) ) then
 	 arrow.dx = 0 
 	 arrow.dy = 0
@@ -1317,6 +1317,12 @@ function update_arrow(arrow)
 		arrow.dy = 0
 		arrow.dx = 0
 		arrow.timer = 0
+	end
+	--]]
+	if ( 0 != #searchmapcols(arrow.hb, 0b1, 0, 0, 0, 0)) then 
+	 arrow.dy = 0
+	 arrow.dx = 0
+	 arrow.timer = 0
 	end
 
 	if (arrow.timer == 0 or (arrow.dx == 0 and arrow.dy == 0) ) then 
