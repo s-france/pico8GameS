@@ -756,9 +756,9 @@ end
 function openslot(b)
 	clearmenu()
 		menuitem(1, "exit slot "..player.slotflag, openinv )
-		displayitem(1)
-		displayitem(2)
-		displayitem(3)
+		displayitemtwo(1,player.working_inventory)
+		displayitemtwo(2,player.working_inventory)
+		displayitemtwo(3,player.working_inventory)
 		menuitem(5, "next page ->", nextslotpage)
 	return true
 end
@@ -766,8 +766,8 @@ end
 function nextslotpage(b)
 	clearmenu()
 		menuitem(1, "exit slot "..player.slotflag, openinv )
-		displayitem(4)
-		displayitem(5)
+		displayitemtwo(4,player.working_inventory)
+		displayitemtwo(5,player.working_inventory)
 		menuitem(4, "<- prev page",openslot)
 	return true
 end
@@ -789,7 +789,7 @@ function clearmenu()
 		menuitem(5)
 	return true
 end
-	
+--[[
 function displayitem(x)
 	if (x<4) then
 		if (player.working_inventory[x] == nil) then
@@ -808,13 +808,22 @@ function displayitem(x)
 	end
 	return true
 end
-
+--]]
 function additemtoslot(x)
  for i = 1,3,1 do
   if (player.slotflag == i) then
    player.slots[i] = player.working_inventory[x]
  	end
  end
+end
+
+function displayitemtwo(x,table)
+	if (table[x] == nil) then
+		menuitem((x%4)+1, "empty")
+	else
+		menuitem((x%4)+1, ""..table[x],function() additemtoslot(x) displayitemtwo(x,table) return true end)	
+	end
+	return true
 end
 -->8
 -- player interaction functions
