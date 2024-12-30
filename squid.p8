@@ -375,6 +375,7 @@ end
 
 -->8
 -- npcs
+
 --[[
 function makenpc()
  npc = {}
@@ -387,9 +388,6 @@ function makenpc()
 	npc.hb = add_hitbox(0,4, 4, 6,6, -1, npc)
 end
 --]]
-
-
-
 -->8
 -- particle effects
 
@@ -944,10 +942,7 @@ end
 function sword()
 		for k,v in pairs(global_faces) do
 			if player.face == k then
-				//sword particle + hitbox
-				--add_partsys(player.x + v[3],player.y + v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], nil,
-					--add_hitbox(4, 0, 0, 1,1, 0, sword_oncollision))
-					
+				//sword particle + hitbox					
 				add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false,
 					add_hitbox(4, 0, 0, 0,0, 0, sword_oncollision))
 			end
@@ -1009,7 +1004,7 @@ function mapcollisions(hb)
 	local topx, topy = map_cell(hb.left-1,hb.top)		
 	local botx, boty = map_cell(hb.left-1,hb.bot)
 	
-	for y=boty, topy, -1 do
+	for y=topy, boty, 1 do
 		if fget(mget(topx, y), 0) then
 			cols.l = true
 		end
@@ -1019,7 +1014,7 @@ function mapcollisions(hb)
 	local topx, topy = map_cell(hb.right+1,hb.top)		
 	local botx, boty = map_cell(hb.right+1,hb.bot)
 	
-	for y=boty, topy, -1 do
+	for y=topy, boty, 1 do
 		if fget(mget(topx, y), 0) then
 			cols.r = true
 		end
@@ -1029,7 +1024,7 @@ function mapcollisions(hb)
 	local leftx, lefty = map_cell(hb.left,hb.top-1)		
 	local rightx, righty = map_cell(hb.right,hb.top-1)
 	
-	for x=rightx, leftx, -1 do
+	for x=leftx, rightx, 1 do
 		if fget(mget(x, lefty), 0) then
 			cols.t = true
 		end
@@ -1039,7 +1034,7 @@ function mapcollisions(hb)
 	local leftx, lefty = map_cell(hb.left,hb.bot+1)		
 	local rightx, righty = map_cell(hb.right,hb.bot+1)
 	
-	for x=rightx, leftx, -1 do
+	for x=leftx, rightx, 1 do
 		if fget(mget(x, lefty), 0) then
 			cols.b = true
 		end
@@ -1055,6 +1050,38 @@ function mapcollisions(hb)
 	
 	return cols
 end
+
+--[[
+function mapcols(hb)
+	local cols = {}
+	
+	--top left
+	local tleftx, tlefty = map_cell(hb.left-1,hb.top-1)		
+	--bottom right
+	local brightx, brighty = map_cell(hb.right+1,hb.bot+1)
+	
+	for y=tlefty, brighty, 1 do
+		local row = {}
+		for x=tleftx, brightx, 1 do
+			local coldata = {x,y, fget(mget(x,y), 0))}
+			add(row, point)
+		end
+		add(cols, row)
+	end
+	
+	
+	
+	
+	for y=boty, topy, -1 do
+		add(cols.l, fget(mget(topx, y), 0))
+	end
+	
+	
+	
+	
+end
+--]]
+
 
 function add_hitbox(tag,
 																				x,y, //position
@@ -1148,7 +1175,7 @@ function update_hitbox(hb)
 				//run oncollision function
 				hb.oncollision(hb, j)
 			end
-	end	
+	end
 
 end
 
@@ -1172,8 +1199,7 @@ function map_cell(x,y)
 end
 
 function map_pos(x,y)
-	local mapx = (x-(x%8))/8
-	local mapy = (y-(y%8))/8
+	local mapx, mapy = map_cell(x,y)
 	local mapposx = (mapx-(mapx%16)) / 16
 	local mapposy = (mapy-(mapy%16)) / 16
 	return mapposx, mapposy
