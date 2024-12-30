@@ -131,6 +131,8 @@ function _draw()
 	print(hitboxes[2].bot)
 	--]]
 	
+	print(mapcols(player.hb)[#mapcols(player.hb)][#mapcols(player.hb)[1]])
+	
  //print(mag)
 end
 -->8
@@ -252,7 +254,6 @@ end
 // the player when called
 
 function update_player()
-	
 	--update player face direction
 	
  local prev = player.face
@@ -1079,34 +1080,27 @@ function mapcollisions(hb)
 	return cols
 end
 
---[[
+
+---[[ new hb+map collision
 function mapcols(hb)
-	local cols = {}
-	
+
 	--top left
 	local tleftx, tlefty = map_cell(hb.left-1,hb.top-1)		
 	--bottom right
 	local brightx, brighty = map_cell(hb.right+1,hb.bot+1)
 	
-	for y=tlefty, brighty, 1 do
-		local row = {}
-		for x=tleftx, brightx, 1 do
-			local coldata = {x,y, fget(mget(x,y), 0))}
-			add(row, point)
+	//iterate from tleft to bright
+	local rows = {}
+	for x=tleftx, brightx, 1 do
+		local col = {}
+		for y=tlefty, brighty, 1 do
+			add(col, fget(mget(x,y)))			
 		end
-		add(cols, row)
+		add(rows, col)
 	end
 	
-	
-	
-	
-	for y=boty, topy, -1 do
-		add(cols.l, fget(mget(topx, y), 0))
-	end
-	
-	
-	
-	
+//return 2d sequence of mapcol flags
+return rows
 end
 --]]
 
