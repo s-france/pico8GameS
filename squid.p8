@@ -1348,17 +1348,10 @@ function update_arrow(arrow)
 			arrow.dx = 0
 			arrow.dy = 0
 			arrow.timer = 0
-		--[[	
-	 elseif (mapcollisions(arrow.hb).tr or mapcollisions(arrow.hb).tl 
-	or mapcollisions(arrow.hb).bl or mapcollisions(arrow.hb).br) then	
-			arrow.dx = 0
-			arrow.dy = 0
-			arrow.timer = 0
-			--]]
 		end
 	end
 	
-	if ( mapcollisions(arrow.hb).r or mapcollisions(arrow.hb).l) then
+	if ( searchmapcols(arrow.hb, 0b1, (arrow.hb.right-arrow.hb.left),1, 0,-1) or 	searchmapcols(arrow.hb, 0b1, 0,1, -(arrow.hb.right-arrow.hb.left),-1)) then
 	 arrow.dx = 0 
 	 arrow.dy = 0
 	 arrow.timer = 0
