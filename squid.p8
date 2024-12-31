@@ -146,8 +146,8 @@ function _draw()
 	print(hitboxes[2].bot)
 	--]]
 	
-	draw_path(astar(player.x,player.y, 56,88))
-	
+	draw_path(astar(player.x+3,player.y+3, 56,88))
+	//draw_path(astar(player.x+3,player.y+3, 32,32))
 	
  //print(mag)
 end
@@ -251,7 +251,7 @@ function move_player()
 	// x and y to the center of each
 	// pixel. only happens on first
 	// frame of diag movement.
-
+	
 	if (player.diag and not (player.face != player.prev_face)) then
   player.x = flr(player.x)+0.5
   player.y = flr(player.y)+0.5
@@ -1392,13 +1392,13 @@ function astar(startx,starty,
   	local nxtvec = idxtovec(nxt)
   	
   	//display exploration (debug)	
-  	//pset(nxtvec.x%128, nxtvec.y%128, 11)
+  	pset(nxtvec.x%128, nxtvec.y%128, 11)
   
   	local newcost = cost_so_far[vectoidx(current)] + 1
   	
   	if (cost_so_far[nxt] == nil) or (newcost < cost_so_far[nxt]) then
   		cost_so_far[nxt] = newcost
-    local priority = newcost + heuristic(goal, nxtvec)
+    local priority = heuristic(goal, nxtvec) + newcost
     insert(frontier, nxtvec, priority)
     came_from[nxt] = current
   	end
@@ -1495,7 +1495,15 @@ end
 
 -- manhattan distance on a square grid
 function heuristic(a, b)
- return abs(a.x - b.x) + abs(a.y - b.y)
+	--[[
+	local xsqr = abs(a.x - b.x)^2
+	local ysqr = abs(a.y-b.y)^2
+	
+ return sqrt(xsqr+ysqr)
+ --]]
+ 
+ return 100*(abs(a.x - b.x) + abs(a.y-b.y))
+
 end
 
 
