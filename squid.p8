@@ -118,8 +118,15 @@ function _draw()
 	
 	pal(level_slots["pallete"],1)
 	
-	print(player.x)
-	print(player.y)
+	print(flr(player.x))
+	print(flr(player.y))
+	
+	--local vec = {x=flr(player.x),y=flr(player.y)}
+	--local idx = vectoidx(vec)
+	--print(idx)
+	--print(flr(idxtopoint(idx).x))
+	--print(flr(idxtopoint(idx).y))
+	
 	--[[
 	print(hitboxes[1].left)
 	print(hitboxes[1].right)
@@ -130,6 +137,8 @@ function _draw()
 	print(hitboxes[2].top)
 	print(hitboxes[2].bot)
 	--]]
+	
+	--draw_path(astar(player.x,player.y, 56,88))
 	
 	
  //print(mag)
@@ -1339,8 +1348,178 @@ function arrow_onmapcollision(arrowhb, otherhb)
 end
 -->8
 -- pathfinding
+function astar(startx,starty,
+															goalx,goaly)
+	--indexing in order of search
+	local idx = 0
+	
+	local frontier = {}
+	local start = {x=startx,y=starty, id="start"}
+	local goal = {x=goalx,y=goaly, id="goal"}
+	insert(frontier, start, 0)
+	
+	came_from = {}
+ came_from[start.id] = nil
+ cost_so_far = {}
+ cost_so_far[start.id] = 0
+ 
+ while (#frontier > 0 and #frontier < 1000) do
+ 	//current x,y point
+ 	local current = frontier[#frontier][1]
+ 	del(frontier,frontier[#frontier])
+ 	
+ 	//current == goal
+ 	if current.x == goal.x and current.y == goal.y then
+ 		print("path found")
+   break
+  end
+  
+  //print(current.x)
+  //print(current.y)
+  //print(current.id)
+  --get neighbors
+  local neighbours = getneighbours(current)
+  //print(#neighbours)
+  for nxt in all(neighbours) do
+  	--set id
+  	nxt.id = idx
+  	--+id count
+  	idx += 1
+  
+  	local newcost = cost_so_far[current.id] + 1
+  	
+  	if (cost_so_far[nxt.id] == nil) or (newcost < cost_so_far[nxt.id]) then
+  		cost_so_far[nxt.id] = newcost
+    local priority = newcost + heuristic(goal, nxt)
+    insert(frontier, nxt, priority)
+    came_from[nxt.id] = current
+  	end
+  end
+  //print(#frontier)
+ end
+	
+	local current = came_from[goal.id]
+ path = {}
+ --[[
+ local curt = current
+ local strt = start
+ 
+ while not (curt.x == strt.x and curt.y == strt.y) do
+  add(path, current)
+  current = came_from[curt]
+  curt = current
+ end
+ --]]
+ 
+ 
+ while not (current.x == start.x and current.y == start.y) do
+  add(path, current)
+  current = came_from[current.id]
+ end
+ 
+ reverse(path)
+ 
+ 
+ return path
+end
 
 
+function draw_path(path)
+	for point in all(path) do
+		local mapposx, mapposy = map_pos(point.x,point.y)
+		
+		if mapposx == player.mapposx and mapposy == player.mapposy then
+			pset(point.x%128, point.y%128, 12)
+		end
+			
+	end
+	
+end
+
+
+
+-- insert into table and sort by priority
+function insert(t, val, p)
+ if #t >= 1 then
+  add(t, {})
+  for i=(#t),2,-1 do
+   
+   local nxt = t[i-1]
+   if p < nxt[2] then
+    t[i] = {val, p}
+    return
+   else
+    t[i] = nxt
+   end
+  end
+  t[1] = {val, p}
+ else
+  add(t, {val, p}) 
+ end
+end
+
+
+
+-- find all existing neighbours of a position that are not walls
+function getneighbours(pos)
+ local neighbours={}
+ --local x = pos.x
+ --local y = pos.y
+ 
+ --left
+ if pos.x > 0 and not fget(mget(map_cell(pos.x-1,pos.y)), 0)  then
+  add(neighbours,{x=pos.x-1,y=pos.y})
+ end
+ --right
+ if pos.x < 1024 and not fget(mget(map_cell(pos.x+1,pos.y)), 0) then
+  add(neighbours,{x=pos.x+1,y=pos.y})
+ end
+ --up
+ if pos.y > 0 and not fget(mget(map_cell(pos.x,pos.y-1)), 0) then
+  add(neighbours,{x=pos.x,y=pos.y-1})
+ end
+ --down
+ if pos.y < 15 and not fget(mget(map_cell(pos.x,pos.y+1)), 0) then
+  add(neighbours,{x=pos.x,y=pos.y+1})
+ end
+
+	//idk what this does
+ -- for making diagonals
+ if (pos.x+pos.y) % 2 == 0 then
+  reverse(neighbours)
+ end
+ 
+ return neighbours
+end
+
+
+-- manhattan distance on a square grid
+function heuristic(a, b)
+ return abs(a.x - b.x) + abs(a.y - b.y)
+end
+
+
+function reverse(t)
+ for i=1,(#t/2) do
+  local temp = t[i]
+  local oppindex = #t-(i-1)
+  t[i] = t[oppindex]
+  t[oppindex] = temp
+ end
+end
+
+
+//fuck my life
+-- translate a 2d x,y coordinate to a 1d
+function vectoidx(vec)
+	return ((vec.y)*1024) + vec.x
+end
+
+function idxtopoint(idx)
+ local tx = idx%1024
+ --local y = (index-x)/1024
+ return {x=idx%1024,y=((idx-tx)/1024)+1}
+end
 __gfx__
 00000000000000001111111111111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
 0000000000005500111cc11111111111222222222f7ff22222ff22222222fff22222222222222222000880002ff222222f62222222ffff22222222222ffff6f2
