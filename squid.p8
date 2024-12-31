@@ -118,8 +118,16 @@ function _draw()
 	
 	pal(level_slots["pallete"],1)
 	
+	--[[
 	print(flr(player.x))
 	print(flr(player.y))
+	local pos = {x=flr(player.x),y=flr(player.y)}
+	local idx =vectoidx(pos)
+	print(idx)
+	local point = idxtovec(idx)
+	print(point.x)
+	print(point.y)
+	--]]
 	
 	--local vec = {x=flr(player.x),y=flr(player.y)}
 	--local idx = vectoidx(vec)
@@ -138,7 +146,7 @@ function _draw()
 	print(hitboxes[2].bot)
 	--]]
 	
-	--draw_path(astar(player.x,player.y, 56,88))
+	draw_path(astar(player.x,player.y, 56,88))
 	
 	
  //print(mag)
@@ -1350,18 +1358,16 @@ end
 -- pathfinding
 function astar(startx,starty,
 															goalx,goaly)
-	--indexing in order of search
-	local idx = 0
 	
 	local frontier = {}
-	local start = {x=startx,y=starty, id="start"}
-	local goal = {x=goalx,y=goaly, id="goal"}
+	local start = {x=startx,y=starty}
+	local goal = {x=goalx,y=goaly}
 	insert(frontier, start, 0)
 	
 	came_from = {}
- came_from[start.id] = nil
+ came_from[vectoidx(start)] = nil
  cost_so_far = {}
- cost_so_far[start.id] = 0
+ cost_so_far[vectoidx(start)] = 0
  
  while (#frontier > 0 and #frontier < 1000) do
  	//current x,y point
@@ -1369,7 +1375,7 @@ function astar(startx,starty,
  	del(frontier,frontier[#frontier])
  	
  	//current == goal
- 	if current.x == goal.x and current.y == goal.y then
+ 	if vectoidx(current) == vectoidx(goal) then
  		print("path found")
    break
   end
@@ -1381,44 +1387,38 @@ function astar(startx,starty,
   local neighbours = getneighbours(current)
   //print(#neighbours)
   for nxt in all(neighbours) do
-  	--set id
-  	nxt.id = idx
-  	--+id count
-  	idx += 1
-  
-  	local newcost = cost_so_far[current.id] + 1
+  	//nxt is id
+  	//nxtvec is x,y
+  	local nxtvec = idxtovec(nxt)
   	
-  	if (cost_so_far[nxt.id] == nil) or (newcost < cost_so_far[nxt.id]) then
-  		cost_so_far[nxt.id] = newcost
-    local priority = newcost + heuristic(goal, nxt)
-    insert(frontier, nxt, priority)
-    came_from[nxt.id] = current
+  	//display exploration (debug)	
+  	//pset(nxtvec.x%128, nxtvec.y%128, 11)
+  
+  	local newcost = cost_so_far[vectoidx(current)] + 1
+  	
+  	if (cost_so_far[nxt] == nil) or (newcost < cost_so_far[nxt]) then
+  		cost_so_far[nxt] = newcost
+    local priority = newcost + heuristic(goal, nxtvec)
+    insert(frontier, nxtvec, priority)
+    came_from[nxt] = current
   	end
   end
   //print(#frontier)
  end
 	
-	local current = came_from[goal.id]
+	local current = came_from[vectoidx(goal)]
  path = {}
- --[[
- local curt = current
- local strt = start
  
- while not (curt.x == strt.x and curt.y == strt.y) do
+ local cidx = vectoidx(current)
+ local sidx = vectoidx(start)
+ 
+ while cidx != sidx do
   add(path, current)
-  current = came_from[curt]
-  curt = current
- end
- --]]
- 
- 
- while not (current.x == start.x and current.y == start.y) do
-  add(path, current)
-  current = came_from[current.id]
+  current = came_from[cidx]
+  cidx = vectoidx(current)
  end
  
  reverse(path)
- 
  
  return path
 end
@@ -1466,21 +1466,21 @@ function getneighbours(pos)
  --local x = pos.x
  --local y = pos.y
  
- --left
+ --left															//no solid
  if pos.x > 0 and not fget(mget(map_cell(pos.x-1,pos.y)), 0)  then
-  add(neighbours,{x=pos.x-1,y=pos.y})
+  add(neighbours,vectoidx({x=pos.x-1,y=pos.y}))
  end
  --right
  if pos.x < 1024 and not fget(mget(map_cell(pos.x+1,pos.y)), 0) then
-  add(neighbours,{x=pos.x+1,y=pos.y})
+  add(neighbours,vectoidx({x=pos.x+1,y=pos.y}))
  end
  --up
  if pos.y > 0 and not fget(mget(map_cell(pos.x,pos.y-1)), 0) then
-  add(neighbours,{x=pos.x,y=pos.y-1})
+  add(neighbours,vectoidx({x=pos.x,y=pos.y-1}))
  end
  --down
- if pos.y < 15 and not fget(mget(map_cell(pos.x,pos.y+1)), 0) then
-  add(neighbours,{x=pos.x,y=pos.y+1})
+ if pos.y < 512 and not fget(mget(map_cell(pos.x,pos.y+1)), 0) then
+  add(neighbours,vectoidx({x=pos.x,y=pos.y+1}))
  end
 
 	//idk what this does
@@ -1510,15 +1510,17 @@ end
 
 
 //fuck my life
--- translate a 2d x,y coordinate to a 1d
+-- translate a 2d x,y coordinate to a binary idx
 function vectoidx(vec)
-	return ((vec.y)*1024) + vec.x
+	local x = flr(vec.x) >>> 11
+	local y = flr(vec.y) --<< 11
+	return x | y
 end
 
-function idxtopoint(idx)
- local tx = idx%1024
- --local y = (index-x)/1024
- return {x=idx%1024,y=((idx-tx)/1024)+1}
+function idxtovec(idx)
+	local tx = (idx << 11) & 0b11111111111
+ local ty = idx & 0b1111111111
+ return {x=tx,y=ty}
 end
 __gfx__
 00000000000000001111111111111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
