@@ -146,7 +146,9 @@ function _draw()
 	print(hitboxes[2].bot)
 	--]]
 	
-	draw_path(astar(player.x+3,player.y+3, 56,88))
+	local mapx,mapy = map_cell(player.x+2,player.y+2)
+	
+	draw_path(astar(mapx,mapy, 8,12))
 	//draw_path(astar(player.x+3,player.y+3, 32,32))
 	
  //print(mag)
@@ -1356,6 +1358,7 @@ function arrow_onmapcollision(arrowhb, otherhb)
 end
 -->8
 -- pathfinding
+--mapcell navigation
 function astar(startx,starty,
 															goalx,goaly)
 	
@@ -1392,7 +1395,7 @@ function astar(startx,starty,
   	local nxtvec = idxtovec(nxt)
   	
   	//display exploration (debug)	
-  	pset(nxtvec.x%128, nxtvec.y%128, 11)
+  	//spr(10,(nxtvec.x*8)%128,(nxtvec.y*8)%128)
   
   	local newcost = cost_so_far[vectoidx(current)] + 1
   	
@@ -1425,13 +1428,12 @@ end
 
 
 function draw_path(path)
-	for point in all(path) do
-		local mapposx, mapposy = map_pos(point.x,point.y)
+	for mapcell in all(path) do
+		local mapposx, mapposy = map_pos(mapcell.x*8,mapcell.y*8)
 		
 		if mapposx == player.mapposx and mapposy == player.mapposy then
-			pset(point.x%128, point.y%128, 12)
-		end
-			
+			spr(44, (mapcell.x*8)%128,(mapcell.y*8)%128)
+		end	
 	end
 	
 end
@@ -1467,19 +1469,19 @@ function getneighbours(pos)
  --local y = pos.y
  
  --left															//no solid
- if pos.x > 0 and not fget(mget(map_cell(pos.x-1,pos.y)), 0)  then
+ if pos.x > 0 and not fget(mget(pos.x-1,pos.y), 0)  then
   add(neighbours,vectoidx({x=pos.x-1,y=pos.y}))
  end
  --right
- if pos.x < 1024 and not fget(mget(map_cell(pos.x+1,pos.y)), 0) then
+ if pos.x < 1024 and not fget(mget(pos.x+1,pos.y), 0) then
   add(neighbours,vectoidx({x=pos.x+1,y=pos.y}))
  end
  --up
- if pos.y > 0 and not fget(mget(map_cell(pos.x,pos.y-1)), 0) then
+ if pos.y > 0 and not fget(mget(pos.x,pos.y-1), 0) then
   add(neighbours,vectoidx({x=pos.x,y=pos.y-1}))
  end
  --down
- if pos.y < 512 and not fget(mget(map_cell(pos.x,pos.y+1)), 0) then
+ if pos.y < 512 and not fget(mget(pos.x,pos.y+1), 0) then
   add(neighbours,vectoidx({x=pos.x,y=pos.y+1}))
  end
 
@@ -1502,7 +1504,7 @@ function heuristic(a, b)
  return sqrt(xsqr+ysqr)
  --]]
  
- return 100*(abs(a.x - b.x) + abs(a.y-b.y))
+ return (abs(a.x - b.x) + abs(a.y-b.y))
 
 end
 
