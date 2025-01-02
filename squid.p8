@@ -20,13 +20,14 @@ function _init()
 	hitboxes = {}
 	make_player()
 	//makenpc()
-	bombpool = {}
+	objectpool = {}
+	
+	//bombpool = {}
 	explosions = {}
-	arrowpool = {}
-
-
-	particlesystems = {}
-	particles = {}
+	//arrowpool = {}
+	
+	//particlesystems = {}
+	//particles = {}
 	
 	
  global_faces = {
@@ -71,11 +72,14 @@ function _update()
 	initialmenu()
 	update_player()
 	//updatenpc()
-	foreach(bombpool,update_bomb)
+	
+	foreach(objectpool,update_object)
+	
+	//foreach(bombpool,update_bomb)
 	foreach(explosions,update_explosion)
-	foreach(arrowpool,update_arrow)
-	foreach(particlesystems, update_partsys)
-	foreach(particles, update_particle)
+	//foreach(arrowpool,update_arrow)
+	//foreach(particlesystems, update_partsys)
+	//foreach(particles, update_particle)
 	foreach(hitboxes, update_hitbox)
 	//collisiontest2()
 	--[[
@@ -102,6 +106,13 @@ function _update()
 end
 
 
+function update_object(obj)
+	if(obj.update != nil) then
+		obj.update(obj)
+	end
+end
+
+
 
 // routine updates every frame
 // using designed update funcs.
@@ -111,9 +122,12 @@ function _draw()
 	draw_map()
 	draw_player()
 	//drawnpc()
-	foreach(arrowpool,draw_arrow)
-	foreach(bombpool,draw_bomb)
-	foreach(particles, draw_particle)
+	
+	foreach(objectpool,draw_object)
+	
+	//foreach(arrowpool,draw_arrow)
+	//foreach(bombpool,draw_bomb)
+	//foreach(particles, draw_particle)
 	foreach(hitboxes, draw_hitbox)
 	
 	pal(level_slots["pallete"],1)
@@ -152,6 +166,12 @@ function _draw()
 	//draw_path(astar(player.x+3,player.y+3, 32,32))
 	
  //print(mag)
+end
+
+function draw_object(obj)
+	if(obj.draw != nil) then
+		obj.draw(obj)
+	end
 end
 
 //empty function
@@ -433,6 +453,43 @@ end
 --]]
 
 
+function make_enemy1(x,y)
+	enemy = {}
+	
+	enemy.x = x
+	enemy.y = y
+	
+	enemy.sprite = 44
+	enemy.hb = add_hitbox(5,
+																				4,4, //offset
+																				6, //length
+																				6,	//height
+																				-1,
+																				nil, //add oncollision function
+																				nil, //onmapcollision function
+																				enemy)
+			
+	//sam finish this																			
+	//enemy.update =
+	
+
+
+	add(enemies, enemy)
+
+end
+
+
+function enm1update()
+		local mapposx, mapposy = map_cell(enemy.x,enemy.y)
+		local pmapx, pmapy = map_cell(player.x,player.y)
+	
+		local path = astar(mapposx,mapposy,
+															pmapx,pmapy)
+															
+		
+		
+		
+end
 -->8
 -- particle effects
 
@@ -496,8 +553,11 @@ function add_partsys(x,y,
 		partsys.hb = hb
 		--hb.parent = partsys
 	end
+	
+	partsys.update = update_partsys
 		
-	add(particlesystems, partsys)
+	add(objectpool, partsys)
+	//add(particlesystems, partsys)
 end
 
 
@@ -506,7 +566,8 @@ function update_partsys(partsys)
 	partsys.sduration -= 1
 	if partsys.sduration < 0 then
 		del(hitboxes, partsys.hb)
-		del(particlesystems,partsys)
+		del(objectpool, partsys)
+		//del(particlesystems,partsys)
 	end
 	
 	--not sure if this is needed...
@@ -569,7 +630,10 @@ function add_particle(x,y,
 																					part)
 	end
 	
-	add(particles, part)
+	part.update = update_particle
+	part.draw = draw_particle
+	
+	add(objectpool, part)
 end
 
 function update_particle(part)
@@ -578,7 +642,7 @@ function update_particle(part)
 	--delete if done
 	if part.duration < 0 then
 		part.isalive = false
-		del(particles, part)
+		del(objectpool, part)
 	end
 	
 	--update position
@@ -619,7 +683,12 @@ function add_bomb(mapposx,mapposy,xpos,ypos)
 	bomb.timer = 100
 	bomb.sprite = 18
 	bomb.hb = add_hitbox(2,4,5,5,5,-1, bomb_oncollision, nil, bomb)
-	add(bombpool,bomb)
+	
+	bomb.update = update_bomb
+	bomb.draw = draw_bomb
+	
+	add(objectpool, bomb)
+	//add(bombpool,bomb)
 end
 
 // update_bomb
@@ -656,7 +725,8 @@ end
 function explode(bomb)
 	add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
  bomb.isalive = false
- del(bombpool,bomb)
+ del(objectpool,bomb)
+ //del(bombpool,bomb)
  
  //add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
  
@@ -1174,7 +1244,7 @@ function update_hitbox(hb)
 
 end
 
---for debug purposes only
+--visualize hitbox for debugging 
 function draw_hitbox(hb)	
 	if (player.mapposx == hb.mapposx and player.mapposy == hb.mapposy) then
 		rect(hb.left%128,
@@ -1314,7 +1384,11 @@ function add_arrow(parent)
 	
 	arrow.hb = add_hitbox(1,4,4,3,3,-1, arrow_oncollision, arrow_onmapcollision, arrow)
 	
-	add(arrowpool, arrow)
+	arrow.update = update_arrow
+	arrow.draw = draw_arrow
+	
+	add(objectpool, arrow)
+	//add(arrowpool, arrow)
 end
 
 
@@ -1328,7 +1402,8 @@ function update_arrow(arrow)
 
 	if (arrow.timer == 0) then 
 	 sfx(10)
-	 del(arrowpool,arrow)
+	 del(objectpool, arrow)
+	 //del(arrowpool,arrow)
 	 arrow.isalive = false
 	else
 	 arrow.x += arrow.dx
