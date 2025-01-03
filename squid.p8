@@ -123,12 +123,12 @@ function update_object(obj)
 	elseif obj.duration == -1 then
 		if obj.parent != nil then
 			if obj.parent.isalive == false then
-				obj.isalive = false
-				del(hitboxes, obj.hb)
-				del(objectpool, obj)
+				//delete
+				obj.duration = 0
 			end
 		end
 	else //duration == 0
+		//delete
 		obj.isalive = false
 		del(hitboxes, obj.hb)
 		del(objectpool, obj)
@@ -140,8 +140,8 @@ function update_object(obj)
 	obj.y += obj.dy
 	
 	if obj.parent != nil and obj.isglobal == false then
-		obj.xoff += obj.dx
-		obj.yoff += obj.dy
+		//obj.xoff += obj.dx
+		//obj.yoff += obj.dy
 		
 		obj.x += obj.parent.dx
 		obj.y += obj.parent.dy
@@ -573,8 +573,11 @@ function add_partsys(x,y,
 																											parent,
 																											isglobal,
 																											nil,
-																											update_partsys
+																											update_partsys,
+																											draw_partsys
 																											)
+																											
+	partsys.partisglobal = partisglobal
 	
 	partsys.partdx = dx
 	partsys.partdy = dy
@@ -649,11 +652,20 @@ function update_partsys(partsys)
 	end
 	--]]
 	
+	local offset = {}
+	if partsys.parent == nil then
+		offset.x = partsys.x
+		offset.y = partsys.y
+	else
+		offset.x = partsys.xoff
+		offset.y = partsys.yoff
+	end
+		
 	--spawn particle
 	if partsys.freq <=1 then
 		for i=0, 1/partsys.freq do
-			add_particle(partsys.x-partsys.xrange + rnd(partsys.xrange*2),
-																partsys.y-partsys.yrange + rnd(partsys.yrange*2),
+			add_particle(offset.x,//-partsys.xrange + rnd(partsys.xrange*2),
+																offset.y,//-partsys.yrange + rnd(partsys.yrange*2),
 																partsys.pduration,
 																partsys.partdx-partsys.dxrange + rnd(partsys.dxrange*2),
 																partsys.partdy-partsys.dyrange + rnd(partsys.dyrange*2),
@@ -662,8 +674,8 @@ function update_partsys(partsys)
 																partsys.hb)
 		end
 	elseif partsys.duration % partsys.freq == 0 then
-		add_particle(partsys.x-partsys.xrange + rnd(partsys.xrange*2),
-															partsys.y-partsys.yrange + rnd(partsys.yrange*2),
+		add_particle(offset.x-partsys.xrange + rnd(partsys.xrange*2),
+															offset.y-partsys.yrange + rnd(partsys.yrange*2),
 															partsys.pduration,
 															partsys.partdx-partsys.dxrange + rnd(partsys.dxrange*2),
 															partsys.partdy-partsys.dyrange + rnd(partsys.dyrange*2),
@@ -672,6 +684,25 @@ function update_partsys(partsys)
 															partsys.hb)
 	end
 	
+	
+	
+end
+
+
+//debugging partsys position
+function draw_partsys(partsys)
+	--[[
+	print(player.x)
+	print(player.y)
+	
+	print(partsys.x)
+	print(partsys.y)
+	
+	print(partsys.xoff)
+	print(partsys.yoff)
+	--]]
+	
+	pset(partsys.x%128, partsys.y%128, 14)
 end
 
 --creates a single particle
@@ -762,7 +793,7 @@ function add_bomb(x,y)
 	local bomb = add_object(x,y,
 																									0,0,
 																									100,
-																									nil,false,
+																									nil,true,
 																									18,
 																									update_bomb)
 	local input_face = player.face
@@ -811,10 +842,10 @@ end
 
 function explode(bomb)
 	add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
- bomb.isalive = false
- del(objectpool,bomb)
- //del(bombpool,bomb)
  
+ //delete bomb
+ bomb.duration = 0
+  
  //add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
  
 	local explosion = {}
@@ -860,20 +891,23 @@ end
 
 //bomb oncollision() function
 function bomb_oncollision(bombhb, otherhb)
- 	--arrows
+ 	--arrows collision
 	 if (otherhb.tag == 1 and otherhb.parent != nil ) then
 		 //match speed to arrow
 		 bombhb.parent.dx = otherhb.parent.dx
 		 bombhb.parent.dy = otherhb.parent.dy
 		 
+		 
 		 //explode if arrow is gone
-		 if (otherhb.parent.timer <= 0) then
+		 if not otherhb.parent.isalive then
 		 	explode(bombhb.parent)
 		 end
 		 
 		 //match timers to bomb
-		 otherhb.parent.timer = bombhb.parent.timer
+		 otherhb.parent.duration = bombhb.parent.duration
 		 //^^^could move this to arrow.oncollision()
+	 
+	 --sword collision
 	 elseif (otherhb.tag == 4 and otherhb.parent != nil) then
 	 	bombhb.parent.dx = global_faces[player.face][1]
 	 	bombhb.parent.dy = global_faces[player.face][2]
@@ -1270,11 +1304,14 @@ function update_hitbox(hb)
 	--lifetime based on parent
 	elseif hb.duration == -1 then
 		if hb.parent.isalive == false then
-			del(hitboxes, hb)
+			hb.duration = 0
+			//del(hitboxes, hb)
 		end
 	else //hb.duration == 0
+		hb.isalive = false
 		del(hitboxes, hb)
 	end
+	
 	
 		
 	--update mappos
@@ -1407,27 +1444,25 @@ function set_movement_from_face(object,
 																																input_face,
 																																speed)
 	if (input_face == 0 or input_face ==3 or input_face ==5) then
-		object.x += (object.mapposx*128 - 8) // world space
+		object.x -= 8
 		object.dx = -(speed)
 	--right
  elseif (input_face ==2 or input_face ==4 or input_face ==7) then
-	 object.x += (object.mapposx*128 + 8) // world space
+		object.x += 8
 		object.dx = speed
 	else
-		object.x += object.mapposx*128
 		object.dx = 0
 	end
 	
 	--up 
  if (input_face ==0 or input_face ==1 or input_face ==2) then
-		object.y += object.mapposy*128 - 8 // world space
+		object.y -= 8 
 		object.dy = -(speed)
 	--down
 	elseif (input_face ==5 or input_face ==6 or input_face ==7) then
-		object.y += (object.mapposy*128 + 8) // world space
+		object.y += 8
 		object.dy = speed
 	else
-		object.y += object.mapposy*128
 		object.dy = 0
 	end																													
 end
@@ -1440,13 +1475,22 @@ end
 // code will be moved there.
 
 
-function add_arrow(parent)
-	local arrow = add_object(parent.mapposx,parent.mapposy,parent.x%128,parent.y%128)
-	local input_face = parent.face
+function add_arrow(origin)
+	local arrow = add_object(origin.x,origin.y,
+																										0,0,
+																										40,
+																										nil,
+																										true,
+																										39,
+																										nil,
+																										nil)
 	
-	set_movement_from_face(arrow,input_face,2.002)
+ //local input_face = origin.face
 	
-	arrow.timer = 40
+	//sets dx,dy
+	set_movement_from_face(arrow,origin.face,2.002)
+	
+	//arrow.timer = 40
 	
 	if ((arrow.dx == 0) or (arrow.dy == 0)) then
 		if arrow.dx == 0 then
@@ -1481,52 +1525,66 @@ function add_arrow(parent)
 	
 	arrow.hb = add_hitbox(1,4,4,3,3,-1, arrow_oncollision, arrow_onmapcollision, arrow)
 	
-	arrow.update = update_arrow
-	arrow.draw = draw_arrow
+	//arrow.update = update_arrow
+	//arrow.draw = draw_arrow
 	
-	add(objectpool, arrow)
+	//add(objectpool, arrow)
 	//add(arrowpool, arrow)
 end
 
-
+--[[
 function update_arrow(arrow)
 	
-	if ( 0 != #searchmapcols(arrow.hb, 0b1, 0, 0, 0, 0)) then 
-	 arrow.dy = 0
-	 arrow.dx = 0
-	 arrow.timer = 0
-	end
+	
 
 	if (arrow.timer == 0) then 
-	 sfx(10)
-	 del(objectpool, arrow)
+	 //del(objectpool, arrow)
 	 //del(arrowpool,arrow)
-	 arrow.isalive = false
-	else
-	 arrow.x += arrow.dx
-		arrow.y += arrow.dy
-		arrow.timer -= 1
+	 //arrow.isalive = false
+	//else
+	 //arrow.x += arrow.dx
+		//arrow.y += arrow.dy
+		//arrow.timer -= 1
 	end
 	
 	--update mappos
-	arrow.mapposx, arrow.mapposy = map_pos(arrow.x, arrow.y)
+	//arrow.mapposx, arrow.mapposy = map_pos(arrow.x, arrow.y)
 	
 end
+--]]
 
+--[[
 function draw_arrow(arrow)
 	if (player.mapposx == arrow.mapposx and player.mapposy == arrow.mapposy) then
 		spr(arrow.sprite,arrow.x%128,arrow.y%128,1.0,1.0,arrow.flipx,arrow.flipy)
  end
 end
+--]]
 
 function arrow_oncollision(arrowhb, otherhb)
 	//add hb collision behavior here!
+	
+	--bomb collision
+	if otherhb.tag == 2 then
+		//explode if arrow is gone
+	 if not arrowhb.parent.isalive then
+	 	explode(otherhb.parent)
+	 end
+	
+	end
+	
 
 	
 end
 
-function arrow_onmapcollision(arrowhb, otherhb)
-
+function arrow_onmapcollision(arrowhb)
+	//colliding with solid obj
+	if ( 0 != #searchmapcols(arrowhb, 0b1, 0, 0, 0, 0)) then 
+	 sfx(10)
+	 //delete arrow on col
+	 arrowhb.parent.duration = 0	 
+	end
+	
 end
 -->8
 -- pathfinding
