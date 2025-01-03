@@ -1043,22 +1043,14 @@ will interact with.
 
 // interaction process
 function interact(face)
-	openchest(face)
-	opendoor(face)
-	pickup_item(face)	
-	//npcfuncwhendone(face)
-end
-
-// code here contains all
-// small chest functionality,
-// although we may add in large
-// chests as well
-function openchest(face)
 	for k,v in pairs(global_faces) do
 		if face == k then
-		 update_chest(xest(player.x/8),xest(player.y/8),v[1],v[2])
+			update_chest(xest(player.x/8),xest(player.y/8),v[1],v[2])
+			update_door(xest(player.x/8),xest(player.y/8),v[1],v[2])
 		end
 	end
+	pickup_item(face)	
+	//npcfuncwhendone(face)
 end
 
 // this function updates the
@@ -1092,20 +1084,6 @@ function update_chest(xtemp,ytemp,xpm,ypm)
   	end	
   end
  end
-end
-
-
-
-// this code handles the opening
-// of locked doors. functionality
-// here removes keys from player
-// per open.
-function opendoor(face)
-	for k,v in pairs(global_faces) do
-		if face == k then
-		 update_door(xest(player.x/8),xest(player.y/8),v[1],v[2])
-		end
-	end
 end
 
 // updates the state of the door
