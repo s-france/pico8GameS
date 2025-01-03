@@ -18,9 +18,11 @@ __lua__
 function _init()
  cls()
 	hitboxes = {}
+	objectpool = {}
+	
 	make_player()
 	//makenpc()
-	objectpool = {}
+	
 	
 	//bombpool = {}
 	explosions = {}
@@ -70,7 +72,7 @@ end
 function _update()
 	//get_mapdata(80,16,16,32) 
 	initialmenu()
-	update_player()
+	//update_player()
 	//updatenpc()
 	
 	foreach(objectpool,update_object)
@@ -107,9 +109,50 @@ end
 
 
 function update_object(obj)
+	
+	--type-specific update
 	if(obj.update != nil) then
 		obj.update(obj)
 	end
+
+	--track lifetime
+	--lifetime based on duration
+	if obj.duration > 0 then
+		obj.duration -= 1
+	--lifetime based on parent
+	elseif obj.duration == -1 then
+		if obj.parent != nil then
+			if obj.parent.isalive == false then
+				obj.isalive = false
+				del(hitboxes, obj.hb)
+				del(objectpool, obj)
+			end
+		end
+	else //duration == 0
+		obj.isalive = false
+		del(hitboxes, obj.hb)
+		del(objectpool, obj)
+	end
+	
+	
+	--movement
+	obj.x += obj.dx
+	obj.y += obj.dy
+	
+	if obj.parent != nil and obj.isglobal == false then
+		obj.xoff += obj.dx
+		obj.yoff += obj.dy
+		
+		obj.x += obj.parent.dx
+		obj.y += obj.parent.dy
+	end
+	
+	--update position
+	obj.mapposx, obj.mapposy = map_pos(obj.x,obj.y)
+	obj.mapcellx, obj.mapcelly = map_cell(obj.x,obj.y)	
+	
+	
+	
 end
 
 
@@ -120,7 +163,7 @@ function _draw()
 	cls(level_slots["background"])
 	bomb_animation()
 	draw_map()
-	draw_player()
+	//draw_player()
 	//drawnpc()
 	
 	foreach(objectpool,draw_object)
@@ -169,8 +212,14 @@ function _draw()
 end
 
 function draw_object(obj)
-	if(obj.draw != nil) then
-		obj.draw(obj)
+	if (player.mapposx == obj.mapposx and player.mapposy == obj.mapposy) then
+		--type-specific draw function
+		if(obj.draw != nil) then
+			obj.draw(obj)
+		--generic sprite draw
+		elseif obj.sprite != nil then
+	   spr(obj.sprite,obj.x%128,obj.y%128)
+		end
 	end
 end
 
@@ -192,14 +241,19 @@ end
 // that we're gonna use
 
 function make_player()
-	player = add_object(0,0,110,60)
+	player = add_object(110,60,
+																				0,0,
+																				-1,
+																				nil,true,
+																				2,
+																				update_player,
+																				draw_player)
 	//player stats
 	//player = add_object(6,1,87*8+4,24*8-4)
 	//player.x =87*8+4
 	//player.y =24*8-4
 	player.diag = false
 	player.prev_face = 0
- player.sprite = 2
  player.face = 6
  player.interaction = false
  // player items
@@ -222,7 +276,7 @@ function make_player()
  player.working_inventory = {}
  player.slotflag = 0
 	player.invis = false
-	--player hurtbox, tag = 0 
+	--player hurtbox, tag = 0
  player.hb = add_hitbox(0, 4,4, 6,6, -1, player_oncollision, player_onmapcollision, player)
 end
 
@@ -282,8 +336,8 @@ function move_player()
  
  // move player by dx and dy
  // (this is why .75 is better)
-	player.x+=player.dx
-	player.y+=player.dy
+	//player.x+=player.dx
+	//player.y+=player.dy
 	
 	// set new previous face for
 	// the next frame
@@ -298,45 +352,45 @@ end
 // update map position, and move
 // the player when called
 
-function update_player()
+function update_player(p)
 	--update player face direction
 	
- local prev = player.face
+ local prev = p.face
 	
 	if btn(1) then
-		player.face = 5
+		p.face = 5
 	elseif btn(0) then
-		player.face = 3
+		p.face = 3
 	else
-		player.face = 4
+		p.face = 4
 	end
 	
 	if btn(3) then
-		player.face +=3
+		p.face +=3
 	elseif btn(2) then
-	 player.face -=3
+	 p.face -=3
 	end
 	
-	if player.face == 4 then
-		player.face = prev
-	elseif player.face >4 then
-		player.face -=1
+	if p.face == 4 then
+		p.face = prev
+	elseif p.face >4 then
+		p.face -=1
 	end
 	
 
 	
 	--update mappos
-	player.mapposx, player.mapposy = map_pos(player.x,player.y)	
+	//player.mapposx, player.mapposy = map_pos(player.x,player.y)	
 
 
  	// check for if bomb has been placed
 -- if ( btnp(5) then	
 -- 	readinfo(player.face) end
-	player.interaction = false
-	player.action = false
+	p.interaction = false
+	p.action = false
 	if ( btnp(5)) then
-		interact(player.face)
-		if ( player.interaction==false ) then
+		interact(p.face)
+		if ( p.interaction==false ) then
 	  use_item_in_slot(1)
  	end
  end
@@ -413,7 +467,7 @@ end
 
 function use_bomb()
  if (player.resources.bombs[1]>0 ) then
-  add_bomb(player.mapposx,player.mapposy,player.x%128, player.y%128)
+  add_bomb(player.x,player.y)
   player.resources.bombs[1] -= 1
 	end
 end
@@ -510,12 +564,25 @@ function add_partsys(x,y,
 																					freq,
 																					parent,
 																					isglobal,
+																					partisglobal,
 																					hb)
-	local partsys = {}
+	
+	local partsys = add_object(x,y,
+																											0,0,
+																											sduration,
+																											parent,
+																											isglobal,
+																											nil,
+																											update_partsys
+																											)
+	
+	partsys.partdx = dx
+	partsys.partdy = dy
+	
 	--world position of
 	--particle system
-	partsys.x = x
-	partsys.y = y
+	//partsys.x = x
+	//partsys.y = y
 	--range of spawn position
 	--variation for particles:
 	--x +- xrange, y +- yrange
@@ -523,12 +590,12 @@ function add_partsys(x,y,
 	partsys.yrange = yrange
 	--time until particle system
 	--despawns
-	partsys.sduration = sduration
+	//partsys.sduration = sduration
 	--time until particles despawn
 	partsys.pduration = pduration
 	--speed / direction of particles
- partsys.dx = dx
- partsys.dy = dy
+ //partsys.dx = dx
+ //partsys.dy = dy
  --speed / direction range of particles
  partsys.dxrange = dxrange
  partsys.dyrange = dyrange
@@ -536,9 +603,10 @@ function add_partsys(x,y,
  --spawns every freq frames
  partsys.freq =freq
 	--particles move in global/local space 
- partsys.isglobal = isglobal
+ //partsys.isglobal = isglobal
 
 	--parent obj of particle system
+	--[[
 	if parent != nil then
 		partsys.parent = parent
 		
@@ -548,54 +616,59 @@ function add_partsys(x,y,
 		partsys.x = parent.x + partsys.xoff
 		partsys.y = parent.y + partsys.yoff
 	end
+	--]]
 	
 	if hb != nil then
 		partsys.hb = hb
 		--hb.parent = partsys
 	end
 	
-	partsys.update = update_partsys
+	//partsys.update = update_partsys
 		
-	add(objectpool, partsys)
+	//add(objectpool, partsys)
 	//add(particlesystems, partsys)
 end
 
 
 function update_partsys(partsys)
 	--track sys lifetime
-	partsys.sduration -= 1
-	if partsys.sduration < 0 then
+	//partsys.sduration -= 1
+	--[[
+	if partsys.duration < 0 then
 		del(hitboxes, partsys.hb)
-		del(objectpool, partsys)
+		//del(objectpool, partsys)
 		//del(particlesystems,partsys)
 	end
+	--]]
 	
+	--[[
 	--not sure if this is needed...
 	if partsys.parent != nil then
 		partsys.x = partsys.parent.x + partsys.xoff
 		partsys.y = partsys.parent.y + partsys.yoff
 	end
+	--]]
 	
 	--spawn particle
 	if partsys.freq <=1 then
 		for i=0, 1/partsys.freq do
 			add_particle(partsys.x-partsys.xrange + rnd(partsys.xrange*2),
-															partsys.y-partsys.yrange + rnd(partsys.yrange*2),
-															partsys.pduration,
-															partsys.dx-partsys.dxrange + rnd(partsys.dxrange*2),
-															partsys.dy-partsys.dyrange + rnd(partsys.dyrange*2),
-															partsys.parent,
-															partsys.isglobal,
-															partsys.hb)
+																partsys.y-partsys.yrange + rnd(partsys.yrange*2),
+																partsys.pduration,
+																partsys.partdx-partsys.dxrange + rnd(partsys.dxrange*2),
+																partsys.partdy-partsys.dyrange + rnd(partsys.dyrange*2),
+																partsys.parent,
+																partsys.partisglobal,
+																partsys.hb)
 		end
-	elseif partsys.sduration % partsys.freq == 0 then
+	elseif partsys.duration % partsys.freq == 0 then
 		add_particle(partsys.x-partsys.xrange + rnd(partsys.xrange*2),
 															partsys.y-partsys.yrange + rnd(partsys.yrange*2),
 															partsys.pduration,
-															partsys.dx-partsys.dxrange + rnd(partsys.dxrange*2),
-															partsys.dy-partsys.dyrange + rnd(partsys.dyrange*2),
+															partsys.partdx-partsys.dxrange + rnd(partsys.dxrange*2),
+															partsys.partdy-partsys.dyrange + rnd(partsys.dyrange*2),
 															partsys.parent,
-															partsys.isglobal,
+															partsys.partisglobal,
 															partsys.hb)
 	end
 	
@@ -609,15 +682,24 @@ function add_particle(x,y,
 																						parent,
 																						isglobal,
 																						hb)
-	part = {}
-	part.x = x
-	part.y = y
-	part.duration = duration
-	part.dx = dx
-	part.dy = dy
-	part.parent = parent
-	part.isalive = true
-	part.isglobal = isglobal
+	
+	part = add_object(x,y,
+																			dx,dy,
+																			duration,
+																			parent,
+																			isglobal,
+																			nil,
+																			nil,
+																			draw_particle)
+	
+	//part.x = x
+	//part.y = y
+	//part.duration = duration
+	//part.dx = dx
+	//part.dy = dy
+	//part.parent = parent
+	//part.isalive = true
+	//part.isglobal = isglobal
 	
 	if hb != nil then
 		part.hb = add_hitbox(hb.tag,
@@ -630,21 +712,24 @@ function add_particle(x,y,
 																					part)
 	end
 	
-	part.update = update_particle
-	part.draw = draw_particle
+	//part.update = update_particle
+	//part.draw = draw_particle
 	
-	add(objectpool, part)
+	//add(objectpool, part)
 end
 
 function update_particle(part)
 	--update duration
-	part.duration -=1
+	//part.duration -=1
 	--delete if done
+	--[[
 	if part.duration < 0 then
 		part.isalive = false
 		del(objectpool, part)
 	end
+	--]]
 	
+	--[[
 	--update position
 	part.x += part.dx 
 	part.y += part.dy	
@@ -652,14 +737,12 @@ function update_particle(part)
 		part.x += part.parent.dx
 		part.y += part.parent.dy
 	end
+	--]]
 	
 end
 
 function draw_particle(part)
-	local mapposx, mapposy = map_pos(part.x,part.y)
-	if mapposx == player.mapposx and mapposy == player.mapposy then
-			pset(part.x%128, part.y%128, 7)
-	end
+	pset(part.x%128, part.y%128, 7)
 end
 -->8
 -- bombs
@@ -674,20 +757,28 @@ end
 // update player) with contained
 // information for further use
 
-function add_bomb(mapposx,mapposy,xpos,ypos)
-	local bomb = add_object(mapposx,mapposy,xpos,ypos)
+function add_bomb(x,y)
+																		
+	local bomb = add_object(x,y,
+																									0,0,
+																									100,
+																									nil,false,
+																									18,
+																									update_bomb)
 	local input_face = player.face
 	
 	set_movement_from_face(bomb,input_face,0)
 	
-	bomb.timer = 100
-	bomb.sprite = 18
+	//bomb.duration = 100
+	//bomb.sprite = 18
+	
+	
 	bomb.hb = add_hitbox(2,4,5,5,5,-1, bomb_oncollision, nil, bomb)
 	
-	bomb.update = update_bomb
-	bomb.draw = draw_bomb
+	//bomb.update = update_bomb
+	//bomb.draw = draw_bomb
 	
-	add(objectpool, bomb)
+	//add(objectpool, bomb)
 	//add(bombpool,bomb)
 end
 
@@ -698,15 +789,9 @@ end
 // hits 0, which triggers an
 // explosion (aka bomb.sprite = 0)
 function update_bomb(bomb)
-	if (bomb.timer == 0) then
+	if (bomb.duration == 0) then
 	 explode(bomb)
-	else
-	 bomb.x += bomb.dx
-	 bomb.y += bomb.dy
-  bomb.timer -= 1
- end
- --update mappos	
-	bomb.mapposx, bomb.mapposy = map_pos(bomb.x,bomb.y)
+	end
 end
 
 // draw_bomb
@@ -716,11 +801,13 @@ end
 // and removes a bomb from the
 // pool when bomb.sprite == 0.
 
+--[[
 function draw_bomb(bomb)
   if (player.mapposx == bomb.mapposx and player.mapposy == bomb.mapposy) then
    spr(bomb.sprite,bomb.x%128,bomb.y%128)
   end
 end
+--]]
 
 function explode(bomb)
 	add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
@@ -1074,7 +1161,7 @@ function sword()
 		for k,v in pairs(global_faces) do
 			if player.face == k then
 				//sword particle + hitbox					
-				add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false,
+				add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false, false,
 					add_hitbox(4, 0, 0, 0,0, 0, sword_oncollision, sword_onmapcollision))
 			
 			end
@@ -1263,6 +1350,7 @@ function map_cell(x,y)
 	return mapx, mapy
 end
 
+
 function map_pos(x,y)
 	local mapx, mapy = map_cell(x,y)
 	local mapposx = (mapx-(mapx%16)) / 16
@@ -1291,18 +1379,49 @@ function hbcollision(updhb, othhb)
 		end
 end
 
-function add_object(mapposx,
-																				mapposy,
-																				xpos,
-																				ypos)
+function add_object(x,y,
+																				dx,dy,
+																				duration,
+																				parent,
+																				isglobal,
+																				sprite,
+																				update,
+																				draw)
 	local obj = {}
-	obj.x = xpos
-	obj.y = ypos
-	obj.dx = 0
-	obj.dy = 0
-	obj.mapposx = mapposx
-	obj.mapposy = mapposy
+	obj.x = x
+	obj.y = y
+	
+	obj.dx = dx
+	obj.dy = dy
+	
+	obj.mapposx, obj.mapposy = map_pos(x,y)
+	obj.mapcellx, obj.mapcelly = map_cell(x,y)
+	
+	obj.sprite = sprite
+	
+	obj.duration = duration
+	
+	if parent != nil then
+		obj.parent = parent
+		obj.isglobal = isglobal
+		
+		obj.xoff = x
+		obj.yoff = y
+		
+		obj.x = parent.x + obj.xoff
+		obj.y = parent.y + obj.yoff
+	end
+	
+	
+	
+	obj.update = update
+	obj.draw = draw
+	
+
 	obj.isalive = true
+	
+	add(objectpool, obj)
+	
 	return obj
 end
 
