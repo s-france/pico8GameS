@@ -22,7 +22,7 @@ function _init()
 	make_player()
 	//makenpc()
 	
-	explosions = {}
+	//explosions = {}
 	
  global_faces = {
 	[0] = {-1,-1,-6,4,.5,.5,4,4,2,-2,.5,.5,.25},
@@ -67,7 +67,7 @@ function _update()
 	foreach(objectpool,update_object)
 	foreach(hitboxes, update_hitbox)
 	//foreach(bombpool,update_bomb)
-	foreach(explosions,update_explosion)
+	//foreach(explosions,update_explosion)
 	//foreach(arrowpool,update_arrow)
 	//foreach(particlesystems, update_partsys)
 	//foreach(particles, update_particle)
@@ -92,10 +92,12 @@ function update_object(obj)
 	 del(objectpool, obj)
 		del(hitboxes, obj.hb)
 	end
+	
 	--type-specific update
 	if(obj.update != nil) then
 		obj.update(obj)
 	end
+	
 	--track lifetime
 	--lifetime based on duration
 	if obj.duration > 0 then
@@ -111,13 +113,14 @@ function update_object(obj)
 	elseif obj.duration == 0 then
 		obj.isalive = false
 	end
+	
 	--movement
 	obj.x += obj.dx
 	obj.y += obj.dy
 	
 	if obj.parent != nil and obj.isglobal == false then
-		//obj.xoff += obj.dx
-		//obj.yoff += obj.dy
+		obj.xoff += obj.dx
+		obj.yoff += obj.dy
 		
 		obj.x += obj.parent.dx
 		obj.y += obj.parent.dy
@@ -164,8 +167,7 @@ function _draw()
 	
 	local mapx,mapy = map_cell(player.x+2,player.y+2)
 	
-	draw_path(astar(mapx,mapy, 8,12))
-	//draw_path(astar(player.x+3,player.y+3, 32,32))
+	//draw_path(astar(mapx,mapy, 8,12))
 	
 end
 
@@ -753,18 +755,26 @@ end
 function explode(bomb)
 	add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
  
-  
- //add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
+ //hb damage hitbox larger
+ add_hitbox(1,
+ 											bomb.x+4,bomb.y+4,
+ 											24,24,
+ 											3,
+ 											explo_oncollision,
+ 											nil)
  
-	local explosion = {}
-		explosion.x = bomb.x
-		explosion.y = bomb.y
-		explosion.hb = add_hitbox(1, explosion.x+4,explosion.y+4, 24,24, 3, explo_oncollision, explo_onmapcollision)
-		add(explosions, explosion)
-
+ //mapcell demo hitbox smaller
+ add_hitbox(1,
+ 											bomb.x+4,bomb.y+4,
+ 											16,16,
+ 											3,
+ 											nil,
+ 											explo_onmapcollision)
+ 
+ //add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
 end
 
-
+--[[
 function update_explosion(explosion)
 	local xcell = xest(explosion.x/8)
 	local ycell = xest(explosion.y/8)
@@ -783,7 +793,9 @@ function update_explosion(explosion)
 	del(explosions,explosion)
 	sfx(6)
 end
+--]]
 
+--[[
 function explode_tile(pair)
 	if fget(mget(pair.xcell,pair.ycell),1) then
 		if fget(mget(pair.xcell,pair.ycell),5) then
@@ -795,7 +807,11 @@ function explode_tile(pair)
 	end
 	del(pair)
 end
+--]]
 
+function explode_tile(point)
+	mset(point.x,point.y, 20)
+end
 
 //bomb oncollision() function
 function bomb_oncollision(bombhb, otherhb)
@@ -826,11 +842,15 @@ end
 
 function explo_oncollision(explohb, otherhb)
 	//behavior for explosion hb colliding
+	//add: should damage most living things
 
 end
 
 function explo_onmapcollision(explohb)
+	//explode tiles with flag 0b01
+	foreach(searchmapcols(explohb, 0b01, 0, 0, 0, 0), explode_tile)
 	
+
 end
 -->8
 -- levels and map
@@ -1367,7 +1387,7 @@ function add_arrow(origin)
 																										true,
 																										39,
 																										nil,
-																										nil)
+																										draw_arrow)
 	
  //local input_face = origin.face
 	
@@ -1410,7 +1430,7 @@ function add_arrow(origin)
 	arrow.hb = add_hitbox(1,4,4,3,3,-1, arrow_oncollision, arrow_onmapcollision, arrow)
 	
 	//arrow.update = update_arrow
-	arrow.draw = draw_arrow
+	//arrow.draw = draw_arrow
 	
 	//add(objectpool, arrow)
 	//add(arrowpool, arrow)
