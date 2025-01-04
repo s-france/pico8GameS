@@ -108,7 +108,7 @@ end
 
 function update_object(obj)
 
-	if (obj.isalive == false) then
+	if obj.isalive == false then
 	 del(objectpool, obj)
 		del(hitboxes, obj.hb)
 	end
