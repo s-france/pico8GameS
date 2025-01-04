@@ -759,21 +759,6 @@ function update_bomb(bomb)
 	end
 end
 
-// draw_bomb
-//
-// draws a bomb when called on
-// a given bomb, or stops drawing
-// and removes a bomb from the
-// pool when bomb.sprite == 0.
-
---[[
-function draw_bomb(bomb)
-  if (player.mapposx == bomb.mapposx and player.mapposy == bomb.mapposy) then
-   spr(bomb.sprite,bomb.x%128,bomb.y%128)
-  end
-end
---]]
-
 function explode(bomb)
 	add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
  
