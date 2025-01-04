@@ -74,15 +74,13 @@ function _update()
 	initialmenu()
 	//update_player()
 	//updatenpc()
-	
 	foreach(objectpool,update_object)
-	
+	foreach(hitboxes, update_hitbox)
 	//foreach(bombpool,update_bomb)
 	foreach(explosions,update_explosion)
 	//foreach(arrowpool,update_arrow)
 	//foreach(particlesystems, update_partsys)
 	//foreach(particles, update_particle)
-	foreach(hitboxes, update_hitbox)
 	//collisiontest2()
 	--[[
 	if ((player.mapposx > 1 and player.mapposx < 4) and music_var !=0) then
@@ -109,7 +107,11 @@ end
 
 
 function update_object(obj)
-	
+
+	if (obj.isalive == false) then
+	 del(objectpool, obj)
+		del(hitboxes, obj.hb)
+	end
 	--type-specific update
 	if(obj.update != nil) then
 		obj.update(obj)
@@ -120,21 +122,17 @@ function update_object(obj)
 	if obj.duration > 0 then
 		obj.duration -= 1
 	--lifetime based on parent
-	elseif obj.duration == -1 then
+	elseif obj.duration == -2 then
 		if obj.parent != nil then
 			if obj.parent.isalive == false then
 				//delete
 				obj.duration = 0
 			end
 		end
-	else //duration == 0
-		//delete
+	elseif obj.duration == 0 then
 		obj.isalive = false
-		del(hitboxes, obj.hb)
-		del(objectpool, obj)
 	end
-	
-	
+
 	--movement
 	obj.x += obj.dx
 	obj.y += obj.dy
@@ -150,8 +148,6 @@ function update_object(obj)
 	--update position
 	obj.mapposx, obj.mapposy = map_pos(obj.x,obj.y)
 	obj.mapcellx, obj.mapcelly = map_cell(obj.x,obj.y)	
-	
-	
 	
 end
 
@@ -243,7 +239,7 @@ end
 function make_player()
 	player = add_object(110,60,
 																				0,0,
-																				-1,
+																				-2,
 																				nil,true,
 																				2,
 																				update_player,
@@ -820,7 +816,7 @@ end
 // hits 0, which triggers an
 // explosion (aka bomb.sprite = 0)
 function update_bomb(bomb)
-	if (bomb.duration == 0) then
+	if (bomb.isalive == false) then
 	 explode(bomb)
 	end
 end
@@ -843,8 +839,6 @@ end
 function explode(bomb)
 	add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
  
- //delete bomb
- bomb.duration = 0
   
  //add_hitbox(1, bomb.x+4,bomb.y+4, 24,24, 3)
  
@@ -899,14 +893,12 @@ function bomb_oncollision(bombhb, otherhb)
 		 
 		 
 		 //explode if arrow is gone
-		 if not otherhb.parent.isalive then
-		 	explode(bombhb.parent)
+
+		 if bombhb.parent.duration < otherhb.parent.duration then
+		  otherhb.parent.duration = bombhb.parent.duration
 		 end
+
 		 
-		 //match timers to bomb
-		 otherhb.parent.duration = bombhb.parent.duration
-		 //^^^could move this to arrow.oncollision()
-	 
 	 --sword collision
 	 elseif (otherhb.tag == 4 and otherhb.parent != nil) then
 	 	bombhb.parent.dx = global_faces[player.face][1]
@@ -1526,7 +1518,7 @@ function add_arrow(origin)
 	arrow.hb = add_hitbox(1,4,4,3,3,-1, arrow_oncollision, arrow_onmapcollision, arrow)
 	
 	//arrow.update = update_arrow
-	//arrow.draw = draw_arrow
+	arrow.draw = draw_arrow
 	
 	//add(objectpool, arrow)
 	//add(arrowpool, arrow)
@@ -1553,27 +1545,21 @@ function update_arrow(arrow)
 end
 --]]
 
---[[
+
 function draw_arrow(arrow)
 	if (player.mapposx == arrow.mapposx and player.mapposy == arrow.mapposy) then
 		spr(arrow.sprite,arrow.x%128,arrow.y%128,1.0,1.0,arrow.flipx,arrow.flipy)
  end
 end
---]]
+
 
 function arrow_oncollision(arrowhb, otherhb)
 	//add hb collision behavior here!
-	
-	--bomb collision
-	if otherhb.tag == 2 then
-		//explode if arrow is gone
-	 if not arrowhb.parent.isalive then
-	 	explode(otherhb.parent)
-	 end
-	
+	if (otherhb.tag == 2 and otherhb.parent != nil ) then
+		if arrowhb.parent.isalive == false then
+		 otherhb.parent.duration = 0
+		end
 	end
-	
-
 	
 end
 
