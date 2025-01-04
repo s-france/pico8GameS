@@ -734,17 +734,8 @@ function add_bomb(x,y)
 	
 	set_movement_from_face(bomb,input_face,0)
 	
-	//bomb.duration = 100
-	//bomb.sprite = 18
-	
-	
 	bomb.hb = add_hitbox(2,4,5,5,5,-1, bomb_oncollision, nil, bomb)
-	
-	//bomb.update = update_bomb
-	//bomb.draw = draw_bomb
-	
-	//add(objectpool, bomb)
-	//add(bombpool,bomb)
+
 end
 
 // update_bomb
@@ -1037,7 +1028,6 @@ function pickup_item(face)
 	local xpm, ypm
 	for k, v in pairs(global_faces) do
 		if face == k then
-		 //p_i_recieve(v[1],v[2])
 		 local temp = mget(xest(player.x/8+v[1]),xest(player.y/8+v[2]))
 			for i,j in pairs(player.itempool) do
 				if temp == j[1] then
@@ -1105,9 +1095,7 @@ end
 // draws map
 
 function draw_map()
-
 	map(player.mapposx * 16,player.mapposy * 16,0,0,16,16)
-
 end
 
 
