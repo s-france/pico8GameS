@@ -130,7 +130,7 @@ function update_object(obj)
 	
 	--update position
 	obj.mapposx, obj.mapposy = map_pos(obj.x,obj.y)
-	obj.mapcellx, obj.mapcelly = map_cell(obj.x,obj.y)	
+	obj.mapcellx, obj.mapcelly = map_cell(obj.x+4,obj.y+4)	
 	
 end
 
@@ -480,10 +480,13 @@ function update_enemy1(enm1)
 	local path = astar(enm1.mapcellx,enm1.mapcelly,
 														enm1.target.mapcellx,enm1.target.mapcelly)
 	
-	if path[1] != nil then
+	if path != nil and path[1] != nil then
 		local pointx,pointy = map_coord(path[1].x, path[1].y)
 	
-		move_toward(enm1, pointx+4,pointy+4, 1)
+		move_toward(enm1, pointx,pointy, 1)
+	else
+		enm1.dx = 0
+		enm1.dy = 0
 	end
 	
 	
@@ -491,8 +494,18 @@ end
 
 //move obj toward x,y world coord
 function move_toward(obj, x,y, speed)
-	obj.dx = sgn(x-obj.x) * speed
-	obj.dy = sgn(y-obj.y) * speed
+	if x-obj.x != 0 then
+		obj.dx = sgn(x-obj.x) * speed
+	else
+		obj.dx = 0
+	end
+	
+	if y-obj.y != 0 then
+		obj.dy = sgn(y-obj.y) * speed
+	else
+		obj.dy = 0
+	end
+	
 end
 -->8
 -- particle effects
@@ -1508,6 +1521,11 @@ end
 --mapcell navigation
 function astar(startx,starty,
 															goalx,goaly)
+															
+	if fget(mget(goalx,goaly), 0)  then
+		print("impossible goal!!")
+		return
+	end
 	
 	local frontier = {}
 	local start = {x=startx,y=starty}
@@ -1567,6 +1585,11 @@ function astar(startx,starty,
 	
 	local current = came_from[vectoidx(goal)]
  path = {}
+ 
+ if current == nil then
+ 	print("path not found!")
+ 	return
+ end
  
  local cidx = vectoidx(current)
  local sidx = vectoidx(start)
