@@ -4,7 +4,6 @@ __lua__
  -- main functions
 // project squidgame
 // by sam france, frank bubbico
-// and lucas diloreto
 //
 // date created ~ sept. 2024
 //
@@ -23,14 +22,7 @@ function _init()
 	make_player()
 	//makenpc()
 	
-	
-	//bombpool = {}
 	explosions = {}
-	//arrowpool = {}
-	
-	//particlesystems = {}
-	//particles = {}
-	
 	
  global_faces = {
 	[0] = {-1,-1,-6,4,.5,.5,4,4,2,-2,.5,.5,.25},
@@ -72,8 +64,6 @@ end
 function _update()
 	//get_mapdata(80,16,16,32) 
 	initialmenu()
-	//update_player()
-	//updatenpc()
 	foreach(objectpool,update_object)
 	foreach(hitboxes, update_hitbox)
 	//foreach(bombpool,update_bomb)
@@ -81,17 +71,7 @@ function _update()
 	//foreach(arrowpool,update_arrow)
 	//foreach(particlesystems, update_partsys)
 	//foreach(particles, update_particle)
-	//collisiontest2()
-	--[[
-	if ((player.mapposx > 1 and player.mapposx < 4) and music_var !=0) then
-		music_var = 0
-		music(0)	
-	
-		elseif (player.mapposx != 2 and player.mapposx != 3 and music_var != 4) then
-		music(5)
-		music_var = 4
-	end 
-	--]]
+
 	if (xest(player.x/8) == 1 and xest(player.y/8) == 1 and level_slots["loaded"] == "overworld") then
 	 load_level("testing")
 	end
@@ -116,7 +96,6 @@ function update_object(obj)
 	if(obj.update != nil) then
 		obj.update(obj)
 	end
-
 	--track lifetime
 	--lifetime based on duration
 	if obj.duration > 0 then
@@ -132,7 +111,6 @@ function update_object(obj)
 	elseif obj.duration == 0 then
 		obj.isalive = false
 	end
-
 	--movement
 	obj.x += obj.dx
 	obj.y += obj.dy
@@ -163,10 +141,6 @@ function _draw()
 	//drawnpc()
 	
 	foreach(objectpool,draw_object)
-	
-	//foreach(arrowpool,draw_arrow)
-	//foreach(bombpool,draw_bomb)
-	//foreach(particles, draw_particle)
 	foreach(hitboxes, draw_hitbox)
 	
 	pal(level_slots["pallete"],1)
@@ -188,23 +162,11 @@ function _draw()
 	--print(flr(idxtopoint(idx).x))
 	--print(flr(idxtopoint(idx).y))
 	
-	--[[
-	print(hitboxes[1].left)
-	print(hitboxes[1].right)
-	print(hitboxes[1].top)
-	print(hitboxes[1].bot)
-	print(hitboxes[2].left)
-	print(hitboxes[2].right)
-	print(hitboxes[2].top)
-	print(hitboxes[2].bot)
-	--]]
-	
 	local mapx,mapy = map_cell(player.x+2,player.y+2)
 	
 	draw_path(astar(mapx,mapy, 8,12))
 	//draw_path(astar(player.x+3,player.y+3, 32,32))
 	
- //print(mag)
 end
 
 function draw_object(obj)
@@ -244,10 +206,6 @@ function make_player()
 																				2,
 																				update_player,
 																				draw_player)
-	//player stats
-	//player = add_object(6,1,87*8+4,24*8-4)
-	//player.x =87*8+4
-	//player.y =24*8-4
 	player.diag = false
 	player.prev_face = 0
  player.face = 6
@@ -291,15 +249,12 @@ function move_player()
 	player.dy = 0
 	player.diag = false
 	
-	// alter dx, dy based on btn input
-	// check mapcollisions on hb
 	if (btn(0) and 0 == #searchmapcols(player.hb, 0b1, 0,1, -(player.hb.right-player.hb.left),-1)) then
   player.dx-=1.001
 	end
 	if (btn(1) and 0 == #searchmapcols(player.hb, 0b1, (player.hb.right-player.hb.left),1, 0,-1)) then
   player.dx+=1.001
 	end
-	--if (btn(2) and not mapcollisions(player.hb).t) then
 	if (btn(2) and 0 == #searchmapcols(player.hb, 0b1, 1,0, -1,-(player.hb.bot-player.hb.top))) then
   player.dy-=1.001
 	end
@@ -328,12 +283,6 @@ function move_player()
   player.x = flr(player.x)+0.5
   player.y = flr(player.y)+0.5
  end
- 
- 
- // move player by dx and dy
- // (this is why .75 is better)
-	//player.x+=player.dx
-	//player.y+=player.dy
 	
 	// set new previous face for
 	// the next frame
@@ -378,10 +327,6 @@ function update_player(p)
 	--update mappos
 	//player.mapposx, player.mapposy = map_pos(player.x,player.y)	
 
-
- 	// check for if bomb has been placed
--- if ( btnp(5) then	
--- 	readinfo(player.face) end
 	p.interaction = false
 	p.action = false
 	if ( btnp(5)) then
@@ -394,13 +339,6 @@ function update_player(p)
  //sword
 	if(btnp(4)) then
 		use_item_in_slot(2)
-		--[[
-		if (player.invis == true) then
-			player.invis = false
-		else
-			player.invis = true
-		end	
-		--]]
 	end
 	
 	if (btnp(0,1) ) then
@@ -1017,26 +955,7 @@ function clearmenu()
 	end
 	return true
 end
---[[
-function displayitem(x)
-	if (x<4) then
-		if (player.working_inventory[x] == nil) then
-			menuitem(x+1, "empty")
-		//elseif(player.working_inventory[x] == "satchel")
-		
-		else
-			menuitem(x+1, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) return true end)	
-		end
-	elseif (x>=4) then
-		if (player.working_inventory[x] == nil) then
-			menuitem(x-2, "empty")
-		else 
-			menuitem(x-2, ""..player.working_inventory[x],function() additemtoslot(x) displayitem(x) return true end)	
-		end
-	end
-	return true
-end
---]]
+
 function additemtoslot(x)
  for i = 1,3,1 do
   if (player.slotflag == i) then
