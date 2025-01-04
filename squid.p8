@@ -21,7 +21,7 @@ function _init()
 	
 	make_player()
 	
-	make_enemy1(60,96, player)
+	testenmy = make_enemy1(60,96, 200, player)
 	//makenpc()
 	
 	//explosions = {}
@@ -101,6 +101,10 @@ function update_object(obj)
 	end
 	
 	--track lifetime
+	--lifetime based on hp
+	if obj.hp <= 0 then
+		obj.duration = 0
+	end
 	--lifetime based on duration
 	if obj.duration > 0 then
 		obj.duration -= 1
@@ -167,8 +171,9 @@ function _draw()
 	--print(flr(idxtopoint(idx).x))
 	--print(flr(idxtopoint(idx).y))
 	
-	local mapx,mapy = map_cell(player.x+2,player.y+2)
+	//print(testenmy.hp)
 	
+	//local mapx,mapy = map_cell(player.x+2,player.y+2)
 	//draw_path(astar(mapx,mapy, 8,12))
 	
 end
@@ -206,6 +211,7 @@ function make_player()
 	player = add_object(110,60,
 																				0,0,
 																				-2,
+																				1000, //hp
 																				nil,true,
 																				2,
 																				update_player,
@@ -445,10 +451,11 @@ end
 --]]
 
 
-function make_enemy1(x,y, target)
+function make_enemy1(x,y, hp, target)
 	enemy = add_object(x,y,
 																				1,1,
 																				-2,
+																				hp,
 																				nil,
 																				true,
 																				44,
@@ -464,14 +471,15 @@ function make_enemy1(x,y, target)
 																							6, //length
 																							6,	//height
 																							-1,
-																							nil, //add oncollision function
+																							enm1_oncollision, //add oncollision function
 																							nil, //onmapcollision function
 																							enemy)
-			
+	
+	enemy.hp = hp
 
 
 	add(enemies, enemy)
-
+	return enemy
 end
 
 
@@ -507,6 +515,15 @@ function move_toward(obj, x,y, speed)
 	end
 	
 end
+
+
+function enm1_oncollision(enm1hb, otherhb)
+	--sword collision
+	if otherhb.tag == 4 then
+		enm1hb.parent.hp -= 1
+	end
+	
+end
 -->8
 -- particle effects
 
@@ -533,6 +550,7 @@ function add_partsys(x,y,
 	local partsys = add_object(x,y,
 																											0,0,
 																											sduration,
+																											1,
 																											parent,
 																											isglobal,
 																											nil,
@@ -680,6 +698,7 @@ function add_particle(x,y,
 	part = add_object(x,y,
 																			dx,dy,
 																			duration,
+																			1,
 																			parent,
 																			isglobal,
 																			nil,
@@ -756,6 +775,7 @@ function add_bomb(x,y)
 	local bomb = add_object(x,y,
 																									0,0,
 																									100,
+																									1,
 																									nil,true,
 																									18,
 																									update_bomb)
@@ -1333,6 +1353,7 @@ end
 function add_object(x,y,
 																				dx,dy,
 																				duration,
+																				hp,
 																				parent,
 																				isglobal,
 																				sprite,
@@ -1351,6 +1372,7 @@ function add_object(x,y,
 	obj.sprite = sprite
 	
 	obj.duration = duration
+	obj.hp = hp
 	
 	if parent != nil then
 		obj.parent = parent
@@ -1415,6 +1437,7 @@ function add_arrow(origin)
 	local arrow = add_object(origin.x,origin.y,
 																										0,0,
 																										40,
+																										1,
 																										nil,
 																										true,
 																										39,
