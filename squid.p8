@@ -20,6 +20,8 @@ function _init()
 	objectpool = {}
 	
 	make_player()
+	
+	make_enemy1(60,96, player)
 	//makenpc()
 	
 	//explosions = {}
@@ -178,7 +180,7 @@ function draw_object(obj)
 			obj.draw(obj)
 		--generic sprite draw
 		elseif obj.sprite != nil then
-	   spr(obj.sprite,obj.x%128,obj.y%128)
+	   spr(obj.sprite,flr(obj.x)%128,flr(obj.y)%128)
 		end
 	end
 end
@@ -443,25 +445,29 @@ end
 --]]
 
 
-function make_enemy1(x,y)
-	enemy = {}
+function make_enemy1(x,y, target)
+	enemy = add_object(x,y,
+																				1,1,
+																				-2,
+																				nil,
+																				true,
+																				44,
+																				update_enemy1,
+																				nil)
 	
-	enemy.x = x
-	enemy.y = y
+	//target player by default
+	enemy.target = player
 	
-	enemy.sprite = 44
+
 	enemy.hb = add_hitbox(5,
-																				4,4, //offset
-																				6, //length
-																				6,	//height
-																				-1,
-																				nil, //add oncollision function
-																				nil, //onmapcollision function
-																				enemy)
+																							4,4, //middle offset
+																							6, //length
+																							6,	//height
+																							-1,
+																							nil, //add oncollision function
+																							nil, //onmapcollision function
+																							enemy)
 			
-	//sam finish this																			
-	//enemy.update =
-	
 
 
 	add(enemies, enemy)
@@ -469,16 +475,24 @@ function make_enemy1(x,y)
 end
 
 
-function enm1update()
-		local mapposx, mapposy = map_cell(enemy.x,enemy.y)
-		local pmapx, pmapy = map_cell(player.x,player.y)
+function update_enemy1(enm1)
 	
-		local path = astar(mapposx,mapposy,
-															pmapx,pmapy)
-															
-		
-		
-		
+	local path = astar(enm1.mapcellx,enm1.mapcelly,
+														enm1.target.mapcellx,enm1.target.mapcelly)
+	
+	if path[1] != nil then
+		local pointx,pointy = map_coord(path[1].x, path[1].y)
+	
+		move_toward(enm1, pointx+4,pointy+4, 1)
+	end
+	
+	
+end
+
+//move obj toward x,y world coord
+function move_toward(obj, x,y, speed)
+	obj.dx = sgn(x-obj.x) * speed
+	obj.dy = sgn(y-obj.y) * speed
 end
 -->8
 -- particle effects
@@ -1269,12 +1283,17 @@ function map_cell(x,y)
 	return mapx, mapy
 end
 
-
+--returns the map screen containing x,y
 function map_pos(x,y)
 	local mapx, mapy = map_cell(x,y)
 	local mapposx = (mapx-(mapx%16)) / 16
 	local mapposy = (mapy-(mapy%16)) / 16
 	return mapposx, mapposy
+end
+
+--converts map_cell to map coords
+function map_coord(mapx,mapy)
+	return mapx*8, mapy*8
 end
 
 function contains(table, element)
@@ -1496,7 +1515,7 @@ function astar(startx,starty,
 	insert(frontier, start, 0)
 	
 	came_from = {}
- came_from[vectoidx(start)] = nil
+ came_from[vectoidx(start)] = start
  cost_so_far = {}
  cost_so_far[vectoidx(start)] = 0
  
@@ -1505,11 +1524,13 @@ function astar(startx,starty,
  	local current = frontier[#frontier][1]
  	del(frontier,frontier[#frontier])
  	
+ 	--[[
  	//current == goal
  	if vectoidx(current) == vectoidx(goal) then
  		print("path found")
    break
   end
+  --]]
   
   //print(current.x)
   //print(current.y)
@@ -1534,6 +1555,13 @@ function astar(startx,starty,
     came_from[nxt] = current
   	end
   end
+  
+  //current == goal
+ 	if vectoidx(current) == vectoidx(goal) then
+ 		print("path found")
+   break
+  end
+  
   //print(#frontier)
  end
 	
@@ -1934,7 +1962,7 @@ __map__
 0c0b080404070303050404070303030303030303030303030103030303030301000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 080407030303030303033b010303030810040d03030303030301030303030103000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0611030103030303030303030303010606030303030303030303010101010303000000000000000000000000000000000000000000000000000000000000000303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-0603030101030303032c2c2c0003010507030303030303030303030303030303000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+0603030101030303030303030003010507030303030303030303030303030303000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0619030301030303030000000003030103030303030303030303030303030303000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603030303030303030000000003000103030303030303030303030303030303000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
 0603010303030303030000000000000303030303030303030303030303030303000000000000000000000000000000000000000000000000000000000000000003030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
