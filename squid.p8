@@ -16,6 +16,7 @@ __lua__
 // objectpools
 function _init()
  cls()
+ coroutines = {}
 	hitboxes = {}
 	objectpool = {}
 	
@@ -66,8 +67,14 @@ end
 function _update()
 	//get_mapdata(80,16,16,32) 
 	initialmenu()
+	foreach(objectpool,type_update)
+	
+	foreach(coroutines, update_coroutine)
+
 	foreach(objectpool,update_object)
 	foreach(hitboxes, update_hitbox)
+	
+	//foreach(coroutines, update_coroutine)
 
 	if (xest(player.x/8) == 1 and xest(player.y/8) == 1 and level_slots["loaded"] == "overworld") then
 	 load_level("testing")
@@ -82,17 +89,28 @@ function _update()
 end
 
 
-function update_object(obj)
+function type_update(obj)
+	--type-specific update
+	if(obj.update != nil) then
+		obj.update(obj)
+	end
+end
 
+
+function update_object(obj)
 	if obj.isalive == false then
 	 del(objectpool, obj)
 		del(hitboxes, obj.hb)
 	end
 	
+	//i moved this to it's own func^^
+	//for sequencing reasons
+	--[[
 	--type-specific update
 	if(obj.update != nil) then
 		obj.update(obj)
 	end
+	--]]
 	
 	--track lifetime
 	--lifetime based on hp
@@ -115,6 +133,29 @@ function update_object(obj)
 		obj.isalive = false
 	end
 	
+	
+	--prevent solid objects from entering walls
+	if obj.hb!=nil and obj.hb.issolid then
+		if obj.dx<0 and 0 < #searchmapcols(obj.hb, 0b1, 0,1, -(obj.hb.right-obj.hb.left),-1) then
+			obj.dx = 0
+		end
+		
+		if obj.dx>0 and 0 < #searchmapcols(obj.hb, 0b1, (obj.hb.right-obj.hb.left),1, 0,-1) then
+			obj.dx = 0
+		end
+		
+		if obj.dy<0 and 0 < #searchmapcols(obj.hb, 0b1, 1,0, -1,-(obj.hb.bot-obj.hb.top)) then
+			obj.dy = 0
+		end
+		
+		if obj.dy>0 and 0 < #searchmapcols(obj.hb, 0b1, 1,(obj.hb.bot-obj.hb.top), -1,0) then
+			obj.dy = 0
+		end
+		
+	end
+	
+	
+	
 	--movement
 	obj.x += obj.dx
 	obj.y += obj.dy
@@ -131,6 +172,12 @@ function update_object(obj)
 	obj.mapposx, obj.mapposy = map_pos(obj.x,obj.y)
 	obj.mapcellx, obj.mapcelly = map_cell(obj.x+4,obj.y+4)	
 	
+end
+
+function update_coroutine(cr)
+	if not coresume(cr) then
+		del(coroutines,cr)
+	end
 end
 
 
@@ -165,6 +212,8 @@ function _draw()
 	--print(flr(idxtopoint(idx).y))
 	
 	print(testenmy.hp)
+	
+	print(#coroutines)
 	
 	//local mapx,mapy = map_cell(player.x+2,player.y+2)
 	//draw_path(astar(mapx,mapy, 8,12))
@@ -234,7 +283,7 @@ function make_player()
  player.slotflag = 0
 	player.invis = false
 	--player hurtbox, tag = 0
- player.hb = add_hitbox(0, 4,4, 6,6, -1, 0,player_oncollision, player_onmapcollision, player)
+ player.hb = add_hitbox(0, 4,4, 6,6, -1, true, 0,player_oncollision, player_onmapcollision, player)
 end
 
 // move player
@@ -252,16 +301,16 @@ function move_player()
 	player.dy = 0
 	player.diag = false
 	
-	if (btn(0) and 0 == #searchmapcols(player.hb, 0b1, 0,1, -(player.hb.right-player.hb.left),-1)) then
+	if (btn(0)  )then//and 0 == #searchmapcols(player.hb, 0b1, 0,1, -(player.hb.right-player.hb.left),-1)) then
   player.dx-=1.001
 	end
-	if (btn(1) and 0 == #searchmapcols(player.hb, 0b1, (player.hb.right-player.hb.left),1, 0,-1)) then
+	if (btn(1)  )then//and 0 == #searchmapcols(player.hb, 0b1, (player.hb.right-player.hb.left),1, 0,-1)) then
   player.dx+=1.001
 	end
-	if (btn(2) and 0 == #searchmapcols(player.hb, 0b1, 1,0, -1,-(player.hb.bot-player.hb.top))) then
+	if (btn(2)  )then//and 0 == #searchmapcols(player.hb, 0b1, 1,0, -1,-(player.hb.bot-player.hb.top))) then
   player.dy-=1.001
 	end
-	if (btn(3) and 0 == #searchmapcols(player.hb, 0b1, 1,(player.hb.bot-player.hb.top), -1,0)) then
+	if (btn(3)  )then//and 0 == #searchmapcols(player.hb, 0b1, 1,(player.hb.bot-player.hb.top), -1,0)) then
   player.dy+=1.001
 	end
 	
@@ -439,6 +488,7 @@ function make_enemy1(x,y, hp, target)
 																							6, //length
 																							6,	//height
 																							-1,
+																							true,
 																							0,
 																							enm1_oncollision, //add oncollision function
 																							nil, //onmapcollision function
@@ -457,15 +507,18 @@ function update_enemy1(enm1)
 	local path = astar(enm1.mapcellx,enm1.mapcelly,
 														enm1.target.mapcellx,enm1.target.mapcelly)
 	
-	if path != nil and path[1] != nil then
-		local pointx,pointy = map_coord(path[1].x, path[1].y)
 	
-		move_toward(enm1, pointx,pointy, 1)
-	else
+	if path != nil then
+		if #path <= 1 then
+			move_toward(enm1, enm1.target.x,enm1.target.y, .5)
+		else
+			local pointx,pointy = map_coord(path[1].x, path[1].y)
+			move_toward(enm1, pointx,pointy, .5)
+		end
+	else --add idle behavior here
 		enm1.dx = 0
 		enm1.dy = 0
 	end
-	
 	
 end
 
@@ -487,8 +540,27 @@ end
 
 
 function enm1_oncollision(enm1hb, otherhb)
+	--sword
+	if otherhb.tag == 4 then
+		knockback(enm1hb.parent, 2,0, 4)
+	end
 	
-	
+end
+
+
+function knockback(
+obj,dx,dy, duration)
+  
+  local c = cocreate(function()
+    for i=1,duration do
+     obj.dx = dx
+     obj.dy = dy
+     
+     yield()
+    end
+  end)
+  
+  add(coroutines,c)
 end
 -->8
 -- particle effects
@@ -623,6 +695,7 @@ function add_particle(x,y,
 																					hb.xlen,
 																					hb.ylen,
 																					-1,
+																					hb.issolid,
 																					hb.damage,
 																					hb.oncollision,
 																					hb.onmapcollision,
@@ -661,7 +734,7 @@ function add_bomb(x,y)
 	
 	set_movement_from_face(bomb,input_face,0)
 	
-	bomb.hb = add_hitbox(2,4,5,5,5,-1, 0, bomb_oncollision, nil, bomb)
+	bomb.hb = add_hitbox(2,4,5,5,5,-1, false, 0, bomb_oncollision, nil, bomb)
 
 end
 
@@ -685,6 +758,7 @@ function explode(bomb)
  											bomb.x+4,bomb.y+4,
  											24,24,
  											3,
+ 											false,
  											50,
  											explo_oncollision,
  											nil)
@@ -694,6 +768,7 @@ function explode(bomb)
  											bomb.x+4,bomb.y+4,
  											16,16,
  											3,
+ 											false,
  											17,
  											nil,
  											explo_onmapcollision)
@@ -967,7 +1042,7 @@ function sword()
 			if player.face == k then
 				//sword particle + hitbox					
 				add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false, false,
-					add_hitbox(4, 0, 0, 0,0, 0, 1, sword_oncollision, sword_onmapcollision))
+					add_hitbox(4, 0, 0, 0,0, 0, false, 1, sword_oncollision, sword_onmapcollision))
 			
 			end
 		end
@@ -1031,6 +1106,7 @@ function add_hitbox(tag,
 																				xlen, //length
 																				ylen,	//height
 																				duration,
+																				issolid,
 																				damage,
 																				oncolfunc, //oncollision function
 																				onmapcolfunc, //onmapcollision function
@@ -1043,12 +1119,12 @@ function add_hitbox(tag,
 	hitbox.xlen = xlen
 	hitbox.ylen = ylen
 	
+	hitbox.issolid = issolid
 	
 	--lifetime of hb
 	---set duration = -1
 	---for parent-based lifetime
 	hitbox.duration = duration
-	
 	hitbox.damage = damage
 	
 	//oncollision() function
@@ -1324,7 +1400,7 @@ function add_arrow(origin)
   arrow.y = flr(player.y)+0.5
 	end
 	
-	arrow.hb = add_hitbox(1,4,4,3,3,-1, 80,  arrow_oncollision, arrow_onmapcollision, arrow)
+	arrow.hb = add_hitbox(1,4,4,3,3,-1, true, 80,  arrow_oncollision, arrow_onmapcollision, arrow)
 	
 end
 
