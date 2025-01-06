@@ -210,7 +210,6 @@ function _draw()
 	--print(flr(idxtopoint(idx).y))
 	
 //	print(testenmy.hp)
-	
 	print(#coroutines)
 	
 	//local mapx,mapy = map_cell(player.x+2,player.y+2)
@@ -317,8 +316,8 @@ function move_player()
   // roughly normalize movement
   // values. using .75 here for
   // fluidity and smoothness.
-  player.dx*=.75
-  player.dy*=.75
+  player.dx*=.707
+  player.dy*=.707
   // set diag to true
   player.diag = true
 	end
@@ -329,7 +328,7 @@ function move_player()
 	// pixel. only happens on first
 	// frame of diag movement.
 	
-	if (player.diag  and not (player.face != player.prev_face)) then
+	if (player.diag) then //  and not (player.face != player.prev_face)) then
   player.x = flr(player.x)+0.5
   player.y = flr(player.y)+0.5
  end
