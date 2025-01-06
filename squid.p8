@@ -188,7 +188,7 @@ function _draw()
 	draw_map()
 	
 	foreach(objectpool,draw_object)
-	//foreach(hitboxes, draw_hitbox)
+	foreach(hitboxes, draw_hitbox)
 	
 	pal(make_kv(16,level_slots["pallete"]))
 	
@@ -1043,6 +1043,9 @@ end
 function sword()
 		for k,v in pairs(global_faces) do
 			if player.face == k then
+				//lunge test
+				//knockback(player, 3*v[1],3*v[2], 4)
+				
 				//sword particle + hitbox					
 				add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false, false,
 					add_hitbox(4, 0, 0, 0,0, 0, false, 1, 2*v[1],2*v[2],4, sword_oncollision, sword_onmapcollision))
