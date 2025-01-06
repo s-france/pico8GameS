@@ -155,7 +155,6 @@ function update_object(obj)
 	end
 	
 	
-	
 	--movement
 	obj.x += obj.dx
 	obj.y += obj.dy
@@ -179,7 +178,6 @@ function update_coroutine(cr)
 		del(coroutines,cr)
 	end
 end
-
 
 
 // routine updates every frame
@@ -283,7 +281,7 @@ function make_player()
  player.slotflag = 0
 	player.invis = false
 	--player hurtbox, tag = 0
- player.hb = add_hitbox(0, 4,4, 6,6, -1, true, 0,player_oncollision, player_onmapcollision, player)
+ player.hb = add_hitbox(0, 4,4, 6,6, -1, true, 0, 0,0,0, player_oncollision, player_onmapcollision, player)
 end
 
 // move player
@@ -490,6 +488,7 @@ function make_enemy1(x,y, hp, target)
 																							-1,
 																							true,
 																							0,
+																							0,0,0,
 																							enm1_oncollision, //add oncollision function
 																							nil, //onmapcollision function
 																							enemy)
@@ -542,7 +541,7 @@ end
 function enm1_oncollision(enm1hb, otherhb)
 	--sword
 	if otherhb.tag == 4 then
-		knockback(enm1hb.parent, 2,0, 4)
+		//knockback(enm1hb.parent, 2*otherhb.facex,2*otherhb.facey, 4)
 	end
 	
 end
@@ -697,6 +696,8 @@ function add_particle(x,y,
 																					-1,
 																					hb.issolid,
 																					hb.damage,
+																					hb.kbx,hb.kby,
+																					hb.kbduration,
 																					hb.oncollision,
 																					hb.onmapcollision,
 																					part)
@@ -734,7 +735,7 @@ function add_bomb(x,y)
 	
 	set_movement_from_face(bomb,input_face,0)
 	
-	bomb.hb = add_hitbox(2,4,5,5,5,-1, false, 0, bomb_oncollision, nil, bomb)
+	bomb.hb = add_hitbox(2,4,5,5,5,-1, false, 0, 0,0,0, bomb_oncollision, nil, bomb)
 
 end
 
@@ -760,6 +761,7 @@ function explode(bomb)
  											3,
  											false,
  											50,
+ 											3,3,2,
  											explo_oncollision,
  											nil)
  
@@ -770,6 +772,7 @@ function explode(bomb)
  											3,
  											false,
  											17,
+ 											4,4,2,
  											nil,
  											explo_onmapcollision)
  
@@ -1042,7 +1045,7 @@ function sword()
 			if player.face == k then
 				//sword particle + hitbox					
 				add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false, false,
-					add_hitbox(4, 0, 0, 0,0, 0, false, 1, sword_oncollision, sword_onmapcollision))
+					add_hitbox(4, 0, 0, 0,0, 0, false, 1, 2*v[1],2*v[2],4, sword_oncollision, sword_onmapcollision))
 			
 			end
 		end
@@ -1108,6 +1111,9 @@ function add_hitbox(tag,
 																				duration,
 																				issolid,
 																				damage,
+																				kbx,
+																				kby,
+																				kbduration,
 																				oncolfunc, //oncollision function
 																				onmapcolfunc, //onmapcollision function
 																				parent)
@@ -1125,7 +1131,11 @@ function add_hitbox(tag,
 	---set duration = -1
 	---for parent-based lifetime
 	hitbox.duration = duration
+	
 	hitbox.damage = damage
+	hitbox.kbx = kbx
+	hitbox.kby = kby
+	hitbox.kbduration = kbduration
 	
 	//oncollision() function
 	if oncolfunc != nil then
@@ -1200,9 +1210,14 @@ function update_hitbox(hb)
  for i,j in pairs(hitboxes) do
 			//check for collision
 			if j != hb and (hbcollision(hb,j)) then
-
+				
 				if hb.parent != nil then
-					hb.parent.hp -= j.damage
+					if not check_parent(hb,j) then 	
+						//apply damage
+						hb.parent.hp -= j.damage
+						//apply knockback
+						knockback(hb.parent,j.kbx,j.kby, j.kbduration)
+					end
 				end
 				
 				if hb.oncollision != nil then
@@ -1346,6 +1361,22 @@ function set_movement_from_face(object,
 		object.dy = 0
 	end																													
 end
+
+
+function check_parent(obj1, obj2)
+	while obj1.parent != nil do
+		local tobj2 = obj2
+		while tobj2.parent != nil do
+			if obj1.parent == tobj2.parent then
+				return true
+			end
+			tobj2 = tobj2.parent
+		end
+		obj1 = obj1.parent
+	end
+	
+	return false
+end
 -->8
 -- arrows and bow
 // this tab contains code for
@@ -1400,7 +1431,7 @@ function add_arrow(origin)
   arrow.y = flr(player.y)+0.5
 	end
 	
-	arrow.hb = add_hitbox(1,4,4,3,3,-1, true, 80,  arrow_oncollision, arrow_onmapcollision, arrow)
+	arrow.hb = add_hitbox(1,4,4,3,3,-1, true, 80, 2*global_faces[player.face][1],2*global_faces[player.face][2],3,  arrow_oncollision, arrow_onmapcollision, arrow)
 	
 end
 
@@ -1413,12 +1444,18 @@ end
 
 
 function arrow_oncollision(arrowhb, otherhb)
+	
+	if otherhb.issolid then
+		arrowhb.parent.duration = 0
+	end
+	
 	//add hb collision behavior here!
 	if (otherhb.tag == 2 and otherhb.parent != nil ) then
 		if arrowhb.parent.isalive == false then
 		 otherhb.parent.duration = 0
 		end
 	end
+
 	
 end
 
