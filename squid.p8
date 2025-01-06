@@ -1417,10 +1417,6 @@ function add_arrow(origin)
 		end
 	else 
 	 arrow.sprite = 40
-	 arrow.x = flr(arrow.x)
-  arrow.y = flr(arrow.y)
-	 arrow.dx*=.75
-	 arrow.dy*=.75
 	end
 	
 	arrow.flipx = false
@@ -1436,8 +1432,10 @@ function add_arrow(origin)
 	end
 	
 	if (arrow.sprite == 40) then
-	 arrow.x = flr(player.x)+0.5
-  arrow.y = flr(player.y)+0.5
+	 arrow.x = flr(arrow.x)+0.5
+  arrow.y = flr(arrow.y)+0.5
+	 arrow.dx*=.75
+	 arrow.dy*=.75
 	end
 	
 	arrow.hb = add_hitbox(1,4,4,3,3,-1, true, 80, 2*global_faces[player.face][1],2*global_faces[player.face][2],3,  arrow_oncollision, arrow_onmapcollision, arrow)
