@@ -486,8 +486,8 @@ function make_enemy1(x,y, hp, target)
 																							6,	//height
 																							-1,
 																							true,
-																							0,
-																							0,0,0,
+																							50,
+																							0,0,2,
 																							enm1_oncollision, //add oncollision function
 																							nil, //onmapcollision function
 																							enemy)
@@ -505,7 +505,6 @@ function update_enemy1(enm1)
 	local path = astar(enm1.mapcellx,enm1.mapcelly,
 														enm1.target.mapcellx,enm1.target.mapcelly)
 	
-	
 	if path != nil then
 		if #path <= 1 then
 			move_toward(enm1, enm1.target.x,enm1.target.y, .5)
@@ -517,6 +516,10 @@ function update_enemy1(enm1)
 		enm1.dx = 0
 		enm1.dy = 0
 	end
+	
+	--set attack kb
+	enm1.hb.kbx = (4*enm1.dx) + sgn(enm1.dx)
+	enm1.hb.kby = (4*enm1.dy) + sgn(enm1.dy)
 	
 end
 
@@ -551,8 +554,12 @@ obj,dx,dy, duration)
   
   local c = cocreate(function()
     for i=1,duration do
-     obj.dx = dx
-     obj.dy = dy
+     if dx != 0 then
+     	obj.dx = dx
+     end
+     if dy != 0 then
+     	obj.dy = dy
+     end
      
      yield()
     end
@@ -760,7 +767,7 @@ function explode(bomb)
  											3,
  											false,
  											50,
- 											3,3,2,
+ 											0,0,2,
  											explo_oncollision,
  											nil)
  
@@ -771,9 +778,59 @@ function explode(bomb)
  											3,
  											false,
  											17,
- 											4,4,2,
+ 											0,0,2,
  											nil,
  											explo_onmapcollision)
+ 
+ add_hitbox(1,
+ 											bomb.x,bomb.y+4,
+ 											8,16,
+ 											3,
+ 											false,
+ 											0,
+ 											-4,0,2
+ 											)
+ add_hitbox(1,
+ 											bomb.x+8,bomb.y+4,
+ 											8,16,
+ 											3,
+ 											false,
+ 											0,
+ 											4,0,2
+ 											)
+ add_hitbox(1,
+ 											bomb.x+4,bomb.y,
+ 											16,8,
+ 											3,
+ 											false,
+ 											0,
+ 											0,-4,2
+ 											)
+ add_hitbox(1,
+ 											bomb.x+4,bomb.y+8,
+ 											16,8,
+ 											3,
+ 											false,
+ 											0,
+ 											0,4,2
+ 											)
+ 
+ --[[
+ add_hitbox(tag,
+												x,y, //position
+												xlen, //length
+												ylen,	//height
+												duration,
+												issolid,
+												damage,
+												kbx,
+												kby,
+												kbduration,
+												oncolfunc, //oncollision function
+												onmapcolfunc, //onmapcollision function
+												parent)
+	--]]
+ 
  
 end
 
