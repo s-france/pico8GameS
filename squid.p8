@@ -1,7 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
- -- main functions
+-- main functions
 // project squidgame
 // by sam france, frank bubbico
 //
@@ -222,8 +222,8 @@ function _draw()
 	
 	pal(make_kv(16,level_slots["pallete"]))
 	
-	print(player.dx)
-	print(player.dy)
+	//print(player.dx)
+	//print(player.dy)
 	
 	--[[
 	print(flr(player.x))
