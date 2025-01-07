@@ -297,7 +297,7 @@ function make_player()
   ["bow"] = {42, 0, 0},
  	["ice boots"] = {43, 0}, 
  	["satchel"] = {58, 0 },
- 	["magnet"] = {17, 0},
+ 	["magnet"] = {17, 0, false},
  	["sword"] = {59, 0} }
  player.resources = {
   ["bombs"] = {0, 0},
