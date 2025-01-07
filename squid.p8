@@ -22,7 +22,7 @@ function _init()
 	
 	make_player()
 	
-	testenmy = make_enemy1(60,96, 200, player)
+	testenmy = make_enemy1(60,96, 50, player)
 	//makenpc()
 	
 	//explosions = {}
@@ -133,23 +133,53 @@ function update_object(obj)
 		obj.isalive = false
 	end
 	
-	
+	--[[
 	--prevent solid objects from entering walls
 	if obj.hb!=nil and obj.hb.issolid then
+		--left collision
 		if obj.dx<0 and 0 < #searchmapcols(obj.hb, 0b1, 0,1, -(obj.hb.right-obj.hb.left),-1) then
 			obj.dx = 0
 		end
-		
+		--right collision
 		if obj.dx>0 and 0 < #searchmapcols(obj.hb, 0b1, (obj.hb.right-obj.hb.left),1, 0,-1) then
 			obj.dx = 0
 		end
-		
+		--up collision
 		if obj.dy<0 and 0 < #searchmapcols(obj.hb, 0b1, 1,0, -1,-(obj.hb.bot-obj.hb.top)) then
 			obj.dy = 0
 		end
-		
+		--down collision
 		if obj.dy>0 and 0 < #searchmapcols(obj.hb, 0b1, 1,(obj.hb.bot-obj.hb.top), -1,0) then
 			obj.dy = 0
+		end
+		
+	end
+	--]]
+	
+	---[[
+	//new new new
+	--prevent solid objects from entering walls
+	if obj.hb!=nil and obj.hb.issolid then
+		
+		--left collision			
+		while obj.dx<0 and 0 < #searchmapcols(obj.hb, 0b1, 2+obj.dx,1, -(obj.hb.right-obj.hb.left),-1) do
+			//obj.dx += 1
+			obj.dx = mid(obj.dx+1,0,-100000)
+		end
+		--right collision
+		while obj.dx>0 and 0 < #searchmapcols(obj.hb, 0b1, (obj.hb.right-obj.hb.left),1, -1+obj.dx,-1) do
+			//obj.dx -= 1
+			obj.dx = mid(obj.dx-1,0,100000)
+		end
+		--up collision
+		while obj.dy<0 and 0 < #searchmapcols(obj.hb, 0b1, 1,2+obj.dy, -1,-(obj.hb.bot-obj.hb.top)) do
+			//obj.dy += 1
+			obj.dy = mid(obj.dy+1,0,-100000)
+		end
+		--down collision
+		while obj.dy>0 and 0 < #searchmapcols(obj.hb, 0b1, 1,(obj.hb.bot-obj.hb.top), -1,-1+obj.dy) do
+			//obj.dy -= 1
+			obj.dy = mid(obj.dy-1,0,100000)
 		end
 		
 	end
@@ -192,6 +222,9 @@ function _draw()
 	
 	pal(make_kv(16,level_slots["pallete"]))
 	
+	print(player.dx)
+	print(player.dy)
+	
 	--[[
 	print(flr(player.x))
 	print(flr(player.y))
@@ -209,8 +242,8 @@ function _draw()
 	--print(flr(idxtopoint(idx).x))
 	--print(flr(idxtopoint(idx).y))
 	
-//	print(testenmy.hp)
-	print(#coroutines)
+ //print(testenmy.hp)
+	//print(#coroutines)
 	
 	//local mapx,mapy = map_cell(player.x+2,player.y+2)
 	//draw_path(astar(mapx,mapy, 8,12))
@@ -298,16 +331,16 @@ function move_player()
 	player.dy = 0
 	player.diag = false
 	
-	if (btn(0)  )then//and 0 == #searchmapcols(player.hb, 0b1, 0,1, -(player.hb.right-player.hb.left),-1)) then
+	if (btn(0)  )then
   player.dx-=1.001
 	end
-	if (btn(1)  )then//and 0 == #searchmapcols(player.hb, 0b1, (player.hb.right-player.hb.left),1, 0,-1)) then
+	if (btn(1)  )then
   player.dx+=1.001
 	end
-	if (btn(2)  )then//and 0 == #searchmapcols(player.hb, 0b1, 1,0, -1,-(player.hb.bot-player.hb.top))) then
+	if (btn(2)  )then
   player.dy-=1.001
 	end
-	if (btn(3)  )then//and 0 == #searchmapcols(player.hb, 0b1, 1,(player.hb.bot-player.hb.top), -1,0)) then
+	if (btn(3)  )then
   player.dy+=1.001
 	end
 	
@@ -316,8 +349,8 @@ function move_player()
   // roughly normalize movement
   // values. using .75 here for
   // fluidity and smoothness.
-  player.dx*=.707
-  player.dy*=.707
+  //player.dx*=.707
+  //player.dy*=.707
   // set diag to true
   player.diag = true
 	end
@@ -487,7 +520,7 @@ function make_enemy1(x,y, hp, target)
 																							-1,
 																							true,
 																							50,
-																							0,0,2,
+																							0,0,5,
 																							enm1_oncollision, //add oncollision function
 																							nil, //onmapcollision function
 																							enemy)
@@ -541,9 +574,16 @@ end
 
 
 function enm1_oncollision(enm1hb, otherhb)
-	--sword
-	if otherhb.tag == 4 then
-		//knockback(enm1hb.parent, 2*otherhb.facex,2*otherhb.facey, 4)
+	--player collision
+	if otherhb.tag == 0 then
+		//calc direction
+		local kbx = (otherhb.x-enm1hb.x)/4
+		local kby = (otherhb.y-enm1hb.y)/4
+		//knock player back
+		knockback(otherhb.parent,kbx,kby, enm1hb.kbduration)
+		
+		knockback(enm1hb.parent,-kbx,-kby,2)
+		
 	end
 	
 end
@@ -553,6 +593,9 @@ function knockback(
 obj,dx,dy, duration)
   
   local c = cocreate(function()
+    local initdx = obj.dx
+  		local initdy = obj.dy
+    
     for i=1,duration do
      if dx != 0 then
      	obj.dx = dx
@@ -563,6 +606,9 @@ obj,dx,dy, duration)
      
      yield()
     end
+    
+   	obj.dx = initdx
+   	obj.dy = initdy
   end)
   
   add(coroutines,c)
@@ -746,11 +792,6 @@ function add_bomb(x,y)
 end
 
 // update_bomb
-// 
-// updated the local information
-// of a given bomb until timer 
-// hits 0, which triggers an
-// explosion (aka bomb.sprite = 0)
 function update_bomb(bomb)
 	if (bomb.isalive == false) then
 	 explode(bomb)
@@ -780,58 +821,7 @@ function explode(bomb)
  											17,
  											0,0,2,
  											nil,
- 											explo_onmapcollision)
- 
- add_hitbox(1,
- 											bomb.x,bomb.y+4,
- 											8,16,
- 											3,
- 											false,
- 											0,
- 											-4,0,2
- 											)
- add_hitbox(1,
- 											bomb.x+8,bomb.y+4,
- 											8,16,
- 											3,
- 											false,
- 											0,
- 											4,0,2
- 											)
- add_hitbox(1,
- 											bomb.x+4,bomb.y,
- 											16,8,
- 											3,
- 											false,
- 											0,
- 											0,-4,2
- 											)
- add_hitbox(1,
- 											bomb.x+4,bomb.y+8,
- 											16,8,
- 											3,
- 											false,
- 											0,
- 											0,4,2
- 											)
- 
- --[[
- add_hitbox(tag,
-												x,y, //position
-												xlen, //length
-												ylen,	//height
-												duration,
-												issolid,
-												damage,
-												kbx,
-												kby,
-												kbduration,
-												oncolfunc, //oncollision function
-												onmapcolfunc, //onmapcollision function
-												parent)
-	--]]
- 
- 
+ 											explo_onmapcollision) 
 end
 
 
@@ -852,13 +842,15 @@ function bomb_oncollision(bombhb, otherhb)
 		  otherhb.parent.duration = bombhb.parent.duration
 		 end
 
-		 
+		end
+		--[[
 	 --sword collision
 	 elseif (otherhb.tag == 4 and otherhb.parent != nil) then
 	 	bombhb.parent.dx = global_faces[player.face][1]
 	 	bombhb.parent.dy = global_faces[player.face][2]
 	 
 	 end
+	 --]]
 	 
 	 //add other collision behavior here
 end
@@ -866,6 +858,12 @@ end
 
 function explo_oncollision(explohb, otherhb)
 	//behavior for explosion hb colliding
+	if otherhb.parent != nil then
+		//calc direction
+		local kbx = mid(otherhb.x-explohb.x, -3,3)
+		local kby = mid(otherhb.y-explohb.y, -3,3)
+		knockback(otherhb.parent,kbx,kby, explohb.kbduration)
+	end
 
 end
 
@@ -1494,7 +1492,7 @@ function add_arrow(origin)
 	 arrow.dy*=.75
 	end
 	
-	arrow.hb = add_hitbox(1,4,4,3,3,-1, true, 80, 2*global_faces[player.face][1],2*global_faces[player.face][2],3,  arrow_oncollision, arrow_onmapcollision, arrow)
+	arrow.hb = add_hitbox(1,4,4,3,3,-1, true, 80, 2*global_faces[player.face][1],2*global_faces[player.face][2],4,  arrow_oncollision, arrow_onmapcollision, arrow)
 	
 end
 
