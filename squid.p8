@@ -22,7 +22,7 @@ function _init()
 	
 	make_player()
 	
-	testenmy = make_enemy1(60,96, 50, player)
+	//testenmy = make_enemy1(60,96, 50, player)
 	//makenpc()
 	
 	//explosions = {}
