@@ -160,26 +160,42 @@ function update_object(obj)
 	//new new new
 	--prevent solid objects from entering walls
 	if obj.hb!=nil and obj.hb.issolid then
-		
-		--left collision			
-		while obj.dx<0 and 0 < #searchmapcols(obj.hb, 0b1, 2+obj.dx,1, -(obj.hb.right-obj.hb.left),-1) do
+			
+		--left collision
+		while obj.dx<0 and 0 < #searchmapcols(obj.hb, 0b1, 0+(flr(abs(obj.dx+.5))*sgn(obj.dx)),1, -(obj.hb.right-obj.hb.left),-1) do
 			//obj.dx += 1
-			obj.dx = mid(obj.dx+1,0,-100000)
+			if obj.dx>-1 then
+				obj.dx = 0
+			else
+				obj.dx = mid(obj.dx+1,0,-100000)
+			end
 		end
 		--right collision
-		while obj.dx>0 and 0 < #searchmapcols(obj.hb, 0b1, (obj.hb.right-obj.hb.left),1, -1+obj.dx,-1) do
+		while obj.dx>0 and 0 < #searchmapcols(obj.hb, 0b1, (obj.hb.right-obj.hb.left),1, -1+(flr(abs(obj.dx+.5))*sgn(obj.dx)),-1) do
 			//obj.dx -= 1
-			obj.dx = mid(obj.dx-1,0,100000)
+			if obj.dx<1 then
+				obj.dx = 0
+			else
+				obj.dx = mid(obj.dx-1,0,100000)
+			end
 		end
 		--up collision
-		while obj.dy<0 and 0 < #searchmapcols(obj.hb, 0b1, 1,2+obj.dy, -1,-(obj.hb.bot-obj.hb.top)) do
+		while obj.dy<0 and 0 < #searchmapcols(obj.hb, 0b1, 1,0+(flr(abs(obj.dy+.5))*sgn(obj.dy)), -1,-(obj.hb.bot-obj.hb.top)) do
 			//obj.dy += 1
-			obj.dy = mid(obj.dy+1,0,-100000)
+			if obj.dy>-1 then
+				obj.dy = 0
+			else
+				obj.dy = mid(obj.dy+1,0,-100000)
+			end
 		end
 		--down collision
-		while obj.dy>0 and 0 < #searchmapcols(obj.hb, 0b1, 1,(obj.hb.bot-obj.hb.top), -1,-1+obj.dy) do
+		while obj.dy>0 and 0 < #searchmapcols(obj.hb, 0b1, 1,(obj.hb.bot-obj.hb.top), -1,-1+(flr(abs(obj.dy+.5))*sgn(obj.dy))) do
 			//obj.dy -= 1
-			obj.dy = mid(obj.dy-1,0,100000)
+			if obj.dy<1 then
+				obj.dy = 0
+			else
+				obj.dy = mid(obj.dy-1,0,100000)
+			end
 		end
 		
 	end
@@ -222,8 +238,8 @@ function _draw()
 	
 	pal(make_kv(16,level_slots["pallete"]))
 	
-	//print(player.dx)
-	//print(player.dy)
+	print(player.dx)
+	print(player.dy)
 	
 	--[[
 	print(flr(player.x))
@@ -349,8 +365,8 @@ function move_player()
   // roughly normalize movement
   // values. using .75 here for
   // fluidity and smoothness.
-  //player.dx*=.707
-  //player.dy*=.707
+  player.dx*=.707
+  player.dy*=.707
   // set diag to true
   player.diag = true
 	end
@@ -361,10 +377,11 @@ function move_player()
 	// pixel. only happens on first
 	// frame of diag movement.
 	
-	if (player.diag) then //  and not (player.face != player.prev_face)) then
+	if (player.diag) and (player.face != player.prev_face) then
   player.x = flr(player.x)+0.5
   player.y = flr(player.y)+0.5
  end
+ 
 	
 	// set new previous face for
 	// the next frame
