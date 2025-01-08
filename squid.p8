@@ -1539,10 +1539,10 @@ end
 
 function arrow_onmapcollision(arrowhb)
 	//colliding with solid obj
-	if ( 0 != #searchmapcols(arrowhb, 0b1, 0, 0, 0, 0)) then 
+	if ( 0 != #searchmapcols(arrowhb, 0b1, 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy), 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy))) then 
 	 sfx(10)
 	 //delete arrow on col
-	 arrowhb.parent.duration = 0	 
+	 arrowhb.parent.duration = 0
 	end
 	
 end
