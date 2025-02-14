@@ -22,6 +22,7 @@ function _init()
 	
 	make_player()
 	
+	testenmy = make_enemy1(60,108, 50, player)
 	//testenmy = make_enemy1(60,96, 50, player)
 	//makenpc()
 	
@@ -55,7 +56,7 @@ function _init()
 	["pallete"] = {1,2,3,4,5,6,7,8,9,10,132,12,13,14,15,0},
 	["curmusic"] =11,
 	["prevmusic"] = 0,
-	["background"] = 0
+	["background"] = 1
 	}
 	
 	menuitem(1,"inventory", openinv)
@@ -73,8 +74,6 @@ function _update()
 
 	foreach(objectpool,update_object)
 	foreach(hitboxes, update_hitbox)
-	
-	//foreach(coroutines, update_coroutine)
 
 	if (xest(player.x/8) == 1 and xest(player.y/8) == 1 and level_slots["loaded"] == "overworld") then
 	 load_level("testing")
@@ -90,6 +89,7 @@ end
 
 
 function type_update(obj)
+	obj.diag = false
 	--type-specific update
 	if(obj.update != nil) then
 		obj.update(obj)
@@ -155,7 +155,9 @@ function update_object(obj)
 		
 	end
 	--]]
-	
+	if (obj.dx*obj.dy != 0) then
+		obj.diag = true
+	end
 	---[[
 	//new new new
 	--prevent solid objects from entering walls
@@ -200,6 +202,15 @@ function update_object(obj)
 		
 	end
 	
+	if (obj.diag == true and obj.dx*obj.dy != 0 and obj.prevdiag == false) then
+	 if  (abs(obj.dx) > 0.5 or abs(obj.dy) > 0.5) then
+	  obj.dx *= .75
+	  obj.dy *= .75
+	  obj.x = flr(obj.x)+0.5
+	  obj.y = flr(obj.y)+0.5
+	 end
+	 obj.diag = false
+	end
 	
 	--movement
 	obj.x += obj.dx
@@ -217,6 +228,7 @@ function update_object(obj)
 	obj.mapposx, obj.mapposy = map_pos(obj.x,obj.y)
 	obj.mapcellx, obj.mapcelly = map_cell(obj.x+4,obj.y+4)	
 	
+	obj.prev_diag = obj.diag
 end
 
 function update_coroutine(cr)
@@ -232,14 +244,14 @@ function _draw()
 	cls(level_slots["background"])
 	bomb_animation()
 	draw_map()
-	
 	foreach(objectpool,draw_object)
 	foreach(hitboxes, draw_hitbox)
-	
 	pal(make_kv(16,level_slots["pallete"]))
 	
 	print(player.dx)
 	print(player.dy)
+	print(player.diag)
+	print(player.prevdiag)
 	
 	--[[
 	print(flr(player.x))
@@ -360,13 +372,14 @@ function move_player()
   player.dy+=1.001
 	end
 	
+	--[[
 	// diagonal check
 	if (player.dx*player.dy != 0) then
   // roughly normalize movement
   // values. using .75 here for
   // fluidity and smoothness.
-  player.dx*=.75
-  player.dy*=.75
+  //player.dx*=.75
+  //player.dy*=.75
   // set diag to true
   player.diag = true
 	end
@@ -387,6 +400,7 @@ function move_player()
 	// the next frame
  player.prev_face = player.face
 	// end!
+	--]]
 end
 
 // update player
@@ -956,9 +970,9 @@ end
 function openslot(b)
 	clearmenu()
 		menuitem(1, "exit slot "..player.slotflag, openinv )
-		displayitemtwo(1,player.working_inventory)
-		displayitemtwo(2,player.working_inventory)
-		displayitemtwo(3,player.working_inventory)
+		for i = 1,3,1 do
+		displayitemtwo(i,player.working_inventory)
+		end
 		menuitem(5, "next page ->", nextslotpage)
 	return true
 end
@@ -1383,6 +1397,9 @@ function add_object(x,y,
 	obj.dx = dx
 	obj.dy = dy
 	
+	obj.diag = false
+	obj.prevdiag = false
+	
 	obj.mapposx, obj.mapposy = map_pos(x,y)
 	obj.mapcellx, obj.mapcelly = map_cell(x,y)
 	
@@ -1502,13 +1519,6 @@ function add_arrow(origin)
 		arrow.flipx = true
 	end
 	
-	if (arrow.sprite == 40) then
-	 arrow.x = flr(arrow.x)+0.5
-  arrow.y = flr(arrow.y)+0.5
-	 arrow.dx*=.75
-	 arrow.dy*=.75
-	end
-	
 	arrow.hb = add_hitbox(1,4,4,3,3,-1, true, 80, 2*global_faces[player.face][1],2*global_faces[player.face][2],4,  arrow_oncollision, arrow_onmapcollision, arrow)
 	
 end
@@ -1567,7 +1577,7 @@ function astar(startx,starty,
  cost_so_far = {}
  cost_so_far[vectoidx(start)] = 0
  
- while (#frontier > 0 and #frontier < 1000) do
+ while (#frontier > 0 and #frontier < 20) do
  	//current x,y point
  	local current = frontier[#frontier][1]
  	del(frontier,frontier[#frontier])
