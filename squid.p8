@@ -22,7 +22,7 @@ function _init()
 	
 	make_player()
 	
-	testenmy = make_enemy1(60,108, 50, player)
+	//testenmy = make_enemy1(60,108, 50, player)
 	//testenmy = make_enemy1(60,96, 50, player)
 	//makenpc()
 	
@@ -198,9 +198,8 @@ function update_object(obj)
 	end
 	
 	--movement
-	
-	//obj.spd
-	//obj.dir
+	obj.dx = obj.spd * cos(obj.dir)
+	obj.dy = obj.spd * sin(obj.dir)
 	
 	obj.x += obj.dx
 	obj.y += obj.dy
@@ -346,18 +345,33 @@ function move_player()
 	player.dx = 0
 	player.dy = 0
 	
+	player.spd = 1
+	
+	local x =0
+	local y =0
+	
 	if (btn(0)  )then
-  player.dx-=.75
+  //player.dx-=.75
+  x-=1
 	end
 	if (btn(1)  )then
-  player.dx+=.75
+  //player.dx+=.75
+  x+=1
 	end
 	if (btn(2)  )then
-  player.dy-=.75
+  //player.dy-=.75
+  y-=1
 	end
 	if (btn(3)  )then
-  player.dy+=.75
+  //player.dy+=.75
+  y+=1
 	end
+	
+	if x==0 and y==0 then
+		player.spd = 0
+	end
+	
+	player.dir = atan2(x,y)
 	
 end
 
@@ -1432,6 +1446,7 @@ function check_parent(obj1, obj2)
 	
 	return false
 end
+
 -->8
 -- arrows and bow
 // this tab contains code for
