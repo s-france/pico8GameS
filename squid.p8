@@ -89,7 +89,6 @@ end
 
 
 function type_update(obj)
-	obj.diag = false
 	--type-specific update
 	if(obj.update != nil) then
 		obj.update(obj)
@@ -133,31 +132,13 @@ function update_object(obj)
 		obj.isalive = false
 	end
 	
-	--[[
-	--prevent solid objects from entering walls
-	if obj.hb!=nil and obj.hb.issolid then
-		--left collision
-		if obj.dx<0 and 0 < #searchmapcols(obj.hb, 0b1, 0,1, -(obj.hb.right-obj.hb.left),-1) then
-			obj.dx = 0
-		end
-		--right collision
-		if obj.dx>0 and 0 < #searchmapcols(obj.hb, 0b1, (obj.hb.right-obj.hb.left),1, 0,-1) then
-			obj.dx = 0
-		end
-		--up collision
-		if obj.dy<0 and 0 < #searchmapcols(obj.hb, 0b1, 1,0, -1,-(obj.hb.bot-obj.hb.top)) then
-			obj.dy = 0
-		end
-		--down collision
-		if obj.dy>0 and 0 < #searchmapcols(obj.hb, 0b1, 1,(obj.hb.bot-obj.hb.top), -1,0) then
-			obj.dy = 0
-		end
-		
-	end
-	--]]
-	if (obj.dx*obj.dy != 0) then
+	if abs(obj.dx)>0 and abs(obj.dy)>0 then
 		obj.diag = true
+	else
+		obj.diag = false
 	end
+	
+	
 	---[[
 	//new new new
 	--prevent solid objects from entering walls
@@ -202,17 +183,25 @@ function update_object(obj)
 		
 	end
 	
-	if (obj.diag == true and obj.dx*obj.dy != 0 and obj.prevdiag == false) then
+	if (obj.diag == true and obj.prevdiag == false) then
 	 if  (abs(obj.dx) > 0.5 or abs(obj.dy) > 0.5) then
-	  obj.dx *= .75
-	  obj.dy *= .75
+	  
+	  local vect = sqrt(obj.dx^2 + obj.dy^2)
+	  
+	  obj.dx *= vect
+	  obj.dy *= vect
+	  
+	  
 	  obj.x = flr(obj.x)+0.5
 	  obj.y = flr(obj.y)+0.5
 	 end
-	 obj.diag = false
 	end
 	
 	--movement
+	
+	//obj.spd
+	//obj.dir
+	
 	obj.x += obj.dx
 	obj.y += obj.dy
 	
@@ -316,7 +305,6 @@ function make_player()
 																				2,
 																				update_player,
 																				draw_player)
-	player.diag = false
 	player.prev_face = 0
  player.face = 6
  player.interaction = false
@@ -357,50 +345,20 @@ function move_player()
 	// initialize dx, dy and diag
 	player.dx = 0
 	player.dy = 0
-	player.diag = false
 	
 	if (btn(0)  )then
-  player.dx-=1.001
+  player.dx-=.75
 	end
 	if (btn(1)  )then
-  player.dx+=1.001
+  player.dx+=.75
 	end
 	if (btn(2)  )then
-  player.dy-=1.001
+  player.dy-=.75
 	end
 	if (btn(3)  )then
-  player.dy+=1.001
+  player.dy+=.75
 	end
 	
-	--[[
-	// diagonal check
-	if (player.dx*player.dy != 0) then
-  // roughly normalize movement
-  // values. using .75 here for
-  // fluidity and smoothness.
-  //player.dx*=.75
-  //player.dy*=.75
-  // set diag to true
-  player.diag = true
-	end
-	
-	// smoothness functions for
-	// diagonal movement. these set
-	// x and y to the center of each
-	// pixel. only happens on first
-	// frame of diag movement.
-	
-	if (player.diag) and (player.face != player.prev_face) then
-  player.x = flr(player.x)+0.5
-  player.y = flr(player.y)+0.5
- end
- 
-	
-	// set new previous face for
-	// the next frame
- player.prev_face = player.face
-	// end!
-	--]]
 end
 
 // update player
