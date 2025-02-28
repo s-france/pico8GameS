@@ -22,7 +22,6 @@ function _init()
 	
 	make_player()
 	
-	//testenmy = make_enemy1(60,108, 50, player)
 	//testenmy = make_enemy1(60,96, 50, player)
 	//makenpc()
 	
@@ -56,7 +55,7 @@ function _init()
 	["pallete"] = {1,2,3,4,5,6,7,8,9,10,132,12,13,14,15,0},
 	["curmusic"] =11,
 	["prevmusic"] = 0,
-	["background"] = 1
+	["background"] = 0
 	}
 	
 	menuitem(1,"inventory", openinv)
@@ -74,6 +73,8 @@ function _update()
 
 	foreach(objectpool,update_object)
 	foreach(hitboxes, update_hitbox)
+	
+	//foreach(coroutines, update_coroutine)
 
 	if (xest(player.x/8) == 1 and xest(player.y/8) == 1 and level_slots["loaded"] == "overworld") then
 	 load_level("testing")
@@ -132,12 +133,28 @@ function update_object(obj)
 		obj.isalive = false
 	end
 	
-	if abs(obj.dx)>0 and abs(obj.dy)>0 then
-		obj.diag = true
-	else
-		obj.diag = false
+	--[[
+	--prevent solid objects from entering walls
+	if obj.hb!=nil and obj.hb.issolid then
+		--left collision
+		if obj.dx<0 and 0 < #searchmapcols(obj.hb, 0b1, 0,1, -(obj.hb.right-obj.hb.left),-1) then
+			obj.dx = 0
+		end
+		--right collision
+		if obj.dx>0 and 0 < #searchmapcols(obj.hb, 0b1, (obj.hb.right-obj.hb.left),1, 0,-1) then
+			obj.dx = 0
+		end
+		--up collision
+		if obj.dy<0 and 0 < #searchmapcols(obj.hb, 0b1, 1,0, -1,-(obj.hb.bot-obj.hb.top)) then
+			obj.dy = 0
+		end
+		--down collision
+		if obj.dy>0 and 0 < #searchmapcols(obj.hb, 0b1, 1,(obj.hb.bot-obj.hb.top), -1,0) then
+			obj.dy = 0
+		end
+		
 	end
-	
+	--]]
 	
 	---[[
 	//new new new
@@ -183,24 +200,8 @@ function update_object(obj)
 		
 	end
 	
-	if (obj.diag == true and obj.prevdiag == false) then
-	 if  (abs(obj.dx) > 0.5 or abs(obj.dy) > 0.5) then
-	  
-	  local vect = sqrt(obj.dx^2 + obj.dy^2)
-	  
-	  obj.dx *= vect
-	  obj.dy *= vect
-	  
-	  
-	  obj.x = flr(obj.x)+0.5
-	  obj.y = flr(obj.y)+0.5
-	 end
-	end
 	
 	--movement
-	obj.dx = obj.spd * cos(obj.dir)
-	obj.dy = obj.spd * sin(obj.dir)
-	
 	obj.x += obj.dx
 	obj.y += obj.dy
 	
@@ -216,7 +217,6 @@ function update_object(obj)
 	obj.mapposx, obj.mapposy = map_pos(obj.x,obj.y)
 	obj.mapcellx, obj.mapcelly = map_cell(obj.x+4,obj.y+4)	
 	
-	obj.prev_diag = obj.diag
 end
 
 function update_coroutine(cr)
@@ -232,14 +232,14 @@ function _draw()
 	cls(level_slots["background"])
 	bomb_animation()
 	draw_map()
+	
 	foreach(objectpool,draw_object)
 	foreach(hitboxes, draw_hitbox)
+	
 	pal(make_kv(16,level_slots["pallete"]))
 	
 	print(player.dx)
 	print(player.dy)
-	print(player.diag)
-	print(player.prevdiag)
 	
 	--[[
 	print(flr(player.x))
@@ -304,6 +304,7 @@ function make_player()
 																				2,
 																				update_player,
 																				draw_player)
+	player.diag = false
 	player.prev_face = 0
  player.face = 6
  player.interaction = false
@@ -344,35 +345,48 @@ function move_player()
 	// initialize dx, dy and diag
 	player.dx = 0
 	player.dy = 0
-	
-	player.spd = 1
-	
-	local x =0
-	local y =0
+	player.diag = false
 	
 	if (btn(0)  )then
-  //player.dx-=.75
-  x-=1
+  player.dx-=1.001
 	end
 	if (btn(1)  )then
-  //player.dx+=.75
-  x+=1
+  player.dx+=1.001
 	end
 	if (btn(2)  )then
-  //player.dy-=.75
-  y-=1
+  player.dy-=1.001
 	end
 	if (btn(3)  )then
-  //player.dy+=.75
-  y+=1
+  player.dy+=1.001
 	end
 	
-	if x==0 and y==0 then
-		player.spd = 0
+	// diagonal check
+	if (player.dx*player.dy != 0) then
+  // roughly normalize movement
+  // values. using .75 here for
+  // fluidity and smoothness.
+  player.dx*=.75
+  player.dy*=.75
+  // set diag to true
+  player.diag = true
 	end
 	
-	player.dir = atan2(x,y)
+	// smoothness functions for
+	// diagonal movement. these set
+	// x and y to the center of each
+	// pixel. only happens on first
+	// frame of diag movement.
 	
+	if (player.diag) and (player.face != player.prev_face) then
+  player.x = flr(player.x)+0.5
+  player.y = flr(player.y)+0.5
+ end
+ 
+	
+	// set new previous face for
+	// the next frame
+ player.prev_face = player.face
+	// end!
 end
 
 // update player
@@ -942,9 +956,9 @@ end
 function openslot(b)
 	clearmenu()
 		menuitem(1, "exit slot "..player.slotflag, openinv )
-		for i = 1,3,1 do
-		displayitemtwo(i,player.working_inventory)
-		end
+		displayitemtwo(1,player.working_inventory)
+		displayitemtwo(2,player.working_inventory)
+		displayitemtwo(3,player.working_inventory)
 		menuitem(5, "next page ->", nextslotpage)
 	return true
 end
@@ -1369,9 +1383,6 @@ function add_object(x,y,
 	obj.dx = dx
 	obj.dy = dy
 	
-	obj.diag = false
-	obj.prevdiag = false
-	
 	obj.mapposx, obj.mapposy = map_pos(x,y)
 	obj.mapcellx, obj.mapcelly = map_cell(x,y)
 	
@@ -1446,7 +1457,6 @@ function check_parent(obj1, obj2)
 	
 	return false
 end
-
 -->8
 -- arrows and bow
 // this tab contains code for
@@ -1490,6 +1500,13 @@ function add_arrow(origin)
 		arrow.flipy = true
 	elseif player.face == 2 then
 		arrow.flipx = true
+	end
+	
+	if (arrow.sprite == 40) then
+	 arrow.x = flr(arrow.x)+0.5
+  arrow.y = flr(arrow.y)+0.5
+	 arrow.dx*=.75
+	 arrow.dy*=.75
 	end
 	
 	arrow.hb = add_hitbox(1,4,4,3,3,-1, true, 80, 2*global_faces[player.face][1],2*global_faces[player.face][2],4,  arrow_oncollision, arrow_onmapcollision, arrow)
@@ -1550,7 +1567,7 @@ function astar(startx,starty,
  cost_so_far = {}
  cost_so_far[vectoidx(start)] = 0
  
- while (#frontier > 0 and #frontier < 20) do
+ while (#frontier > 0 and #frontier < 1000) do
  	//current x,y point
  	local current = frontier[#frontier][1]
  	del(frontier,frontier[#frontier])
