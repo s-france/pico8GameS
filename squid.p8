@@ -359,34 +359,7 @@ function move_player()
 	if (btn(3)  )then
   player.dy+=1.001
 	end
-	
-	// diagonal check
-	if (player.dx*player.dy != 0) then
-  // roughly normalize movement
-  // values. using .75 here for
-  // fluidity and smoothness.
-  player.dx*=.75
-  player.dy*=.75
-  // set diag to true
-  player.diag = true
-	end
-	
-	// smoothness functions for
-	// diagonal movement. these set
-	// x and y to the center of each
-	// pixel. only happens on first
-	// frame of diag movement.
-	
-	if (player.diag) and (player.face != player.prev_face) then
-  player.x = flr(player.x)+0.5
-  player.y = flr(player.y)+0.5
- end
- 
-	
-	// set new previous face for
-	// the next frame
- player.prev_face = player.face
-	// end!
+
 end
 
 // update player
