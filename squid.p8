@@ -22,7 +22,8 @@ function _init()
 	
 	make_player()
 	
-	//testenmy = make_enemy1(60,96, 50, player)
+	testenmy = make_enemy1(60,96, 50, player)
+	
 	//makenpc()
 	
 	//explosions = {}
@@ -240,7 +241,6 @@ function _draw()
 	
 	print(player.dx)
 	print(player.dy)
-	
 	--[[
 	print(flr(player.x))
 	print(flr(player.y))
@@ -345,7 +345,6 @@ function move_player()
 	// initialize dx, dy and diag
 	player.dx = 0
 	player.dy = 0
-	player.diag = false
 	
 	if (btn(0)  )then
   player.dx-=1.001
@@ -359,6 +358,7 @@ function move_player()
 	if (btn(3)  )then
   player.dy+=1.001
 	end
+	
 
 end
 
@@ -530,10 +530,10 @@ function update_enemy1(enm1)
 	
 	if path != nil then
 		if #path <= 1 then
-			move_toward(enm1, enm1.target.x,enm1.target.y, .5)
+			move_toward(enm1, enm1.target.x,enm1.target.y, .25)
 		else
 			local pointx,pointy = map_coord(path[1].x, path[1].y)
-			move_toward(enm1, pointx,pointy, .5)
+			move_toward(enm1, pointx,pointy, .25)
 		end
 	else --add idle behavior here
 		enm1.dx = 0
@@ -816,6 +816,7 @@ end
 
 
 function explode_tile(point)
+ sfx(7)
 	mset(point.x,point.y, 20)
 end
 
@@ -853,6 +854,7 @@ function explo_oncollision(explohb, otherhb)
 		local kbx = mid(otherhb.x-explohb.x, -3,3)
 		local kby = mid(otherhb.y-explohb.y, -3,3)
 		knockback(otherhb.parent,kbx,kby, explohb.kbduration)
+	 sfx(6)
 	end
 
 end
@@ -1078,6 +1080,8 @@ function pickup_item(face)
 		end
 	end
 end
+
+///function make_rock(x,y,)
 -->8
 -- sword
 
