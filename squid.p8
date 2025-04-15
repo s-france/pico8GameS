@@ -837,6 +837,7 @@ function explo_onmapcollision(explohb)
 	//explode tiles with flag 0b01
 	foreach(searchmapcols(explohb, 0b10, 0, 0, 0, 0), explode_tile)
 end
+
 -->8
 -- levels and map
 
