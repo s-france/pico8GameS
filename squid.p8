@@ -783,6 +783,9 @@ end
 
 // update_bomb
 function update_bomb(bomb)
+
+	bomb.dx=0
+	bomb.dy=0
 	if (bomb.isalive == false) then
 	 explode(bomb)
 	end
@@ -834,14 +837,6 @@ function bomb_oncollision(bombhb, otherhb)
 		 end
 
 		end
-		--[[
-	 --sword collision
-	 elseif (otherhb.tag == 4 and otherhb.parent != nil) then
-	 	bombhb.parent.dx = global_faces[player.face][1]
-	 	bombhb.parent.dy = global_faces[player.face][2]
-	 
-	 end
-	 --]]
 	 
 	 //add other collision behavior here
 end
@@ -863,6 +858,7 @@ function explo_onmapcollision(explohb)
 	//explode tiles with flag 0b01
 	foreach(searchmapcols(explohb, 0b10, 0, 0, 0, 0), explode_tile)
 end
+
 -->8
 -- levels and map
 
