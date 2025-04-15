@@ -134,28 +134,6 @@ function update_object(obj)
 		obj.isalive = false
 	end
 	
-	--[[
-	--prevent solid objects from entering walls
-	if obj.hb!=nil and obj.hb.issolid then
-		--left collision
-		if obj.dx<0 and 0 < #searchmapcols(obj.hb, 0b1, 0,1, -(obj.hb.right-obj.hb.left),-1) then
-			obj.dx = 0
-		end
-		--right collision
-		if obj.dx>0 and 0 < #searchmapcols(obj.hb, 0b1, (obj.hb.right-obj.hb.left),1, 0,-1) then
-			obj.dx = 0
-		end
-		--up collision
-		if obj.dy<0 and 0 < #searchmapcols(obj.hb, 0b1, 1,0, -1,-(obj.hb.bot-obj.hb.top)) then
-			obj.dy = 0
-		end
-		--down collision
-		if obj.dy>0 and 0 < #searchmapcols(obj.hb, 0b1, 1,(obj.hb.bot-obj.hb.top), -1,0) then
-			obj.dy = 0
-		end
-		
-	end
-	--]]
 	
 	---[[
 	//new new new
@@ -783,6 +761,9 @@ end
 
 // update_bomb
 function update_bomb(bomb)
+	bomb.dx = 0
+	bomb.dy = 0
+
 	if (bomb.isalive == false) then
 	 explode(bomb)
 	end
@@ -834,14 +815,7 @@ function bomb_oncollision(bombhb, otherhb)
 		 end
 
 		end
-		--[[
-	 --sword collision
-	 elseif (otherhb.tag == 4 and otherhb.parent != nil) then
-	 	bombhb.parent.dx = global_faces[player.face][1]
-	 	bombhb.parent.dy = global_faces[player.face][2]
-	 
-	 end
-	 --]]
+		
 	 
 	 //add other collision behavior here
 end
