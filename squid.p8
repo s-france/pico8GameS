@@ -16,6 +16,12 @@ __lua__
 // objectpools
 function _init()
  cls()
+ 
+ //init input
+ btn5 = {}
+ btn4 = {}
+ btn01 = {}
+ 
  coroutines = {}
 	hitboxes = {}
 	objectpool = {}
@@ -26,7 +32,6 @@ function _init()
 	
 	//makenpc()
 	
-	//explosions = {}
 	
  global_faces = {
 	[0] = {-1,-1,-6,4,.5,.5,4,4,2,-2,.5,.5,.25},
@@ -66,6 +71,9 @@ end
 // routine updates every frame
 // using designed update funcs.
 function _update()
+	//process input
+	update_input()
+
 	//get_mapdata(80,16,16,32) 
 	initialmenu()
 	foreach(objectpool,type_update)
@@ -202,6 +210,78 @@ function update_coroutine(cr)
 	if not coresume(cr) then
 		del(coroutines,cr)
 	end
+end
+
+function update_input()
+	//btn5
+	//btn press
+	if btn(5) then
+	 //down frame
+		if not btn5.press then
+			btn5.down = true
+		else
+			btn5.down = false
+		end
+		//general press
+		btn5.press = true
+		btn5.time += 1
+		
+	//not pressed
+	else
+		//up frame
+		if btn5.press then
+			btn5.up = true
+		else
+			btn5.up = false
+			btn5.time = 0
+		end
+		
+		btn5.press = false
+	end
+	
+	
+	//btn4
+	//btn press
+	if btn(4) then
+	 //down frame
+		if not btn4.press then
+			btn4.down = true
+		else
+			btn4.down = false
+		end
+		//general press
+		btn4.press = true
+		
+	//up frame
+	elseif btn4.press then
+		btn4.up = true
+		btn4.press = false
+	else
+		btn4.up = false
+	end
+	
+	
+	//btn01
+	//btn press
+	if btn(0,1) then
+	 //down frame
+		if not btn01.press then
+			btn01.down = true
+		else
+			btn01.down = false
+		end
+		//general press
+		btn01.press = true
+		
+	//up frame
+	elseif btn01.press then
+		btn01.up = true
+		btn01.press = false
+	else
+		btn01.up = false
+	end
+	
+
 end
 
 
@@ -379,20 +459,20 @@ function update_player(p)
 
 	p.interaction = false
 	p.action = false
-	if ( btnp(5)) then
+	if (btn5.press or btn5.up) then
 		interact(p.face)
 		if ( p.interaction==false ) then
-	  use_item_in_slot(1)
+	  use_item_in_slot(1, btn5)
  	end
  end
  
  //sword
-	if(btnp(4)) then
-		use_item_in_slot(2)
+	if(btn4.press or btn5.up) then
+		use_item_in_slot(2, btn4)
 	end
 	
 	if (btnp(0,1) ) then
-		use_item_in_slot(3)
+		use_item_in_slot(3, btn01)
 	end
 	
 	--process input, update world pos
@@ -441,23 +521,23 @@ function player_onmapcollision(playerhb)
 end
 
 
-function use_item_in_slot(num)
+function use_item_in_slot(num, butn)
 	for k,v in pairs(global_items) do
 	 if (k == player.slots[num]) then
-	 	global_items[k].use()
+	 	global_items[k].use(butn)
 	 end
  end
 end
 
-function use_bomb()
- if (player.resources.bombs[1]>0 ) then
+function use_bomb(butn)
+ if (butn.down and player.resources.bombs[1]>0 ) then
   add_bomb(player.x,player.y)
   player.resources.bombs[1] -= 1
 	end
 end
 
-function use_bow()
-	if (player.itempool.bow[2] >= 1 and player.resources.arrows[1] > 0) then
+function use_bow(butn)
+	if (butn.down and player.itempool.bow[2] >= 1 and player.resources.arrows[1] > 0) then
 	 add_arrow(player)
 		player.resources.arrows[1] -= 1
 	end
@@ -1063,7 +1143,9 @@ end
 // sword()
 // draws sword swing
 // creates hitbox
-function sword()
+function sword(butn)
+	//swing on down
+	if butn.down then
 		for k,v in pairs(global_faces) do
 			if player.face == k then
 				//lunge test
@@ -1072,9 +1154,18 @@ function sword()
 				//sword particle + hitbox					
 				add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false, false,
 					add_hitbox(4, 0, 0, 0,0, 0, false, 1, 2*v[1],2*v[2],4, sword_oncollision, sword_onmapcollision))
-			
+						
 			end
 		end
+	//lunge
+	elseif butn.up and  butn.time > 45 then
+		knockback(player, 3*global_faces[player.face][1],3*global_faces[player.face][2], 4)
+		
+		//sword particle + hitbox					
+		add_partsys(global_faces[player.face][3],global_faces[player.face][4], global_faces[player.face][5],global_faces[player.face][6], global_faces[player.face][7], global_faces[player.face][8], global_faces[player.face][9],global_faces[player.face][10], global_faces[player.face][11],global_faces[player.face][12],global_faces[player.face][13], player, false, false,
+			add_hitbox(4, 0, 0, 0,0, 0, false, 1, 2*global_faces[player.face][1],2*global_faces[player.face][2],4, sword_oncollision, sword_onmapcollision))
+	end
+	
 end
 
 function sword_oncollision(swordhb, otherhb)
