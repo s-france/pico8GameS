@@ -26,6 +26,7 @@ function _init()
 	hitboxes = {}
 	objectpool = {}
 	
+
 	make_player()
 	
 	testenmy = make_enemy1(60,96, 50, player)
@@ -82,6 +83,9 @@ function _update()
 
 	foreach(objectpool,update_object)
 	foreach(hitboxes, update_hitbox)
+	
+	process_collisions()
+
 	
 	//foreach(coroutines, update_coroutine)
 
@@ -297,8 +301,9 @@ function _draw()
 	
 	pal(make_kv(16,level_slots["pallete"]))
 	
-	print(player.dx)
-	print(player.dy)
+	print(player.hp)
+	//print(player.dx)
+	//print(player.dy)
 	--[[
 	print(flr(player.x))
 	print(flr(player.y))
@@ -1328,7 +1333,8 @@ function update_hitbox(hb)
 		hb.top = hb.y-(.5*hb.ylen)
 		hb.bot = hb.y+(.5*hb.ylen)
 	end
-	
+
+	--[[
 	--oncollision function
  for i,j in pairs(hitboxes) do
 			//check for collision
@@ -1336,7 +1342,7 @@ function update_hitbox(hb)
 				
 				if hb.parent != nil then
 					if not check_parent(hb,j) then 	
-						//apply damage
+						//apply damage both
 						hb.parent.hp -= j.damage
 						//apply knockback
 						knockback(hb.parent,j.kbx,j.kby, j.kbduration)
@@ -1350,12 +1356,44 @@ function update_hitbox(hb)
 			end
 	end
 	
+	
 	if hb.onmapcollision != nil then
 		--onmapcollision function
 		hb.onmapcollision(hb)
 	end
+	
+	--]]
 
 end
+
+
+//update function processes all collisions
+function process_collisions()
+	--oncollision function
+ for i,hb1 in pairs(hitboxes) do
+ 	for j, hb2 in pairs(hitboxes) do
+ 		
+ 		//check for collision
+			if hb1 != hb2 and (hbcollision(hb1,hb2)) then
+ 			
+ 			if hb1.parent != nil then
+					if not check_parent(hb1,hb2) then 	
+						//apply damage
+						hb1.parent.hp -= hb2.damage
+						//apply knockback
+						knockback(hb1.parent,hb2.kbx,hb2.kby, hb2.kbduration)
+					end
+				end
+				
+				if hb1.oncollision != nil then
+					//run oncollision function
+					hb1.oncollision(hb1, hb2)
+				end
+ 		end
+ 	end
+ end
+end
+
 
 --visualize hitbox for debugging 
 function draw_hitbox(hb)	
@@ -1485,7 +1523,7 @@ function set_movement_from_face(object,
 	end																													
 end
 
-
+//checks if objects are in the same parent heirarchy
 function check_parent(obj1, obj2)
 	while obj1.parent != nil do
 		local tobj2 = obj2
