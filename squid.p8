@@ -30,7 +30,7 @@ function _init()
 	make_player()
 	
 	testenmy = make_enemy1(60,96, 50, player)
-	
+	testflag = false
 	//makenpc()
 	
 	
@@ -48,8 +48,7 @@ function _init()
 	global_items = {
 	["bombs"] = {use = use_bomb},
 	["bow"] = {use = use_bow},
-	["sword"] = {use = sword}
-	}
+	["sword"] = {use = sword} }
 	
 	//levels
 	levels = {
@@ -72,21 +71,26 @@ end
 // routine updates every frame
 // using designed update funcs.
 function _update()
+
 	//process input
 	update_input()
+
+ testflag = false
 
 	//get_mapdata(80,16,16,32) 
 	initialmenu()
 	foreach(objectpool,type_update)
-	
-	foreach(coroutines, update_coroutine)
-
+ 
+ 	foreach(coroutines, update_coroutine)
+ 
 	foreach(objectpool,update_object)
 	foreach(hitboxes, update_hitbox)
+
 	
 	process_collisions()
 
 	
+
 	//foreach(coroutines, update_coroutine)
 
 	if (xest(player.x/8) == 1 and xest(player.y/8) == 1 and level_slots["loaded"] == "overworld") then
@@ -99,6 +103,7 @@ function _update()
 		music(level_slots["curmusic"])
 		level_slots["prevmusic"] = level_slots["curmusic"]
 	end
+	
 end
 
 
@@ -295,15 +300,21 @@ function _draw()
 	cls(level_slots["background"])
 	bomb_animation()
 	draw_map()
-	
 	foreach(objectpool,draw_object)
 	foreach(hitboxes, draw_hitbox)
 	
 	pal(make_kv(16,level_slots["pallete"]))
 	
 	print(player.hp)
+
 	//print(player.dx)
 	//print(player.dy)
+
+	print(testenmy.hp)
+	print(testflag)
+	print(player.dx)
+	print(player.dy)
+
 	--[[
 	print(flr(player.x))
 	print(flr(player.y))
@@ -517,7 +528,7 @@ end
 
 function player_oncollision(playerhb, otherhb)
 	//add hb collision behavior here
-
+ 
 end
 
 function player_onmapcollision(playerhb)
@@ -627,6 +638,7 @@ end
 
 
 function enm1_oncollision(enm1hb, otherhb)
+	
 	--player collision
 	if otherhb.tag == 0 then
 		//calc direction
@@ -638,7 +650,6 @@ function enm1_oncollision(enm1hb, otherhb)
 		knockback(enm1hb.parent,-kbx,-kby,2)
 		
 	end
-	
 end
 
 
@@ -971,7 +982,7 @@ function openinv(b)
  	menuitem(2," slot 1 - "..player.slots[1], function() setslotflag(1) openslot(b) return true end )
  	menuitem(3," slot 2 - "..player.slots[2], function() setslotflag(2) openslot(b) return true end )
  	menuitem(4," slot 3 - "..player.slots[3], function() setslotflag(3) openslot(b) return true end )
-  menuitem(5," stats and info "  )
+  menuitem(5," stats and info ", function() openstats()  return true end )
  return true
 end
 
@@ -985,6 +996,15 @@ end
 
 function setslotflag(x)
  player.slotflag = x
+ return true
+end
+
+function openstats()
+ clearmenu()
+ menuitem(1, "exit stats", openinv)
+	menuitem(2, "♥  "..player.hp)
+	menuitem(3, "keys "..player.resources["keys"][1])
+	menuitem(4, "money "..player.resources["money"][1])
  return true
 end
 
@@ -1344,15 +1364,16 @@ function update_hitbox(hb)
 					if not check_parent(hb,j) then 	
 						//apply damage both
 						hb.parent.hp -= j.damage
+						testflag = true
 						//apply knockback
 						knockback(hb.parent,j.kbx,j.kby, j.kbduration)
 					end
 				end
-				
 				if hb.oncollision != nil then
 					//run oncollision function
 					hb.oncollision(hb, j)
 				end
+				
 			end
 	end
 	
