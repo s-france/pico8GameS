@@ -645,7 +645,7 @@ function enm1_oncollision(enm1hb, otherhb)
 		local kbx = (otherhb.x-enm1hb.x)/4
 		local kby = (otherhb.y-enm1hb.y)/4
 		//knock player back
-		knockback(otherhb.parent,kbx,kby, enm1hb.kbduration)
+		knockback(otherhb.parent,kbx/2,kby/2, enm1hb.kbduration)
 		
 		knockback(enm1hb.parent,-kbx,-kby,2)
 		
