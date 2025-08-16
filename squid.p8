@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
 -- main functions
-// st. stephen engine v2.0
+// the mountain of carols
 //
 // date created ~ sept. 2024
 //
@@ -155,12 +155,13 @@ function _draw()
 	print(player.hp)
 	print(player.resources["keys"][1])
 	print(testenmy.hp)
+	print(testvar)
 	//print(testvar)
 	//print(testflag)
-	//local mapx,mapy = map_cell(player.x+2,player.y+2)
 	//draw_path(astar(mapx,mapy, 8,12))
 	
 end
+
 -->8
 --objects
 // add object initializes an
@@ -204,8 +205,6 @@ function add_object(x,y,
 		obj.y = parent.y + obj.yoff
 	end
 	
-	
-	
 	// initialize indiv update/draw
 	obj.update = update
 	obj.draw = draw
@@ -236,19 +235,12 @@ function update_object(obj)
 	// lifetime based on duration
 	if obj.duration > 0 then
 		// subtract 1 from duration
-		// iff >1
 		obj.duration -= 1
 	// lifetime based on parent
 	elseif obj.duration == -2 then
-		// if a parent object doesn't
-		// == nil then we know this obj
-		// has no duration, but dies
-		// when the parent does
-		if obj.parent != nil then
+		if obj.parent != nil and obj.parent.isalive == false then
 			//delete object
-			if obj.parent.isalive == false then
-				obj.duration = 0
-			end
+			obj.duration = 0
 		end
 		// kill at duration=0
 	elseif obj.duration == 0 then
@@ -323,109 +315,69 @@ end
 
 // type update
 function type_update(obj)
-	--type-specific update
-	if(obj.update != nil) then
-		obj.update(obj)
-	end
+	if(obj.update != nil) obj.update(obj)
 end
 
 -- implement into add_object
 // draw object
 function draw_object(obj)
-	// draw if player mappos =
-	// obj.mappos
 	if (player.mapposx == obj.mapposx and player.mapposy == obj.mapposy) then
-		// type-specific draw function
+		// type-specific draw
 		if(obj.draw != nil) then
 			obj.draw(obj)
 		// generic sprite draw
 		elseif obj.sprite != nil then
-	   spr(obj.sprite,flr(obj.x)%128,flr(obj.y)%128)
+	 	spr(obj.sprite,flr(obj.x)%128,flr(obj.y)%128)
 		end
 	end
 end
 -->8
 -- other updates/draws
-// update button inputs, this
-// uses our homemade button 
-// pressing system
 function update_input()
+ local function bfunc(b,bt)
+  //btn press
+  if b then
+	 	//down frame
+			if not bt.press then
+				bt.down = true
+			else
+				bt.down = false
+			end
+			//general press
+			bt.press = true
+			bt.time += 1
+		//not pressed
+		else
+			//up frame
+			if bt.press then
+				bt.up = true
+			else
+				bt.up = false
+				bt.time = 0
+			end
+			bt.press = false
+		end
+ end
+	
 	//btn5
-	//btn press
-	if btn(5) then
-	 //down frame
-		if not btn5.press then
-			btn5.down = true
-		else
-			btn5.down = false
-		end
-		//general press
-		btn5.press = true
-		btn5.time += 1
-	//not pressed
-	else
-		//up frame
-		if btn5.press then
-			btn5.up = true
-		else
-			btn5.up = false
-			btn5.time = 0
-		end
-		btn5.press = false
-	end
-	
+	bfunc(btn(5),btn5)
 	//btn4
-	//btn press
-	if btn(4) then
-	 //down frame
-		if not btn4.press then
-			btn4.down = true
-		else
-			btn4.down = false
-		end
-		//general press
-		btn4.press = true
-		
-	//up frame
-	elseif btn4.press then
-		btn4.up = true
-		btn4.press = false
-	else
-		btn4.up = false
-	end
-	
+	bfunc(btn(4),btn4)
 	//btn01
-	//btn press
-	if btn(0,1) then
-	 //down frame
-		if not btn01.press then
-			btn01.down = true
-		else
-			btn01.down = false
-		end
-		//general press
-		btn01.press = true
-	//up frame
-	elseif btn01.press then
-		btn01.up = true
-		btn01.press = false
-	else
-		btn01.up = false
-	end
+	bfunc(btn(0,1),btn01)
+	
 end
 
 // update coroutines, processes
 // coroutines in pool
 function update_coroutine(cr)
-	if not coresume(cr) then
-		del(coroutines,cr)
-	end
+	if (not coresume(cr)) del(coroutines,cr)
 end
 
 // draw map
 // draws map
 function draw_map()
-	map(player.mapposx * 16,player.mapposy * 16,0,0,16,16)
+	map(player.mapposx*16,player.mapposy*16,0,0,16,16)
 end
 
 
@@ -559,9 +511,9 @@ end
 function process_collisions(hb1)
 	for i,hb2 in pairs(hitboxes) do
 		if hbcollision(hb1,hb2) and hb1 != hb2 then
-			if hb1.oncollision != nil then
-				hb1.oncollision(hb1,hb2)
-			end
+			//oncol
+			if (hb1.oncollision != nil) hb1.oncollision(hb1,hb2)
+			//coltbl
 			if hb1.parent != nil then
 			 if not check_parent(hb1,hb2) then
 					if kcontains(collisions,hb1.tag) and kcontains(collisions[hb1.tag],hb2.tag) then
@@ -837,12 +789,8 @@ function add_particle(x,y,
 																			nil,
 																			nil,
 																			draw_particle)
-	if _c == nil then
-		part.color = 7
-	else
-		part.color = _c
-	end
 	
+	part.color = _c
 	if hb != nil then
 		part.hb = add_hitbox(hb.tag,
 																					hb.x,hb.y,
@@ -899,10 +847,7 @@ end
 -->8
 -- menu(inventory) code
 function initialmenu()
- if (btnp(6) ) then
-  closeinv(b)
-  return true
- end
+ if (btnp(6)) closeinv(b) return true
 end
 
 function openinv(b)
@@ -974,9 +919,7 @@ end
 
 function additemtoslot(x)
  for i = 1,3,1 do
-  if (player.slotflag == i) then
-   player.slots[i] = player.working_inventory[x]
- 	end
+  if (player.slotflag == i) player.slots[i] = player.working_inventory[x]
  end
 end
 
@@ -1102,26 +1045,18 @@ end
 // creates hitbox
 function sword(butn)
 	//swing on down
+	local v = global_faces[player.face]
 	if butn.down then
-		for k,v in pairs(global_faces) do
-			if player.face == k then
-				//lunge test
-				//knockback(player, 3*v[1],3*v[2], 4)
-				
-				//sword particle + hitbox					
-				add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false, false,
-					add_hitbox(4, 0, 0, 0,0, 0, false, 1, 2*v[1],2*v[2],4, sword_oncollision, sword_onmapcollision))
-						
-			end
-		end
+		//sword particle + hitbox					
+		add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false, false,
+			add_hitbox(4, 0, 0, 0,0, 0, false, 1, 2*v[1],2*v[2],4, sword_oncollision, sword_onmapcollision))	
 	//lunge
 	elseif butn.up and  butn.time > 45 then
-		knockback(player, 3*global_faces[player.face][1],3*global_faces[player.face][2], 4)
+		knockback(player, 3*v[1],3*v[2], 4)
 		//sword particle + hitbox					
-		add_partsys(global_faces[player.face][3],global_faces[player.face][4], global_faces[player.face][5],global_faces[player.face][6], global_faces[player.face][7], global_faces[player.face][8], global_faces[player.face][9],global_faces[player.face][10], global_faces[player.face][11],global_faces[player.face][12],global_faces[player.face][13], player, false, false,
+		add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false, false,
 			add_hitbox(4, 0, 0, 0,0, 0, false, 1, 2*global_faces[player.face][1],2*global_faces[player.face][2],4, nil, sword_onmapcollision))
 	end
-	
 end
 
 function sword_onmapcollision(swordhb)
@@ -1136,11 +1071,11 @@ function xest(x)
 end
 
 function make_kv(size,input)
- local tbl = {}
+ local t = {}
  for i = 1,size,1 do
- 	tbl[i] = input[i]
+ 	t[i] = input[i]
  end
- return tbl
+ return t
 end
 
 --returns the map cell containing x,y
@@ -1164,9 +1099,9 @@ function map_coord(mapx,mapy)
 end
 
 function contains(t, e)
-  for k,v in pairs(t) do 
-  	if (v == e) return true
-  end return false
+ for k,v in pairs(t) do 
+ 	if (v == e) return true
+ end return false
 end
 
 function kcontains(t,k)
@@ -1174,41 +1109,19 @@ function kcontains(t,k)
 	return false
 end
 
-function set_movement_from_face(object,
-																																input_face,
-																																speed)
-	if (input_face == 0 or input_face ==3 or input_face ==5) then
-		object.x -= 8
-		object.dx = -(speed)
-	--right
- elseif (input_face ==2 or input_face ==4 or input_face ==7) then
-		object.x += 8
-		object.dx = speed
-	else
-		object.dx = 0
-	end
-	
-	--up 
- if (input_face ==0 or input_face ==1 or input_face ==2) then
-		object.y -= 8 
-		object.dy = -(speed)
-	--down
-	elseif (input_face ==5 or input_face ==6 or input_face ==7) then
-		object.y += 8
-		object.dy = speed
-	else
-		object.dy = 0
-	end																													
+// set_movement_from_face
+function smff(object,input_face,speed)
+object.dx=0
+object.dy=0
+//lrud
+if (input_face==0 or input_face ==3 or input_face ==5) object.x -= 8 object.dx = -(speed)
+if (input_face==2 or input_face ==4 or input_face ==7) object.x += 8 object.dx = speed
+if (input_face==0 or input_face ==1 or input_face ==2) object.y -= 8 object.dy = -(speed)
+if (input_face==5 or input_face ==6 or input_face ==7) object.y += 8 object.dy = speed	
 end
 
 -->8
 -- arrows and bow
-// this tab contains code for
-// the arrows utilized in bow
-// combat. if a "combat" tab
-// is formalized later, this 
-// code will be moved there.
-
 
 function add_arrow(origin)
  local arrow = add_object(origin.x,origin.y,
@@ -1222,7 +1135,7 @@ function add_arrow(origin)
 																										draw_arrow)
 		
 	//sets dx,dy
-	set_movement_from_face(arrow,origin.face,2.002)
+	smff(arrow,origin.face,2.002)
 		
 	if ((arrow.dx == 0) or (arrow.dy == 0)) then
 		if arrow.dx == 0 then
@@ -1257,26 +1170,17 @@ end
 
 
 function draw_arrow(arrow)
-	if (player.mapposx == arrow.mapposx and player.mapposy == arrow.mapposy) then
-		spr(arrow.sprite,arrow.x%128,arrow.y%128,1.0,1.0,arrow.flipx,arrow.flipy)
- end
+	if (player.mapposx == arrow.mapposx and player.mapposy == arrow.mapposy) spr(arrow.sprite,arrow.x%128,arrow.y%128,1.0,1.0,arrow.flipx,arrow.flipy)
 end
 
 
 function arrow_oncollision(arrowhb,otherhb)
-	if otherhb.issolid then
-	 sfx(10)
-		arrowhb.parent.duration = 0
-	end
+	if (otherhb.issolid) sfx(10) arrowhb.parent.duration = 0
 end
 
 function arrow_onmapcollision(arrowhb)
-	//colliding with solid obj
-	if ( 0 != #searchmapcols(arrowhb, 0b1, 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy), 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy))) then 
-	 sfx(10)
-	 //delete arrow on col
-	 arrowhb.parent.duration = 0
-	end	
+//col w/ solid obj -> del
+if ( 0 != #searchmapcols(arrowhb, 0b1, 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy), 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy))) sfx(10) arrowhb.parent.duration = 0
 end
 -->8
 -- pathfinding
@@ -1360,12 +1264,8 @@ end
 function draw_path(path)
 	for mapcell in all(path) do
 		local mapposx, mapposy = map_pos(mapcell.x*8,mapcell.y*8)
-		
-		if mapposx == player.mapposx and mapposy == player.mapposy then
-			spr(44, (mapcell.x*8)%128,(mapcell.y*8)%128)
-		end	
+		if (mapposx == player.mapposx and mapposy == player.mapposy) spr(44, (mapcell.x*8)%128,(mapcell.y*8)%128)
 	end
-	
 end
 
 
@@ -1374,8 +1274,7 @@ end
 function insert(t, val, p)
  if #t >= 1 then
   add(t, {})
-  for i=(#t),2,-1 do
-   
+  for i=(#t),2,-1 do  
    local nxt = t[i-1]
    if p < nxt[2] then
     t[i] = {val, p}
@@ -1395,45 +1294,24 @@ end
 -- find all existing neighbours of a position that are not walls
 function getneighbours(pos)
  local neighbours={}
- 
- --left															//no solid
- if pos.x > 0 and not fget(mget(pos.x-1,pos.y), 0)  then
-  add(neighbours,vectoidx({x=pos.x-1,y=pos.y}))
- end
- --right
- if pos.x < 1024 and not fget(mget(pos.x+1,pos.y), 0) then
-  add(neighbours,vectoidx({x=pos.x+1,y=pos.y}))
- end
- --up
- if pos.y > 0 and not fget(mget(pos.x,pos.y-1), 0) then
-  add(neighbours,vectoidx({x=pos.x,y=pos.y-1}))
- end
- --down
- if pos.y < 512 and not fget(mget(pos.x,pos.y+1), 0) then
-  add(neighbours,vectoidx({x=pos.x,y=pos.y+1}))
- end
-
+ //lrup												//no solid
+ if (pos.x > 0 and not fget(mget(pos.x-1,pos.y),0)) add(neighbours,vectoidx({x=pos.x-1,y=pos.y}))
+ if (pos.x < 1024 and not fget(mget(pos.x+1,pos.y),0)) add(neighbours,vectoidx({x=pos.x+1,y=pos.y}))
+ if (pos.y > 0 and not fget(mget(pos.x,pos.y-1),0)) add(neighbours,vectoidx({x=pos.x,y=pos.y-1}))
+ if (pos.y < 512 and not fget(mget(pos.x,pos.y+1),0)) add(neighbours,vectoidx({x=pos.x,y=pos.y+1}))
 	//idk what this does
- -- for making diagonals
- if (pos.x+pos.y) % 2 == 0 then
-  reverse(neighbours)
- end
- 
+ //for making diagonals
+ if ((pos.x+pos.y) % 2 == 0) reverse(neighbours)
  return neighbours
 end
 
 
 -- manhattan distance on a square grid
 function heuristic(a, b)
-	--[[
-	local xsqr = abs(a.x - b.x)^2
+	--[[local xsqr = abs(a.x - b.x)^2
 	local ysqr = abs(a.y-b.y)^2
-	
- return sqrt(xsqr+ysqr)
- --]]
- 
- return (abs(a.x - b.x) + abs(a.y-b.y))
-
+ return sqrt(xsqr+ysqr)--]]
+ return (abs(a.x-b.x)+abs(a.y-b.y))
 end
 
 
@@ -1592,14 +1470,9 @@ function update_player(p)
  	end
  end
  
- //sword
-	if(btn4.press or btn5.up) then
-		use_item_in_slot(2, btn4)
-	end
-	
-	if (btnp(0,1) ) then
-		use_item_in_slot(3, btn01)
-	end
+	if (btn4.press or btn4.up) use_item_in_slot(2, btn4)
+
+	if (btn01.press or btn01.up) use_item_in_slot(3, btn01) 
 	
 	--process input, update world pos
 	// called from above
@@ -1611,24 +1484,9 @@ end
 // draws player
 
 function draw_player()
- local table = {
- [6] = {2},
- [1] = {35},
- [7] = {37},
- [5] = {38},
- [2] = {34},
- [0] = {36}, 
- [3] = {33}, 
- [4] = {32} }
- for k,v in pairs(table) do
-		if player.face == k then
-		 player.sprite = v[1]
-		end
-	end
-	if (player.invis) then
-		player.sprite = 3
-	end	
-	
+ local t = make_kv(8,{36,35,34,33,32,38,2,37})
+	player.sprite = t[player.face+1]
+	if (player.invis) player.sprite = 3	
 	palt(0, false)
 	palt(1, true)
 	spr(player.sprite, player.x%128, player.y%128)
@@ -1666,37 +1524,18 @@ end
 -- npcs
 
 function make_enemy1(x,y, hp, target)
-	enemy = add_object(x,y,
-																				1,1,
-																				-2,
-																				hp,
-																				nil,
-																				true,
-																				43,
-																				update_enemy1,
-																				nil)
+	enemy = add_object(x,y,1,1,-2,hp,
+	 nil,true,43,update_enemy1,nil)
 	
 	//target player by default
 	enemy.target = player
 	
  enemy.dcv = 0
  enemy.dcs = 1
- 
-	enemy.hb = add_hitbox(5,
-																							4,4, //middle offset
-																							6, //length
-																							6,	//height
-																							-1,
-																							true,
-																							50,
-																							0,0,5,
-																							nil, //add oncollision function
-																							nil, //onmapcollision function
-																							enemy)
+	enemy.hb = add_hitbox(5,4,4,6,6,
+		-1,true,50,0,0,5,nil,nil,enemy)
 	
 	enemy.hp = hp
-
-
 	add(enemies, enemy)
 	return enemy
 end
@@ -1778,109 +1617,53 @@ end
 --]]
 -->8
 -- bombs
-// tab 4 handles bomb functions
-// and potenitally other future
-// item functions
-//
-// add_bomb
-// 
-// adds a bomb upon call to 
-// the bomb table (called in 
-// update player) with contained
-// information for further use
-
-function add_bomb(x,y)
-																		
-	local	bomb = add_object(x,y,
-																									0,0,
-																									100,
-																									1000000,
-																									nil,true,
-																									18,
-																									update_bomb)
-	local input_face = player.face
-	
-	set_movement_from_face(bomb,input_face,0)
-	
-	bomb.hb = add_hitbox(2,4,5,5,5,-1, false, 0, 0,0,0, nil, nil, bomb)
-	bomb.ps = add_partsys(6,-1,1,1, bomb.duration,2, 0,0, 1,1, 0.5,bomb,false,false,nil,{8,6,7})
+// add_bomb makes a bomb
+function add_bomb(x,y)														
+local	bomb = add_object(x,y,0,
+	0,100,1000000,nil,true,18,
+	update_bomb)
+local input_face = player.face
+smff(bomb,input_face,0)
+bomb.hb = add_hitbox(2,4,5,5,5,-1,false,0,0,0,0,nil, nil,bomb)
+bomb.ps = add_partsys(6,-1,1,1,bomb.duration,2,0,0,1,1,0.5,bomb,false,false,nil,{8,6,7})
 end
 
 // update_bomb
 function update_bomb(bomb)
-	bomb.dx = 0
-	bomb.dy = 0
-	
-	if (bomb.isalive == false) then
-	 explode(bomb)
-	 bomb.ps.duration = 0
-	end
-
+bomb.dx = 0
+bomb.dy = 0
+if (bomb.isalive == false) explode(bomb) bomb.ps.duration = 0
 end
 
 function explode(bomb)
-	add_partsys(bomb.x+4,bomb.y+4,1,1, 2,5, 0,0, 2,2, 0.0625)
- 
- //hb damage hitbox larger
- add_hitbox(3,
- 											bomb.x+4,bomb.y+4,
- 											24,24,
- 											3,
- 											false,
- 											50,
- 											0,0,2,
- 											explo_oncollision,
- 											nil)
- 
- //mapcell demo hitbox smaller
- add_hitbox(3,
- 											bomb.x+4,bomb.y+4,
- 											16,16,
- 											3,
- 											false,
- 											17,
- 											0,0,2,
- 											nil,
- 											explo_onmapcollision) 
+add_partsys(bomb.x+4,bomb.y+4,1,1,2,5,0,0,2,2, 0.0625)
+
+//hb damage hitbox larger
+add_hitbox(3,bomb.x+4,bomb.y+4,
+	24,24,3,false,50,0,0,2,
+	explo_oncollision,nil)
+
+//mapcell demo hitbox smaller
+add_hitbox(3,bomb.x+4,bomb.y+4,
+	16,16,3,false,17,0,0,2,nil,
+	explo_onmapcollision)
 end
 
 function explode_tile(point)
- sfx(7)
-	mset(point.x,point.y, 20)
-end
-
-function explo_oncollision(explohb, otherhb)
-	--[[//behavior for explosion hb colliding
-	if otherhb.parent != nil then
-		//calc direction
-		local kbx = mid(otherhb.x-explohb.x, -3,3)
-		local kby = mid(otherhb.y-explohb.y, -3,3)
-		knockback(otherhb.parent,kbx,kby, explohb.kbduration)
-	 sfx(6)
-	end
---]]
+sfx(7)
+mset(point.x,point.y, 20)
 end
 
 function explo_onmapcollision(explohb)
-	//explode tiles with flag 0b01
-	foreach(searchmapcols(explohb, 0b10, 0, 0, 0, 0), explode_tile)
+foreach(searchmapcols(explohb,0b10,0,0,0,0), explode_tile)
 end
 
---[[
-function bomb_animation()
-	if (sget(22,8) == 8) then
-		sset(22,8,6)
-	else
-		sset(22,8,8)
-	end
+function explo_oncollision(explohb, otherhb)
 end
---]]
 -->8
 function add_rock(x,y)
 	rock = add_object(x,y,0,0,-1,10000,nil,true,51,update_rock,nil)
-	
 	rock.hb = add_hitbox(6,4,4,7,6,-1, true, 0, 0,0,0, nil, nil, rock)
-
 end
 
 function update_rock(rock)
