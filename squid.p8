@@ -850,12 +850,16 @@ function initialmenu()
  if (btnp(6)) closeinv(b) return true
 end
 
+function slot(i)
+ return menuitem(i+1," slot "..i .." - "..player.slots[i], function() setslotflag(i) openslot(b) return true end )
+end
+
 function openinv(b)
  clearmenu()
 		menuitem(1,"close inventory", closeinv)
- 	menuitem(2," slot 1 - "..player.slots[1], function() setslotflag(1) openslot(b) return true end )
- 	menuitem(3," slot 2 - "..player.slots[2], function() setslotflag(2) openslot(b) return true end )
- 	menuitem(4," slot 3 - "..player.slots[3], function() setslotflag(3) openslot(b) return true end )
+ 	for i = 1,3 do
+ 	 slot(i)
+ 	end
   menuitem(5," stats and info ", function() openstats()  return true end )
  return true
 end
@@ -933,17 +937,6 @@ function displayitemtwo(x,table)
 end
 -->8
 -- player interaction functions
-
---[[
-interactions range from opening
-chests/doors to picking up items,
-and the like. all code here 
-utilizes the global_faces table
-which has a set of parameters to
-determine which map cell the 
-player is directly looking at/
-will interact with.
---]]
 
 // interaction process
 function interact(face)
