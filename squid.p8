@@ -29,7 +29,7 @@ function _init()
 	make_player()
 	// init enemies, this will later
 	// be done with a table of refs
-	testenmy = make_enemy1(60,96, 100, player)
+	//testenmy = make_enemy1(60,96, 100, player)
 	testenmy2 = make_enemy1(96*8,6*8, 50, player)
 	testenmy3 = make_enemy1(92*8,7*8, 50, player)
 	add_rock(280,86)
@@ -41,6 +41,7 @@ function _init()
 		},
 		[2] = {
 			[1] = {_mp,_mpd},
+			[3] = {_kbe},
 			[4] = {_kb}
 		},
 		[5] = {
@@ -63,12 +64,12 @@ function _init()
 	// info and parameters
  global_faces = {
 	[0] = {-1,-1,-6,4,.5,.5,4,4,2,-2,.5,.5,.25,0,0},
- [1] = {0,-1,-2,-4,0,1,4,4,2,0,1,.5,.25,0,0},
+ [1] = {0,-1,-2,-4,0,1,4,4,2,0,1,.5,.25,0,-1},
  [2] = {1,-1,4,-6,.5,.5,4,4,2,2,.5,.5,.25,1,0},
-	[3] = {-1,0,-4,10,1,0,4,4,0,-2,.5,1,.25,0,0},
-	[4] = {1,0,12,-2,1,0,4,4,0,2,.5,1,.25,1,0},
+	[3] = {-1,0,-4,10,1,0,4,4,0,-2,.5,1,.25,-1,0},
+	[4] = {1,0,12,-2,1,0,4,4,0,2,.5,1,.25,2,0},
 	[5] = {-1,1,4,14,.5,.5,4,4,-2,-2,.5,.5,.25,0,1},
-	[6] = {0,1,10,12,0,1,4,4,-2,0,1,.5,.25,0,1},
+	[6] = {0,1,10,12,0,1,4,4,-2,0,1,.5,.25,0,2},
 	[7] = {1,1,14,4,.5,.5,4,4,-2,2,.5,.5,.25,1,1} }
 	
 	// global inventory flags
@@ -154,7 +155,7 @@ function _draw()
  //rectfill(40,20,88,40,0)
 	print(player.hp)
 	print(player.resources["keys"][1])
-	print(testenmy.hp)
+//	print(testenmy.hp)
 	print(testvar)
 	//print(testvar)
 	//print(testflag)
@@ -332,74 +333,15 @@ function draw_object(obj)
 	end
 end
 -->8
--- other updates/draws
-function update_input()
- local function bfunc(b,bt)
-  //btn press
-  if b then
-	 	//down frame
-			if not bt.press then
-				bt.down = true
-			else
-				bt.down = false
-			end
-			//general press
-			bt.press = true
-			bt.time += 1
-		//not pressed
-		else
-			//up frame
-			if bt.press then
-				bt.up = true
-			else
-				bt.up = false
-				bt.time = 0
-			end
-			bt.press = false
-		end
- end
-	
-	//btn5
-	bfunc(btn(5),btn5)
-	//btn4
-	bfunc(btn(4),btn4)
-	//btn01
-	bfunc(btn(0,1),btn01)
-	
-end
-
-// update coroutines, processes
-// coroutines in pool
-function update_coroutine(cr)
-	if (not coresume(cr)) del(coroutines,cr)
-end
-
-// draw map
-// draws map
-function draw_map()
-	map(player.mapposx*16,player.mapposy*16,0,0,16,16)
-end
-
-
--->8
 --hitboxes
 
 // add hitbox adds a hitbox
-function add_hitbox(tag,
-																				x,y, //position
-																				xlen, //length
-																				ylen,	//height
-																				duration,
-																				issolid,
-																				damage,
-																				kbx,
-																				kby,
-																				kbduration,
-																				oncolfunc, //oncollision function
-																				onmapcolfunc, //onmapcollision function
-																				parent)
-	hitbox = {}
+function add_hitbox(tag,x,y,xlen,
+		ylen,duration,issolid,damage,
+		kbx,kby,kbduration,oncolfunc, 
+		onmapcolfunc,parent)
 	
+	hitbox = {}
 	hitbox.tag = tag
 	hitbox.x = x
 	hitbox.y = y
@@ -473,8 +415,6 @@ function update_hitbox(hb)
 		del(hitboxes, hb)
 	end
 	
-	
-		
 	--update mappos
 	hb.mapposx, hb.mapposy = map_pos(hb.x,hb.y)
 	if hb.parent != nil then
@@ -497,15 +437,12 @@ end
 
 // check hb cols, standard implementation
 function hbcollision(updhb, othhb)
- 	local c1 = updhb.top <= othhb.bot
- 	local c2 = updhb.bot >= othhb.top
- 	local c3 = updhb.left <= othhb.right
- 	local c4 = updhb.right >= othhb.left
-		if (c1 and c2 and c3 and c4) then
-	 	return true
-		else 
-	 	return false
-		end
+	local c1 = updhb.top <= othhb.bot
+	local c2 = updhb.bot >= othhb.top
+	local c3 = updhb.left <= othhb.right
+	local c4 = updhb.right >= othhb.left
+	if (c1 and c2 and c3 and c4) return true
+ return false
 end
 
 function process_collisions(hb1)
@@ -533,9 +470,7 @@ function check_parent(obj1, obj2)
 	local tobj2 = obj2
 	while tobj1.parent != nil do
 		while tobj2.parent != nil do
-			if tobj1.parent == tobj2.parent then
-				return true
-			end
+			if (tobj1.parent == tobj2.parent) return true
 			tobj2 = tobj2.parent
 		end
 		tobj1 = tobj1.parent
@@ -566,37 +501,30 @@ end
 
 --visualize hitbox for debugging 
 function draw_hitbox(hb)	
-	if (player.mapposx == hb.mapposx and player.mapposy == hb.mapposy) then
-		rect(hb.left%128,
-							hb.top%128,
-							hb.right%128,
-							hb.bot%128, 8)
-	end
+	if (player.mapposx == hb.mapposx and player.mapposy == hb.mapposy) rect(hb.left%128,hb.top%128,hb.right%128,hb.bot%128, 8)
 end
 
 function knockback(
 obj,dx,dy, duration)
   
-  local c = cocreate(function()
-    local initdx = obj.dx
-  		local initdy = obj.dy
+ local c = cocreate(function()
+	 local initdx = obj.dx
+		local initdy = obj.dy
     
-    for i=1,duration do
-     if dx != 0 then
-     	obj.dx = dx
-     end
-     if dy != 0 then
-     	obj.dy = dy
-     end
-     
-     yield()
-    end
+ 	for i=1,duration do
+   if dx != 0 then
+   	obj.dx = dx
+   end
+   if dy != 0 then
+   	obj.dy = dy
+   end
+   yield()
+  end
     
-   	obj.dx = initdx
-   	obj.dy = initdy
-  end)
-  
-  add(coroutines,c)
+ 	obj.dx = initdx
+ 	obj.dy = initdy
+ end)
+ add(coroutines,c)
 end
 
 function _d(hb1,hb2)
@@ -647,6 +575,8 @@ function _mpd(hb1,hb2)
 		hb1.parent.duration = hb2.parent.duration
 	end
 end
+
+-->8
 
 -->8
 -- particle effects
@@ -951,7 +881,6 @@ function interact(face)
 end
 
 function wipe_save()
-
 end
 
 
@@ -1052,13 +981,12 @@ function sword(butn)
 	end
 end
 
+--[[
 function sword_onmapcollision(swordhb)
-
-end
+end --]]
 -->8
 -- optimizations and development functions
-// cook any other code opt.
-
+-- + other updates (relocated)
 function xest(x)
 	return flr(x+0.5)
 end
@@ -1071,27 +999,24 @@ function make_kv(size,input)
  return t
 end
 
---returns the map cell containing x,y
 function map_cell(x,y)
-	local mapx = (x-(x%8))/8
-	local mapy = (y-(y%8))/8
-	return mapx, mapy
+	local mx = (x-(x%8))/8
+	local my = (y-(y%8))/8
+	return mx, my
 end
 
---returns the map screen containing x,y
 function map_pos(x,y)
-	local mapx, mapy = map_cell(x,y)
-	local mapposx = (mapx-(mapx%16)) / 16
-	local mapposy = (mapy-(mapy%16)) / 16
-	return mapposx, mapposy
+	local mx, my = map_cell(x,y)
+	local mpx = (mx-(mx%16)) / 16
+	local mpy = (my-(my%16)) / 16
+	return mpx, mpy
 end
 
---converts map_cell to map coords
 function map_coord(mapx,mapy)
 	return mapx*8, mapy*8
 end
 
-function contains(t, e)
+function contains(t,e)
  for k,v in pairs(t) do 
  	if (v == e) return true
  end return false
@@ -1112,6 +1037,48 @@ if (input_face==2 or input_face ==4 or input_face ==7) object.x += 8 object.dx =
 if (input_face==0 or input_face ==1 or input_face ==2) object.y -= 8 object.dy = -(speed)
 if (input_face==5 or input_face ==6 or input_face ==7) object.y += 8 object.dy = speed	
 end
+
+function update_coroutine(cr)
+	if (not coresume(cr)) del(coroutines,cr)
+end
+
+function draw_map()
+	map(player.mapposx*16,player.mapposy*16,0,0,16,16)
+end
+
+function update_input()
+ local function bfunc(b,bt)
+  //btn press
+  if b then
+	 	//down frame
+			if not bt.press then
+				bt.down = true
+			else
+				bt.down = false
+			end
+			//general press
+			bt.press = true
+			bt.time += 1
+		//not pressed
+		else
+			//up frame
+			if bt.press then
+				bt.up = true
+			else
+				bt.up = false
+				bt.time = 0
+			end
+			bt.press = false
+		end
+ end
+	//btn5
+	bfunc(btn(5),btn5)
+	//btn4
+	bfunc(btn(4),btn4)
+	//btn01
+	bfunc(btn(0,1),btn01)
+end
+
 
 -->8
 -- arrows and bow
@@ -1163,16 +1130,15 @@ end
 
 
 function draw_arrow(arrow)
-	if (player.mapposx == arrow.mapposx and player.mapposy == arrow.mapposy) spr(arrow.sprite,arrow.x%128,arrow.y%128,1.0,1.0,arrow.flipx,arrow.flipy)
+if (player.mapposx == arrow.mapposx and player.mapposy == arrow.mapposy) spr(arrow.sprite,arrow.x%128,arrow.y%128,1.0,1.0,arrow.flipx,arrow.flipy)
 end
 
 
 function arrow_oncollision(arrowhb,otherhb)
-	if (otherhb.issolid) sfx(10) arrowhb.parent.duration = 0
+if (otherhb.issolid) sfx(10) arrowhb.parent.duration = 0
 end
 
 function arrow_onmapcollision(arrowhb)
-//col w/ solid obj -> del
 if ( 0 != #searchmapcols(arrowhb, 0b1, 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy), 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy))) sfx(10) arrowhb.parent.duration = 0
 end
 -->8
@@ -1394,30 +1360,16 @@ function move_player()
 	player.dx = 0
 	player.dy = 0
 	
-	if (btn(0)  )then
-  player.dx-=1.001
-	end
-	if (btn(1)  )then
-  player.dx+=1.001
-	end
-	if (btn(2)  )then
-  player.dy-=1.001
-	end
-	if (btn(3)  )then
-  player.dy+=1.001
-	end
+	if (btn(0)) player.dx-=1.001
+	if (btn(1)) player.dx+=1.001
+	if (btn(2)) player.dy-=1.001
+	if (btn(3)) player.dy+=1.001
 	
 	player.hb.kbx = player.dx*2
 	player.hb.kby = player.dy*2
- 
 end
 
 // update player
-//
-// update player does a variety
-// of things, including use items,
-// update map position, and move
-// the player when called
 
 function update_player(p)
 	--update player face direction
@@ -1480,37 +1432,28 @@ function draw_player()
  local t = make_kv(8,{36,35,34,33,32,38,2,37})
 	player.sprite = t[player.face+1]
 	if (player.invis) player.sprite = 3	
-	palt(0, false)
-	palt(1, true)
+	palt(0, false) 
+	palt(1, true) 
 	spr(player.sprite, player.x%128, player.y%128)
 	pal()
 end
 
+--[[
 function player_onmapcollision(playerhb)
-	//add hb+map collision behavior here!!
 end
-
+--]]
 
 function use_item_in_slot(num, butn)
-	for k,v in pairs(global_items) do
-	 if (k == player.slots[num]) then
-	 	global_items[k].use(butn)
-	 end
- end
+local k = player.slots[num]
+if (kcontains(global_items,k)) global_items[k].use(butn) 
 end
 
 function use_bomb(butn)
- if (butn.down and player.resources.bombs[1]>0 ) then
-  add_bomb(player.x,player.y)
-  player.resources.bombs[1] -= 1
-	end
+if (butn.down and player.resources.bombs[1]>0 ) add_bomb(player.x,player.y) player.resources.bombs[1] -= 1
 end
 
 function use_bow(butn)
-	if (butn.down and player.itempool.bow[2] >= 1 and player.resources.arrows[1] > 0) then
-	 add_arrow(player)
-		player.resources.arrows[1] -= 1
-	end
+if (butn.down and player.itempool.bow[2] >= 1 and player.resources.arrows[1] > 0) add_arrow(player) player.resources.arrows[1] -= 1
 end	
 
 -->8
@@ -1588,26 +1531,6 @@ function move_toward(obj, x,y, speed)
 	end
 	
 end
-
---[[
-function enm1_oncollision(enm1hb,otherhb)
-	
-	--player collision
-	if otherhb.tag == 0 then
-		//calc direction
-		//local kbx = (otherhb.x-enm1hb.x)/4
-		//local kby = (otherhb.y-enm1hb.y)/4
-		//knock player back
-		//knockback(otherhb.parent,kbx/2,kby/2, enm1hb.kbduration)
-		
-		//knockback(enm1hb.parent,-kbx,-kby,2)
-		
-	elseif (otherhb.tag == 5) then
-	 
-	end
-	
-end
---]]
 -->8
 -- bombs
 // add_bomb makes a bomb
@@ -1651,8 +1574,9 @@ function explo_onmapcollision(explohb)
 foreach(searchmapcols(explohb,0b10,0,0,0,0), explode_tile)
 end
 
+--[[
 function explo_oncollision(explohb, otherhb)
-end
+end --]]
 -->8
 function add_rock(x,y)
 	rock = add_object(x,y,0,0,-1,10000,nil,true,51,update_rock,nil)
@@ -1697,13 +1621,13 @@ f444444f0975579009999990555dd55d007000600f3334f00f3334f00f3334f000f3334007333337
 55ffff55009999000099990055d55555007006000f5555f00f5555f00f5555f000055500733776e00043374005900000644c4cc75d5705d5bbbbbbbb55555555
 f544445f00000000000000000d55555000a660000050050000500500005005000005050007e00000000444005009000007c7c77005d07d50bbbbbbbb45444454
 55555555000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-57000075000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-57700075064000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-57070075644600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-57007075644466000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-57000775644444670000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-57000075644c4cc70000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-5555555507c7c7700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+57000075000000000050050000500500005005000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+57700075064000005055550500555500005555000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+57070075644600005075570550755705007557000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+57007075644466005585585550855805558558550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+57000775644444670555555055555555555555550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+57000075644c4cc70055550005555550505555050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5555555507c7c7700005500000055000000550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
