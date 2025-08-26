@@ -489,7 +489,6 @@ function searchmapcols(hb, flags, tlxoff,tlyoff, brxoff,bryoff)
 			if (flags & fget(mget(x,y))) == flags then
 				local point = {x=x, y=y}
 				add(results, point)
-				--return true
 			end
 		end
 	end
@@ -556,17 +555,12 @@ function _kbe(hb1,hb2)
 end
 
 function _ik(hb1,hb2)	
-	if hb2.parent.isalive == false then
-		hb1.parent.duration = 0
-	end
+	if (hb2.parent.isalive == false) hb1.parent.duration = 0
 end
 
 function _mp(hb1,hb2)
-	if hb2.parent != nil then
-		hb1.parent.parent = hb2.parent
-	end
+	if (hb2.parent != nil) hb1.parent.parent = hb2.parent
 end
-
 
 function _mpd(hb1,hb2)
 	if hb1.parent.duration < hb2.parent.duration then
@@ -575,8 +569,6 @@ function _mpd(hb1,hb2)
 		hb1.parent.duration = hb2.parent.duration
 	end
 end
-
--->8
 
 -->8
 -- particle effects
@@ -741,6 +733,165 @@ end
 function draw_particle(part)
 	pset(part.x%128, part.y%128, part.color)
 end
+-->8
+-- player info
+// the collions function, and
+// map info/functions
+//
+// make player
+//
+// make player generates our
+// player when called in _init
+// it contains a ton of info 
+// that we're gonna use
+
+function make_player()
+	player = add_object(300,60,
+																				0,0,
+																				-2,
+																				1000, //hp
+																				nil,true,
+																				2,
+																				update_player,
+																				draw_player)
+	player.diag = false
+	player.prev_face = 0
+ player.face = 6
+ player.interaction = false
+ // player items
+ player.itempool = {
+  ["bow"] = {42, 0, 0},
+ 	["ice boots"] = {43, 0}, 
+ 	["satchel"] = {58, 0 },
+ 	["magnet"] = {17, 0, false},
+ 	["sword"] = {59, 0} }
+ player.resources = {
+  ["bombs"] = {0, 0},
+  ["keys"] = {0},
+  ["arrows"] = {0},
+  ["money"] = {0} }
+ player.slots = {
+  [1] = "none",
+  [2] = "none",
+  [3] = "none"
+ }
+ player.working_inventory = {}
+ player.slotflag = 0
+	player.invis = false
+	--player hurtbox, tag = 0
+ player.hb = add_hitbox(0, 4,4, 6,6, -1, true, 0, 1,1,2, nil, player_onmapcollision, player)
+end
+
+// move player
+//
+// move player is self explanatory
+// the function uses our mapcollions
+// function (tab 9)
+// to restrict movement against
+// walls and objects with the
+// flag #0.
+
+function move_player()
+	// initialize dx, dy and diag
+	player.dx = 0
+	player.dy = 0
+	
+	if (btn(0)) player.dx-=1.001
+	if (btn(1)) player.dx+=1.001
+	if (btn(2)) player.dy-=1.001
+	if (btn(3)) player.dy+=1.001
+	
+	player.hb.kbx = player.dx*2
+	player.hb.kby = player.dy*2
+end
+
+// update player
+
+function update_player(p)
+	--update player face direction
+	
+ local prev = p.face
+	
+	if btn(1) then
+		p.face = 5
+	elseif btn(0) then
+		p.face = 3
+	else
+		p.face = 4
+	end
+	
+	if btn(3) then
+		p.face +=3
+	elseif btn(2) then
+	 p.face -=3
+	end
+	
+	if p.face == 4 then
+		p.face = prev
+	elseif p.face >4 then
+		p.face -=1
+	end
+	
+	p.interaction = false
+	p.action = false
+	if (btn5.press or btn5.up) then
+		local t = global_faces[p.face]
+		add_hitbox(7,
+ 											(4+t[14]+t[1]*6),
+ 											(4+t[15]+t[2]*6),
+ 											3,3,
+ 											1,
+ 											false,
+ 											50,
+ 											0,0,2,nil,nil,player)
+ 											
+		interact(p.face)
+		if ( p.interaction==false ) then
+	  use_item_in_slot(1, btn5)
+ 	end
+ end
+ 
+	if (btn4.press or btn4.up) use_item_in_slot(2, btn4)
+
+	if (btn01.press or btn01.up) use_item_in_slot(3, btn01) 
+	
+	--process input, update world pos
+	// called from above
+	move_player()
+end
+
+// draw player
+//
+// draws player
+
+function draw_player()
+ local t = make_kv(8,{36,35,34,33,32,38,2,37})
+	player.sprite = t[player.face+1]
+	if (player.invis) player.sprite = 3	
+	palt(0, false) 
+	palt(1, true) 
+	spr(player.sprite, player.x%128, player.y%128)
+	pal()
+end
+
+--[[
+function player_onmapcollision(playerhb)
+end
+--]]
+
+function use_item_in_slot(num, butn)
+local k = player.slots[num]
+if (kcontains(global_items,k)) global_items[k].use(butn) 
+end
+
+function use_bomb(butn)
+if (butn.down and player.resources.bombs[1]>0 ) add_bomb(player.x,player.y) player.resources.bombs[1] -= 1
+end
+
+function use_bow(butn)
+if (butn.down and player.itempool.bow[2] >= 1 and player.resources.arrows[1] > 0) add_arrow(player) player.resources.arrows[1] -= 1
+end	
+
 -->8
 -- levels and map
 
@@ -962,9 +1113,6 @@ end
 -->8
 -- sword
 
-// sword()
-// draws sword swing
-// creates hitbox
 function sword(butn)
 	//swing on down
 	local v = global_faces[player.face]
@@ -1081,8 +1229,56 @@ end
 
 
 -->8
--- arrows and bow
+-- npos
 
+--bombs
+// add_bomb makes a bomb
+function add_bomb(x,y)														
+local	bomb = add_object(x,y,0,
+	0,100,1000000,nil,true,18,
+	update_bomb)
+local input_face = player.face
+smff(bomb,input_face,0)
+bomb.hb = add_hitbox(2,4,5,5,5,-1,false,0,0,0,0,nil, nil,bomb)
+bomb.ps = add_partsys(6,-1,1,1,bomb.duration,2,0,0,1,1,0.5,bomb,false,false,nil,{8,6,7})
+end
+
+// update_bomb
+function update_bomb(bomb)
+bomb.dx = 0
+bomb.dy = 0
+if (bomb.isalive == false) explode(bomb) bomb.ps.duration = 0
+end
+
+function explode(bomb)
+add_partsys(bomb.x+4,bomb.y+4,1,1,2,5,0,0,2,2, 0.0625)
+
+//hb damage hitbox larger
+add_hitbox(3,bomb.x+4,bomb.y+4,
+	24,24,3,false,50,0,0,2,
+	explo_oncollision,nil)
+
+//mapcell demo hitbox smaller
+add_hitbox(3,bomb.x+4,bomb.y+4,
+	16,16,3,false,17,0,0,2,nil,
+	explo_onmapcollision)
+end
+
+function explode_tile(point)
+sfx(7)
+mset(point.x,point.y, 20)
+end
+
+function explo_onmapcollision(explohb)
+foreach(searchmapcols(explohb,0b10,0,0,0,0), explode_tile)
+end
+
+--[[
+function explo_oncollision(explohb, otherhb)
+end --]]
+
+
+-- arrow
 function add_arrow(origin)
  local arrow = add_object(origin.x,origin.y,
 																										0,0,
@@ -1140,6 +1336,18 @@ end
 
 function arrow_onmapcollision(arrowhb)
 if ( 0 != #searchmapcols(arrowhb, 0b1, 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy), 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy))) sfx(10) arrowhb.parent.duration = 0
+end
+
+
+-- rock
+function add_rock(x,y)
+	rock = add_object(x,y,0,0,-1,10000,nil,true,51,update_rock,nil)
+	rock.hb = add_hitbox(6,4,4,7,6,-1, true, 0, 0,0,0, nil, nil, rock)
+end
+
+function update_rock(rock)
+	rock.dx =0
+	rock.dy =0
 end
 -->8
 -- pathfinding
@@ -1298,167 +1506,10 @@ function idxtovec(idx)
  return {x=tx,y=ty}
 end
 -->8
--- player info
-// the collions function, and
-// map info/functions
-//
-// make player
-//
-// make player generates our
-// player when called in _init
-// it contains a ton of info 
-// that we're gonna use
+--enemies
 
-function make_player()
-	player = add_object(300,60,
-																				0,0,
-																				-2,
-																				1000, //hp
-																				nil,true,
-																				2,
-																				update_player,
-																				draw_player)
-	player.diag = false
-	player.prev_face = 0
- player.face = 6
- player.interaction = false
- // player items
- player.itempool = {
-  ["bow"] = {42, 0, 0},
- 	["ice boots"] = {43, 0}, 
- 	["satchel"] = {58, 0 },
- 	["magnet"] = {17, 0, false},
- 	["sword"] = {59, 0} }
- player.resources = {
-  ["bombs"] = {0, 0},
-  ["keys"] = {0},
-  ["arrows"] = {0},
-  ["money"] = {0} }
- player.slots = {
-  [1] = "none",
-  [2] = "none",
-  [3] = "none"
- }
- player.working_inventory = {}
- player.slotflag = 0
-	player.invis = false
-	--player hurtbox, tag = 0
- player.hb = add_hitbox(0, 4,4, 6,6, -1, true, 0, 1,1,2, nil, player_onmapcollision, player)
-end
 
-// move player
-//
-// move player is self explanatory
-// the function uses our mapcollions
-// function (tab 9)
-// to restrict movement against
-// walls and objects with the
-// flag #0.
-
-function move_player()
-	// initialize dx, dy and diag
-	player.dx = 0
-	player.dy = 0
-	
-	if (btn(0)) player.dx-=1.001
-	if (btn(1)) player.dx+=1.001
-	if (btn(2)) player.dy-=1.001
-	if (btn(3)) player.dy+=1.001
-	
-	player.hb.kbx = player.dx*2
-	player.hb.kby = player.dy*2
-end
-
-// update player
-
-function update_player(p)
-	--update player face direction
-	
- local prev = p.face
-	
-	if btn(1) then
-		p.face = 5
-	elseif btn(0) then
-		p.face = 3
-	else
-		p.face = 4
-	end
-	
-	if btn(3) then
-		p.face +=3
-	elseif btn(2) then
-	 p.face -=3
-	end
-	
-	if p.face == 4 then
-		p.face = prev
-	elseif p.face >4 then
-		p.face -=1
-	end
-	
-	p.interaction = false
-	p.action = false
-	if (btn5.press or btn5.up) then
-		local t = global_faces[p.face]
-		add_hitbox(7,
- 											(4+t[14]+t[1]*6),
- 											(4+t[15]+t[2]*6),
- 											3,3,
- 											1,
- 											false,
- 											50,
- 											0,0,2,nil,nil,player)
- 											
-		interact(p.face)
-		if ( p.interaction==false ) then
-	  use_item_in_slot(1, btn5)
- 	end
- end
- 
-	if (btn4.press or btn4.up) use_item_in_slot(2, btn4)
-
-	if (btn01.press or btn01.up) use_item_in_slot(3, btn01) 
-	
-	--process input, update world pos
-	// called from above
-	move_player()
-end
-
-// draw player
-//
-// draws player
-
-function draw_player()
- local t = make_kv(8,{36,35,34,33,32,38,2,37})
-	player.sprite = t[player.face+1]
-	if (player.invis) player.sprite = 3	
-	palt(0, false) 
-	palt(1, true) 
-	spr(player.sprite, player.x%128, player.y%128)
-	pal()
-end
-
---[[
-function player_onmapcollision(playerhb)
-end
---]]
-
-function use_item_in_slot(num, butn)
-local k = player.slots[num]
-if (kcontains(global_items,k)) global_items[k].use(butn) 
-end
-
-function use_bomb(butn)
-if (butn.down and player.resources.bombs[1]>0 ) add_bomb(player.x,player.y) player.resources.bombs[1] -= 1
-end
-
-function use_bow(butn)
-if (butn.down and player.itempool.bow[2] >= 1 and player.resources.arrows[1] > 0) add_arrow(player) player.resources.arrows[1] -= 1
-end	
-
--->8
--- npcs
-
+-- enemy1
 function make_enemy1(x,y, hp, target)
 	enemy = add_object(x,y,1,1,-2,hp,
 	 nil,true,43,update_enemy1,nil)
@@ -1529,64 +1580,8 @@ function move_toward(obj, x,y, speed)
 	else
 		obj.dy = 0
 	end
-	
-end
--->8
--- bombs
-// add_bomb makes a bomb
-function add_bomb(x,y)														
-local	bomb = add_object(x,y,0,
-	0,100,1000000,nil,true,18,
-	update_bomb)
-local input_face = player.face
-smff(bomb,input_face,0)
-bomb.hb = add_hitbox(2,4,5,5,5,-1,false,0,0,0,0,nil, nil,bomb)
-bomb.ps = add_partsys(6,-1,1,1,bomb.duration,2,0,0,1,1,0.5,bomb,false,false,nil,{8,6,7})
 end
 
-// update_bomb
-function update_bomb(bomb)
-bomb.dx = 0
-bomb.dy = 0
-if (bomb.isalive == false) explode(bomb) bomb.ps.duration = 0
-end
-
-function explode(bomb)
-add_partsys(bomb.x+4,bomb.y+4,1,1,2,5,0,0,2,2, 0.0625)
-
-//hb damage hitbox larger
-add_hitbox(3,bomb.x+4,bomb.y+4,
-	24,24,3,false,50,0,0,2,
-	explo_oncollision,nil)
-
-//mapcell demo hitbox smaller
-add_hitbox(3,bomb.x+4,bomb.y+4,
-	16,16,3,false,17,0,0,2,nil,
-	explo_onmapcollision)
-end
-
-function explode_tile(point)
-sfx(7)
-mset(point.x,point.y, 20)
-end
-
-function explo_onmapcollision(explohb)
-foreach(searchmapcols(explohb,0b10,0,0,0,0), explode_tile)
-end
-
---[[
-function explo_oncollision(explohb, otherhb)
-end --]]
--->8
-function add_rock(x,y)
-	rock = add_object(x,y,0,0,-1,10000,nil,true,51,update_rock,nil)
-	rock.hb = add_hitbox(6,4,4,7,6,-1, true, 0, 0,0,0, nil, nil, rock)
-end
-
-function update_rock(rock)
-	rock.dx =0
-	rock.dy =0
-end
 __gfx__
 00000000000000001111111111111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
 0000000000005500111cc11111111111222222222f7ff22222ff22222222fff22222222222222222000880002ff222222f62222222ffff22222222222ffff6f2
