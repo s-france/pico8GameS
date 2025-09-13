@@ -18,43 +18,73 @@ function _init()
  coroutines = {}
 	hitboxes = {}
 	objectpool = {}
-	
+	enemies = {}
+	//memset(0x1000,0,0x2000)
 	// init player
 	make_player()
 	// init enemies, this will later
 	// be done with a table of refs
 	add_switch(296,86,32*8,2*8)
-	testenmy = make_enemy1(60,96, 100, player)
-	testenmy2 = make_enemy1(96*8,6*8, 50, player)
-	testenmy3 = make_enemy1(92*8,7*8, 50, player)
+	testenmy  = make_enemy1(60,96, 100, player)
+	testenmy2 = make_enemy1(68,10*8, 50, player)
+	testenmy3 = make_enemy1(50,13*8, 50, player)
 	add_rock(280,86)
+	add_warpbox(47*8,16,1,1,"firstcave")
 	
+	//tempitems
+	add_item(35*8,6*8,"satchel",58)
+	add_item(36*8,6*8,"bow",42)
+	add_item(37*8,6*8,"bow",52)
+	add_item(14*8-4,1*8+4,"sword",59)
+	add_item(39*8,6*8,"sword",73)
+	add_item(40*8,6*8,"bombs",18,5)
+	add_item(40*8,5*8,"bombs",18,5)
+	add_item(40*8,4*8,"bombs",18,5)
+	add_item(41*8,6*8,"arrows",40,20)
+	add_item(41*8,5*8,"arrows",40,20)
+	add_item(41*8,4*8,"arrows",40,20)
+	add_item(42*8,6*8,"magnet",17)
+ add_item(43*8,6*8,"skates",60)
+ add_item(44*8,6*8,"bigkeys",74)
+ add_item(45*8,6*8,"keys",75)
 	
 	collisions = {
 		[0] = {
+		 [1] = {_d,_kba},
 			[3] = {_d,_kbe},
-			[5] = {_d,_kbb},
-			[7] = {_st}
+			[4] = {_d,_kba},
+			[5] = {_d,_kba},
+			[7] = {_st},
+			[11] = {_ll}
 		},
 		[2] = {
 			[1] = {_mp,_mpd},
 			[3] = {_kbe},
-			[4] = {_kb}
+			[4] = {_kb},
+			[7] = {_st}
 		},
 		[5] = {
-			[0] = {_kb},
+			[0] = {_d,_kba},
 			[1] = {_d,_kba},
 			[3] = {_d,_kbe},
 			[4] = {_d,_kba},
-		 [6] = {_kbb}
+		 [6] = {_kba},
+		 [7] = {_st}
 		},
 		[6] = {
 			[0] = {_kb},
 			[1] = {_kba},
 			[3] = {_kbe},
 			[4] = {_kb},
+			[5] = {_kba},
 			[7] = {_st}
-		}
+		},
+		[8] = {
+		 [9] = {_kio,_ai}
+		},
+		[9] = {
+		 [1] = {_mp}
+		} 
 	}
 	
 	// initialize global faces,
@@ -74,7 +104,7 @@ function _init()
 	global_items = {
 	["bombs"] = {use = use_bomb},
 	["bow"] = {use = use_bow},
-	["sword"] = {use = sword} }
+	["sword"] = {use = use_sword} }
 	
 	//levels
 	levels = {
@@ -82,17 +112,30 @@ function _init()
 	["firstcave"] = {16,32, "0804041004040404040404040404040906150807151500000000000001141406060c06151515000000000000010000060615061515150000000000000000010606150615151500000000000000000006050906151500000000000000000000060816071500003939393900000000000606000000000039393939000000000006060000000000393939390000000000060600000000003939393900000000080706000e0100000000000000000008160906010601010000000000000000060b0606010601010000000000000000060e0606010504040900000000000804070f06060101010b0509000000000608170d060617040d0b0b0600000804070b0b0c06080d0017040409000004040404040409061515001a01060000000000000000060615000000000509000000000000000606000000393939060000000000000006060000003939390600000000000000060600000039390006000000000000000606010000000000060000000000000006050409010108040700000000000000060804070101050409000000000000000606000000000000060000000000000006060000000000000f141400000000000601000000000000011400000000000006000000000000141400000000000000060e0000000000000e00000000000000060600000000000006000000000000000605040404090008070404040404040407", {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}, 13, 48,48, 13}
 	}
 	
-	// level slots for storing
-	// current level info. later,
-	// info can be pulled directly
-	// from level table
-	level_slots = {
-	["loaded"] = "overworld",
-	["pallete"] = {1,2,3,4,5,6,7,8,9,10,132,12,13,14,15,0},
-	["curmusic"] =11,
-	["prevmusic"] = 0,
-	["background"] = 0
+	regions = {
+	 ["cave"] = {
+	  enemies = {make_enemy1},
+	  track = 25
+	 },
+	 ["example2"] = {
+	  enemies = {make_enemy1},
+	  track = 13,
+	  palette = {128, 131, 0, 132, 131, 133, 134, 7, 138, 9, 10, 11, 140, 13, 14, 15}
+	 }
 	}
+	
+	new_levels = {
+	 ["firstcave"] = {"0804041004040404040404040404040906150807151500000000000001141406060c06151515000000000000010000060615061515150000000000000000010606150615151500000000000000000006050906151500000000000000000000060816071500003939393900000000000606000000000039393939000000000006060000000000393939390000000000060600000000003939393900000000080706000e0100000000000000000008160906010601010000000000000000060b0606010601010000000000000000060e0606010504040900000000000804070f06060101010b0509000000000608170d060617040d0b0b0600000804070b0b0c06080d0017040409000004040404040409061515001a01060000000000000000060615000000000509000000000000000606000000393939060000000000000006060000003939390600000000000000060600000039390006000000000000000606010000000000060000000000000006050409010108040700000000000000060804070101050409000000000000000606000000000000060000000000000006060000000000000f141400000000000601000000000000011400000000000006000000000000141400000000000000060e0000000000000e00000000000000060600000000000006000000000000000605040404090008070404040404040407"},
+  ["example"] = {}
+	}
+	
+	
+	// level slots for storing
+	// current level info. 
+	
+	curregion = "overworld"
+ curpallete = {1,2,3,4,5,6,7,8,9,10,132,12,13,14,15,0}
+	curmusic,prevmusic,curbg = 11,0,0
 	
 	menuitem(1,"inventory", openinv)
 	menuitem(2,"save game", opensaveprompt)
@@ -103,9 +146,6 @@ end
 function _update()
 	//process input
 	update_input()
-	testvar = 0
- testflag= 0
- 
  //copy mapdata
 	//get_mapdata(0,0,32,32) 
 	
@@ -118,41 +158,33 @@ function _update()
  foreach(coroutines, update_coroutine)
  // update objects and hitboxes
 	foreach(objectpool,update_object)
-	foreach(hitboxes, update_hitbox)
-
+	foreach(hitboxes,update_hitbox)
 	// run collision coroutine
 	foreach(hitboxes,process_collisions)
-
-	// temp level loading code
-	if (player.mapcellx == 1 and player.mapcelly == 1 and level_slots["loaded"] == "overworld") then
-	 load_level("testing")
-	end
-	if (player.mapcellx == 38 and player.mapcelly == 24 and level_slots["loaded"] == "testing") then
-	 load_level("firstcave")
-	end
-	if (level_slots["prevmusic"] != level_slots["curmusic"]) then
-		music(level_slots["curmusic"])
-		level_slots["prevmusic"] = level_slots["curmusic"]
-	end
 	
+	if ((btn5.press or btn5.up) and player.interaction == false)  use_item_in_slot(1, btn5)
+	if (btn4.press or btn4.up) use_item_in_slot(2, btn4)
+	if (btn01.press or btn01.up) use_item_in_slot(3, btn01) 
+	
+	if (prevmusic != curmusic) then
+		music(curmusic)
+		prevmusic = curmusic
+	end
 end
 
 // routine updates every frame
 // using designed update funcs.
 function _draw()
-	cls(level_slots["background"])
+	cls(curbg)
 	//bomb_animation()
 	draw_map()
-	foreach(objectpool,draw_object)
+	foreach(objectpool,function(obj) obj:draw_object() end)
  draw_player()
- //foreach(hitboxes, draw_hitbox)
-	pal(make_kv(16,level_slots["pallete"]))
- //rectfill(40,20,88,40,0)
+ foreach(hitboxes, draw_hitbox)
+	pal(make_kv(16,curpallete))
 	print(player.hp)
-	//print(player.resources["keys"][1])
-	print(testenmy.hp)
+	//print(testenmy.hp)
 end
-
 -->8
 --objects
 // add object initializes an
@@ -165,14 +197,17 @@ function add_object(x,y,
 	local obj = {}
 	obj.x,obj.y,obj.dx,obj.dy,
 	obj.sprite,obj.duration,
-	obj.hp,obj.update,obj.draw,
-	obj.isalive = x,y,dx,dy,sprite,
-	duration,hp,update,draw,true
+	obj.hp,obj.update,obj.isalive = x,
+	y,dx,dy,sprite,duration,hp,update,true
+	// draw
+	function obj:draw_object()
+	 if (self.sprite and player.mapposx == self.mapposx and player.mapposy == self.mapposy) spr(self.sprite,flr(self.x)%128,flr(self.y)%128,1.0,1.0,self.flipx,self.flipy)
+	end
 	// init mappos/cell
 	obj.mapposx, obj.mapposy = map_pos(x,y)
 	obj.mapcellx, obj.mapcelly = map_cell(x,y)
 	// parent relationships
-	if parent != nil then
+	if parent then
 		obj.parent = parent
 		obj.isglobal = isglobal
 		obj.xoff = x
@@ -204,9 +239,15 @@ function update_object(obj)
 		obj.duration -= 1
 	// lifetime based on parent
 	elseif obj.duration == -2 then
-		if obj.parent != nil and obj.parent.isalive == false then
+		if obj.parent and obj.parent.isalive == false then
 			//delete object
 			obj.duration = 0
+		end
+		// lifetime independent of parent
+	elseif obj.duration == -3 then
+		if obj.parent and obj.parent.isalive == false then
+			//delete object
+			obj.parent = nil
 		end
 		// kill at duration=0
 	elseif obj.duration == 0 then
@@ -214,7 +255,7 @@ function update_object(obj)
 	end
 	
 	//prevent solid objects from entering walls
-	if obj.hb!=nil and obj.hb.issolid then
+	if obj.hb and obj.hb.issolid==true then
 			
 		// if |dx|>0 and checking a bitwise flag for spriteflag1
 		while obj.dx<0 and 0 < #searchmapcols(obj.hb, 0b1, 0+(flr(abs(obj.dx+.5))*sgn(obj.dx)),1, -(obj.hb.right-obj.hb.left),-1) do
@@ -257,8 +298,8 @@ function update_object(obj)
 	obj.y += obj.dy
 	
 	// update object
-	if obj.parent != nil then
-		if obj.xoff != nil then
+	if obj.parent then
+		if (obj.xoff) then
 			obj.xoff += obj.dx
 			obj.yoff += obj.dy
 		end	
@@ -276,19 +317,6 @@ function type_update(obj)
 	if (obj.update) obj.update(obj)
 end
 
--- implement into add_object
-// draw object
-function draw_object(obj)
-	if (player.mapposx == obj.mapposx and player.mapposy == obj.mapposy) then
-		// type-specific draw
-		if(obj.draw != nil) then
-			obj.draw(obj)
-		// generic sprite draw
-		elseif obj.sprite != nil then
-	 	spr(obj.sprite,flr(obj.x)%128,flr(obj.y)%128)
-		end
-	end
-end
 -->8
 --hitboxes
 
@@ -318,11 +346,11 @@ function add_hitbox(tag,x,y,xlen,
 	hitbox.kbduration = kbduration
 	
 	//oncollision() function
-	if oncolfunc != nil then
+	if oncolfunc then
 		//runs on all currently colliding hbs
 		hitbox.oncollision = oncolfunc
 	end
-	if onmapcolfunc != nil then
+	if onmapcolfunc then
 		//runs on all currently colliding map cells
 		hitbox.onmapcollision = onmapcolfunc
 	end
@@ -374,7 +402,7 @@ function update_hitbox(hb)
 	
 	--update mappos
 	hb.mapposx, hb.mapposy = map_pos(hb.x,hb.y)
-	if hb.parent != nil then
+	if hb.parent then
 		hb.x = flr(hb.xoff+hb.parent.x)
  	hb.y = flr(hb.yoff+hb.parent.y)
 		
@@ -385,11 +413,8 @@ function update_hitbox(hb)
 		hb.bot = hb.y+(.5*hb.ylen)
 	end
 	
-	if hb.onmapcollision != nil then
-		--onmapcollision function
-		hb.onmapcollision(hb)
-	end
-
+	--onmapcollision function
+	if (hb.onmapcollision)	hb.onmapcollision(hb)
 end
 
 // check hb cols, standard implementation
@@ -406,9 +431,9 @@ function process_collisions(hb1)
 	for i,hb2 in pairs(hitboxes) do
 		if hbcollision(hb1,hb2) and hb1 != hb2 then
 			//oncol
-			if (hb1.oncollision != nil) hb1.oncollision(hb1,hb2)
+			if (hb1.oncollision) hb1.oncollision(hb1,hb2)
 			//coltbl
-			if hb1.parent != nil then
+			if hb1.parent then
 			 if not check_parent(hb1,hb2) then
 					if kcontains(collisions,hb1.tag) and kcontains(collisions[hb1.tag],hb2.tag) then
 						for k,v in pairs(collisions[hb1.tag][hb2.tag]) do
@@ -488,7 +513,7 @@ function _d(hb1,hb2)
 end
 
 function _kb(hb1,hb2)
- knockback(hb1.parent,hb2.kbx,hb2.kby, hb2.kbduration)
+ knockback(hb1.parent,hb2.kbx,hb2.kby,hb2.kbduration)
 end
 
 function _kba(hb1,hb2)
@@ -497,26 +522,15 @@ function _kba(hb1,hb2)
 	knockback(hb1.parent,kbx,kby, hb2.kbduration)
 end
 
-function _kbb(hb1,hb2)
- local kbx = (hb1.parent.x-hb2.parent.x)/4
-	local kby = (hb1.parent.y-hb2.parent.y)/4
-	knockback(hb1.parent,kbx,kby, hb2.kbduration)
-	knockback(hb2.parent,-kbx,-kby,hb1.kbduration)
-end
-
 function _kbe(hb1,hb2)
+ sfx(7)
  local kbx = mid(hb1.x-hb2.x, -hb2.tag,hb2.tag)
 	local kby = mid(hb1.y-hb2.y, -hb2.tag,hb2.tag)
 	knockback(hb1.parent,kbx,kby, hb2.kbduration)
-	sfx(6)
-end
-
-function _ik(hb1,hb2)	
-	if (hb2.parent.isalive == false) hb1.parent.duration = 0
 end
 
 function _mp(hb1,hb2)
-	if (hb2.parent != nil) hb1.parent.parent = hb2.parent
+	if (hb2.parent) hb1.parent.parent = hb2.parent
 end
 
 function _mpd(hb1,hb2)
@@ -529,6 +543,22 @@ end
 
 function _st(hb1,hb2)
 hb2.parent.truth = true
+end
+
+function _ai(hb1,hb2)
+local k = hb2.parent.name
+sfx(8)
+hb1.parent.interaction = true
+hb1.parent.ninventory[k][1] += hb2.parent.count
+if (hb1.parent.ninventory[k][2] == true and not contains(hb1.parent.working_inventory,k)) add(hb1.parent.working_inventory,k)
+end
+
+function _kio(hb1,hb2)
+hb2.parent.isalive = false
+end
+
+function _ll(hb1,hb2)
+load_level(hb2.parent.level)
 end
 -->8
 -- particle effects
@@ -650,40 +680,22 @@ end
 
 --creates a single particle
 --from particle system
-function add_particle(x,y,
-																						duration,
-																						dx,dy,
-																						parent,
-																						isglobal,
-																						hb,_c)
+function add_particle(x,y,duration,
+	dx,dy,parent,isglobal,hb,_c)
 	
-	part = add_object(x,y,
-																			dx,dy,
-																			duration,
-																			1,
-																			parent,
-																			isglobal,
-																			nil,
-																			nil,
-																			draw_particle)
+	part = add_object(x,y,dx,dy,
+		duration,1,parent,isglobal)
 	
+	part.draw_object = draw_particle
 	part.color = _c
 	if hb != nil then
 		part.hb = add_hitbox(hb.tag,
-																					hb.x,hb.y,
-																					hb.xlen,
-																					hb.ylen,
-																					-1,
-																					hb.issolid,
-																					hb.damage,
-																					hb.kbx,hb.kby,
-																					hb.kbduration,
-																					hb.oncollision,
-																					hb.onmapcollision,
-																					part)
+			hb.x,hb.y,hb.xlen,hb.ylen,-1,
+			hb.issolid,hb.damage,hb.kbx,
+			hb.kby,hb.kbduration,hb.oncollision,
+	  hb.onmapcollision,part)
 	end
 end
-
 
 function draw_particle(part)
 	pset(part.x%128, part.y%128, part.color)
@@ -698,47 +710,48 @@ function make_player()
 																				1000, //hp
 																				nil,true,
 																				2,
-																				update_player,
-																				draw_player)
+																				update_player)
 	player.diag = false
 	player.prev_face = 0
  player.face = 6
  player.interaction = false
  // player items
- player.itempool = {
-  ["bow"] = {42, 0, 0},
- 	["ice boots"] = {43, 0}, 
- 	["satchel"] = {58, 0 },
- 	["magnet"] = {17, 0, false},
- 	["sword"] = {59, 0} }
- player.resources = {
-  ["bombs"] = {0, 0},
-  ["keys"] = {0},
-  ["arrows"] = {0},
-  ["money"] = {0} }
+ player.draw_object = draw_player
  player.slots = {
   [1] = "none",
   [2] = "none",
   [3] = "none"
  }
+ player.ninventory = {
+ 	["bow"] = {0,true,1},
+ 	["skates"] = {0,false},
+ 	["satchel"] = {0,true,2},
+ 	["magnet"] = {0,true,3},
+ 	["sword"] = {0,true,4},
+ 	["bombs"] = {0,true,5},
+  ["keys"] = {0,false},
+  ["arrows"] = {0,false},
+  ["money"] = {0,false},
+  ["bigkeys"] = {0,false} }
  player.working_inventory = {}
  player.slotflag = 0
 	player.invis = false
 	--player hurtbox, tag = 0
- player.hb = add_hitbox(0, 4,4, 6,6, -1, true, 0, 1,1,2, nil, player_onmapcollision, player)
+ player.hb = add_hitbox(0, 4,4, 6,6, -1, true, 0, 1,1,2, nil, nil, player)
 end
 
 // move player
 
 function move_player()
 	// initialize dx, dy and diag
-	player.dx = 0
-	player.dy = 0
+	setdxdy(player,0)
 	
 	if (btn(0)) player.dx-=1.001
 	if (btn(1)) player.dx+=1.001
 	if (btn(2)) player.dy-=1.001
 	if (btn(3)) player.dy+=1.001
+	
+	//if (player.dx*player.dy == 0) setdxdy(player,1.3)
 	
 	player.hb.kbx = player.dx*2
 	player.hb.kby = player.dy*2
@@ -748,8 +761,7 @@ end
 
 function update_player(p)
 	--update player face direction
-	
- local prev = p.face
+	local prev = p.face
 	
 	if btn(1) then
 		p.face = 5
@@ -772,35 +784,19 @@ function update_player(p)
 	end
 	
 	p.interaction = false
-	p.action = false
 	if (btn5.press or btn5.up) then
 		local t = global_faces[p.face]
-		player.ib = add_hitbox(8,
- 											(4+t[14]+t[1]*6),
- 											(4+t[15]+t[2]*6),
- 											3,3,
- 											1,
- 											false,
- 											50,
- 											0,0,2,nil,nil,player)
-		interact(p.face)
-		if ( p.interaction==false ) then
-	  use_item_in_slot(1, btn5)
- 	end
+		p.ib = add_hitbox(8,(4+t[14]+t[1]*6),
+ 	 (4+t[15]+t[2]*6),3,3,1,false,
+ 		50,0,0,2,nil,pib_ompcol,player)
  end
  
-	if (btn4.press or btn4.up) use_item_in_slot(2, btn4)
-
-	if (btn01.press or btn01.up) use_item_in_slot(3, btn01) 
-	
-	--process input, update world pos
+	--update world pos
 	// called from above
 	move_player()
 end
 
 // draw player
-//
-// draws player
 
 function draw_player()
  local t = make_kv(8,{36,35,34,33,32,38,2,37})
@@ -812,10 +808,37 @@ function draw_player()
 	pal()
 end
 
---[[
-function player_onmapcollision(playerhb)
+function pib_ompcol(pib)
+foreach(searchmapcols(pib,0b101,0,0,0,0),keydoor)
 end
---]]
+
+function keydoor(point)
+if (player.ninventory.keys[1]>0) player.ninventory.keys[1] -= 1 player.interaction = true  open_door(point) 
+end
+
+function open_door(point)
+sfx(9,-1,0,2)
+mset(point.x,point.y,47)
+end
+
+function close_door(point)
+sfx(9,-1,2,2)
+mset(point.x,point.y,29)
+end
+
+function use_sword(butn)
+	//swing on down
+	local v = global_faces[player.face]
+	if butn.down then
+		//sword particle + hitbox					
+		add_sword(player)
+	//lunge
+	elseif butn.up and  butn.time > 45 then
+		lunge(player,4)
+		//sword particle + hitbox
+		add_sword(player)
+	end
+end
 
 function use_item_in_slot(num, butn)
 local k = player.slots[num]
@@ -823,22 +846,25 @@ if (kcontains(global_items,k)) global_items[k].use(butn)
 end
 
 function use_bomb(butn)
-if (butn.down and player.resources.bombs[1]>0 ) add_bomb(player.x,player.y) player.resources.bombs[1] -= 1
+if (butn.down and player.ninventory.bombs[1]>0 ) add_bomb(player) player.ninventory.bombs[1] -= 1
 end
 
 function use_bow(butn)
-if (butn.down and player.itempool.bow[2] >= 1 and player.resources.arrows[1] > 0) add_arrow(player) player.resources.arrows[1] -= 1
-end	
+if (butn.down and player.ninventory.bow[1] >= 1 and player.ninventory.arrows[1] > 0) add_arrow(player) player.ninventory.arrows[1] -= 1
+end
+
+function wipe_save()
+end
 
 -->8
 -- levels and map
 
 function load_level(level_name)
 	set_mapdata(0,0,levels[level_name][1],levels[level_name][2],levels[level_name][3])
- level_slots["loaded"] = level_name
- level_slots["pallete"] = levels[level_name][4]
-	level_slots["curmusic"] = levels[level_name][5]
-	level_slots["background"] = levels[level_name][8]
+ curregion = level_name
+ curpallete = levels[level_name][4]
+	curmusic = levels[level_name][5]
+	curbg = levels[level_name][8]
 	player.x = levels[level_name][6]
  player.y = levels[level_name][7]
 end
@@ -900,8 +926,9 @@ function openstats()
  clearmenu()
  menuitem(1, "exit stats", openinv)
 	menuitem(2, "♥  "..player.hp)
-	menuitem(3, "keys "..player.resources["keys"][1])
-	menuitem(4, "money "..player.resources["money"][1])
+	menuitem(3, "keys "..player.ninventory["keys"][1])
+	menuitem(4, "money "..player.ninventory["money"][1])
+ 
  return true
 end
 
@@ -955,241 +982,18 @@ function displayitemtwo(x,table)
 	return true
 end
 -->8
--- player interaction functions
-
-// interaction process
-function interact(face)
-	for k,v in pairs(global_faces) do
-		if face == k then
-			update_chest(xest(player.x/8),xest(player.y/8),v[1],v[2])
-			update_door(xest(player.x/8),xest(player.y/8),v[1],v[2])
-		end
-	end
-	pickup_item(face)	
-	//npcfuncwhendone(face)
-end
-
-function wipe_save()
-end
-
-
-// this function updates the
-// state of the chest and returns
-// items to the player.
-function update_chest(xtemp,ytemp,xpm,ypm)
-	local contentflag = false
-	local loopflag = false
-	local loot_table = {
-	["bombs"] = {1,5},
-	["keys"] = {2,1},
-	["arrows"] = {3,20} }
- contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 5)
- if ( contentflag == true) then
-  for k,v in pairs(loot_table) do
-   loopflag = fget(mget((xtemp+xpm),(ytemp+ypm)),v[1])
-  	if loopflag == true then
-  		for i,j in pairs(player.resources) do
-  			if (k == i) then
-  			 player.interaction = true
-  			 sfx(8)
-  			 mset((xtemp+xpm),(ytemp+ypm),24)
-  			 j[1] += v[2]
-  			 if (k=="bombs") then
-  			  if (not contains(player.working_inventory,"bombs")) then
-  			 	 add(player.working_inventory,"bombs")
-  			 	end
-  			 end
-  			end	
-  		end
-  	end	
-  end
- end
-end
-
-// updates the state of the door
-// and removes the players key
-function update_door(xtemp,ytemp,xpm, ypm)
- local contentflag = false
- contentflag = fget(mget((xtemp+xpm),(ytemp+ypm)), 2)
-		if (contentflag == true and player.resources.keys[1] > 0) then
-				player.interaction = true
-			 player.resources.keys[1] -= 1
-			 sfx(9)
-  		mset((xtemp+xpm),(ytemp+ypm),0)
-		end
-end
-
-// picks up player inventory 
-// items which are meant to lie
-// static on the map.	can be 
-// utilized post acquisition
-function pickup_item(face) 
-	local xpm, ypm
-	for k, v in pairs(global_faces) do
-		if face == k then
-		 local temp = mget(xest(player.x/8+v[1]),xest(player.y/8+v[2]))
-			for i,j in pairs(player.itempool) do
-				if temp == j[1] then
-		 		player.interaction = true
-	 			j[2] += 1
-		 			
-	 		 if (i != "ice boots") then
-	 			 if (not contains(player.working_inventory,i)) then
-	 			  add(player.working_inventory,i)
-	 			 end
-	 			end  
-	 			if (i == "bow") then
-	 				j[1] = 52
-	 			end
-	 			
-	 			mset(xest(player.x/8+v[1]),xest(player.y/8+v[2]),0)
-				end
-			end
-		end
-	end
-end
--->8
--- sword
-
-function sword(butn)
-	//swing on down
-	local v = global_faces[player.face]
-	if butn.down then
-		//sword particle + hitbox					
-		add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false, false,
-			add_hitbox(4, 0, 0, 0,0, 0, false, 1, 2*v[1],2*v[2],4, sword_oncollision, sword_onmapcollision))	
-	//lunge
-	elseif butn.up and  butn.time > 45 then
-		knockback(player, 3*v[1],3*v[2],4)
-		//sword particle + hitbox					
-		add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], player, false, false,
-			add_hitbox(4, 0, 0, 0,0, 0, false, 1, 2*v[1],2*v[2],4, nil, sword_onmapcollision))
-	end
-end
-
---[[
-function sword_onmapcollision(swordhb)
-end --]]
--->8
--- optimizations and development functions
--- + other updates (relocated)
-function xest(x)
-	return flr(x+0.5)
-end
-
-function lunge(o,s)
- o.dx *= s
- o.dy *= s
-end
-
-function make_kv(size,input)
- local t = {}
- for i = 1,size,1 do
- 	t[i] = input[i]
- end
- return t
-end
-
-function map_cell(x,y)
-	local mx = (x-(x%8))/8
-	local my = (y-(y%8))/8
-	return mx, my
-end
-
-function map_pos(x,y)
-	local mx, my = map_cell(x,y)
-	local mpx = (mx-(mx%16)) / 16
-	local mpy = (my-(my%16)) / 16
-	return mpx, mpy
-end
-
-function map_coord(mapx,mapy)
-	return mapx*8, mapy*8
-end
-
-function contains(t,e)
- for k,v in pairs(t) do 
- 	if (v == e) return true
- end return false
-end
-
-function kcontains(t,k)
-	if (t[k]) return true
-	return false
-end
-
-// set_movement_from_face
-function smff(object,input_face,speed)
-object.dx=0
-object.dy=0
-//lrud
-if (input_face==0 or input_face ==3 or input_face ==5) object.x -= 8 object.dx = -(speed)
-if (input_face==2 or input_face ==4 or input_face ==7) object.x += 8 object.dx = speed
-if (input_face==0 or input_face ==1 or input_face ==2) object.y -= 8 object.dy = -(speed)
-if (input_face==5 or input_face ==6 or input_face ==7) object.y += 8 object.dy = speed	
-end
-
-function update_coroutine(cr)
-	if (not coresume(cr)) del(coroutines,cr)
-end
-
-function draw_map()
-	map(player.mapposx*16,player.mapposy*16,0,0,16,16)
-end
-
-function update_input()
- local function bfunc(b,bt)
-  //btn press
-  if b then
-	 	//down frame
-			if not bt.press then
-				bt.down = true
-			else
-				bt.down = false
-			end
-			//general press
-			bt.press = true
-			bt.time += 1
-		//not pressed
-		else
-			//up frame
-			if bt.press then
-				bt.up = true
-			else
-				bt.up = false
-				bt.time = 0
-			end
-			bt.press = false
-		end
- end
-	//btn5
-	bfunc(btn(5),btn5)
-	//btn4
-	bfunc(btn(4),btn4)
-	//btn01
-	bfunc(btn(0,1),btn01)
-end
-
-
--->8
 -- npos
 
 --bombs
 // add_bomb makes a bomb
-function add_bomb(x,y)														
-local	bomb = add_object(x,y,0,
-	0,100,1000000,nil,true,18,
-	update_bomb)
-local input_face = player.face
+function add_bomb(origin)														
+local	bomb = add_object(origin.x,origin.y,0,
+	0,100,1000000,nil,true,18,update_bomb)
+local input_face = origin.face
 smff(bomb,input_face,0)
-bomb.hb = add_hitbox(2,4,5,5,5,-1,false,0,0,0,0,nil, nil,bomb)
+bomb.hb = add_hitbox(2,4,5,5,5,-1,false,0,0,0,0,nil,nil,bomb)
 bomb.ps = add_partsys(6,-1,1,1,bomb.duration,2,0,0,1,1,0.5,bomb,false,false,nil,{8,6,7})
-end
-
-// update_bomb
-function update_bomb(bomb)
-lunge(bomb,0)
-if (bomb.isalive == false) explode(bomb) bomb.ps.duration = 0
+function bomb:update() setdxdy(bomb,0) if (bomb.isalive == false) sfx(6) explode(bomb) bomb.ps.duration = 0 end
 end
 
 function explode(bomb)
@@ -1197,8 +1001,7 @@ add_partsys(bomb.x+4,bomb.y+4,1,1,2,5,0,0,2,2, 0.0625)
 
 //hb damage hitbox larger
 add_hitbox(3,bomb.x+4,bomb.y+4,
-	24,24,3,false,50,0,0,2,
-	explo_oncollision,nil)
+	24,24,3,false,50,0,0,2)
 
 //mapcell demo hitbox smaller
 add_hitbox(3,bomb.x+4,bomb.y+4,
@@ -1215,97 +1018,101 @@ function explo_onmapcollision(explohb)
 foreach(searchmapcols(explohb,0b10,0,0,0,0), explode_tile)
 end
 
---[[
-function explo_oncollision(explohb, otherhb)
-end --]]
-
-
 -- arrow
 function add_arrow(origin)
- local arrow = add_object(origin.x,origin.y,
-																										0,0,
-																										40,
-																										1,
-																										nil,
-																										true,
-																										39,
-																										nil,
-																										draw_arrow)
-		
+ arrow = add_object(origin.x,
+ 	origin.y,0,0,40,1,nil,true,40)
 	//sets dx,dy
-	smff(arrow,origin.face,2.002)
-		
-	if ((arrow.dx == 0) or (arrow.dy == 0)) then
-		if arrow.dx == 0 then
-			arrow.sprite = 39
-		else
-			arrow.sprite = 41
-		end
-	else 
-	 arrow.sprite = 40
+	local cx,cy = smff(arrow,origin.face,2.002)
+	
+	if (cx*cy == 0) then
+		//setdxdy(arrow,1.3)
+	 arrow.sprite = 41
+		if (cx == 0) arrow.sprite = 39
 	end
 	
-	arrow.flipx = false
-	arrow.flipy = false
-	
-	if player.face == 5 then
+	if origin.face == 5 then
 		arrow.flipy = true
-	elseif (player.face == 7 or player.face == 6 or player.face == 4) then
+	elseif (origin.face == 7 or origin.face == 6 or origin.face == 4) then
 		arrow.flipx = true
 		arrow.flipy = true
-	elseif player.face == 2 then
+	elseif origin.face == 2 then
 		arrow.flipx = true
 	end
 	
-	if (arrow.sprite == 40) then
-	 arrow.x = flr(arrow.x)+0.5
-  arrow.y = flr(arrow.y)+0.5
-	end
-	arrow.hb = add_hitbox(1,4,4,3,3,-1, true, 80, 2*global_faces[player.face][1],2*global_faces[player.face][2],4,  arrow_oncollision, arrow_onmapcollision, arrow)
+ arrow.x = flr(arrow.x)+0.5
+ arrow.y = flr(arrow.y)+0.5
+	
+	arrow.hb = add_hitbox(1,4,4,3,3,-1, true, 80, 2*global_faces[origin.face][1],2*global_faces[origin.face][2],4,  arrow_oncollision, arrow_onmapcollision, arrow)
+ 
+ function arrow:update() 
+  if ((self.dx  == 0) and (self.dy == 0)) sfx(10) self.duration = 0 
+ end
 end
-
-
-function draw_arrow(arrow)
-if (player.mapposx == arrow.mapposx and player.mapposy == arrow.mapposy) spr(arrow.sprite,arrow.x%128,arrow.y%128,1.0,1.0,arrow.flipx,arrow.flipy)
-end
-
 
 function arrow_oncollision(arrowhb,otherhb)
 if (otherhb.issolid) sfx(10) arrowhb.parent.duration = 0
 end
 
 function arrow_onmapcollision(arrowhb)
-if ( 0 != #searchmapcols(arrowhb, 0b1, 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy), 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy))) sfx(10) arrowhb.parent.duration = 0
+if (0 != #searchmapcols(arrowhb, 0b1, 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy), 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.parent.dy))) sfx(10) arrowhb.parent.duration = 0
 end
-
 
 -- rock
 function add_rock(x,y)
-	rock = add_object(x,y,0,0,-1,10000,nil,true,51,update_rock,nil)
-	rock.hb = add_hitbox(6,4,4,7,6,-1, true, 0, 0,0,0, nil, nil, rock)
-end
-
-function update_rock(rock)
-	lunge(rock,0)
+	rock = add_object(x,y,0,0,-2,10000,nil,true,51)
+	rock.hb = add_hitbox(6,4,4,7,7,-1, true, 0, 0,0,0, nil, nil, rock)
+ function rock:update() setdxdy(self,0) end
 end
 
 -- button
 function add_switch(x,y,gx,gy)
- switch = add_object(x,y,0,0,-1,10000,nil,true,69,update_switch,nil)
+ switch = add_object(x,y,0,0,-2,10000,nil,true,69,update_switch,nil)
  switch.hb = add_hitbox(7,4,4,5,5,-1, true, 0, 0,0,0, nil, nil, switch)
- switch.gx,switch.gy = gx,gy
- switch.truth = false
+ switch.gx,switch.gy,switch.truth,switch.call = gx,gy,false,true
 end
 
 function update_switch(switch)
-	lunge(switch,0)
-	if (switch.truth == true) then
-		add_hitbox(8,switch.gx+4,switch.gy+4,4,4,1, true, 0, 0,0,0, nil, nil, nil) 
-		switch.sprite = 70
+	local t,c = switch.truth,switch.call
+	if (t == true) then
+		if (c == true) add_hitbox(10,switch.gx+4,switch.gy+4,4,4,1,true,0,0,0,0,nil,swtchboxmpcol) switch.call = false switch.sprite = 70
 	else
-	 switch.sprite = 69
+	 if (c == false) add_hitbox(12,switch.gx+4,switch.gy+4,4,4,1,true,0,0,0,0,nil,swtchboxfalcol) switch.call = true switch.sprite = 69
 	end
 	switch.truth = false
+end
+
+function swtchboxfalcol(sb)
+foreach(searchmapcols(sb,0b0,0,0,0,0),close_door)
+end
+
+function swtchboxmpcol(sb)
+foreach(searchmapcols(sb,0b101,0,0,0,0),open_door)
+end
+
+function add_warpbox(x,y,w,h,level)
+warpbox = add_object(x,y,0,0,-2,10000,nil,false)
+warpbox.level = level
+warpbox.hb = add_hitbox(11,4,4,w,h,-1, true, 0, 0,0,0, nil, nil, warpbox)
+end
+
+function add_sword(o)
+	local v = global_faces[o.face]
+	add_partsys(v[3],v[4], v[5],v[6], v[7], v[8], v[9],v[10], v[11],v[12],v[13], o, false, false,
+		add_hitbox(4, 0, 0, 0,0, 0, false, 1, 2*v[1],2*v[2],4))	
+	sfx(2)
+end
+
+function add_dispenser(x,y,item,face)
+
+end
+
+function add_item(x,y,name,sprite,_cnt)
+item = add_object(x,y,0,0,-3,10000,nil,true,sprite)
+item.name,item.count = name,1
+if (_cnt) item.count = _cnt
+function item:update() setdxdy(self,0) end
+item.hb = add_hitbox(9,4,4,5,5,-1,false, 0, 0,0,0, nil, nil, item)
 end
 -->8
 -- pathfinding
@@ -1359,7 +1166,6 @@ function astar(startx,starty,
  		print("path found")
    break
   end
-  
   //print(#frontier)
  end
 	
@@ -1393,8 +1199,6 @@ function draw_path(path)
 	end
 end
 
-
-
 -- insert into table and sort by priority
 function insert(t, val, p)
  if #t >= 1 then
@@ -1414,8 +1218,6 @@ function insert(t, val, p)
  end
 end
 
-
-
 -- find all existing neighbours of a position that are not walls
 function getneighbours(pos)
  local neighbours={}
@@ -1430,7 +1232,6 @@ function getneighbours(pos)
  return neighbours
 end
 
-
 -- manhattan distance on a square grid
 function heuristic(a, b)
 	--[[local xsqr = abs(a.x - b.x)^2
@@ -1438,7 +1239,6 @@ function heuristic(a, b)
  return sqrt(xsqr+ysqr)--]]
  return (abs(a.x-b.x)+abs(a.y-b.y))
 end
-
 
 function reverse(t)
  for i=1,(#t/2) do
@@ -1448,7 +1248,6 @@ function reverse(t)
   t[oppindex] = temp
  end
 end
-
 
 //fuck my life
 -- translate a 2d x,y coordinate to a binary idx
@@ -1464,27 +1263,162 @@ function idxtovec(idx)
  return {x=tx,y=ty}
 end
 -->8
+-- optimizations and development functions
+-- + other updates (relocated)
+function xest(x)
+	return flr(x+0.5)
+end
+
+function setdxdy(o,s)
+ o.dx *= s
+ o.dy *= s
+end
+
+function lunge(o,d)
+local v = global_faces[o.face]
+knockback(o,3*v[1],3*v[2],d)
+end
+
+function make_kv(size,input)
+ local t = {}
+ for i = 1,size,1 do
+ 	t[i] = input[i]
+ end
+ return t
+end
+
+function map_cell(x,y)
+	local mx = (x-(x%8))/8
+	local my = (y-(y%8))/8
+	return mx, my
+end
+
+function map_pos(x,y)
+	local mx, my = map_cell(x,y)
+	local mpx = (mx-(mx%16)) / 16
+	local mpy = (my-(my%16)) / 16
+	return mpx, mpy
+end
+
+function map_coord(mapx,mapy)
+	return mapx*8, mapy*8
+end
+
+function contains(t,e)
+ for k,v in pairs(t) do 
+ 	if (v == e) return true
+ end return false
+end
+
+function kcontains(t,k)
+	if (t[k]) return true
+	return false
+end
+
+// set_movement_from_face
+function smff(object,input_face,speed)
+object.dx=0
+object.dy=0
+//lrud
+if (input_face==0 or input_face ==3 or input_face ==5) object.x -= 8 object.dx = -(speed)
+if (input_face==2 or input_face ==4 or input_face ==7) object.x += 8 object.dx = speed
+if (input_face==0 or input_face ==1 or input_face ==2) object.y -= 8 object.dy = -(speed)
+if (input_face==5 or input_face ==6 or input_face ==7) object.y += 8 object.dy = speed	
+
+return object.dx,object.dy
+end
+
+function update_coroutine(cr)
+	if (not coresume(cr)) del(coroutines,cr)
+end
+
+function draw_map()
+	map(player.mapposx*16,player.mapposy*16,0,0,16,16)
+end
+
+function update_input()
+ local function bfunc(b,bt)
+  //btn press
+  if b then
+	 	//down frame
+			if not bt.press then
+				bt.down = true
+			else
+				bt.down = false
+			end
+			//general press
+			bt.press = true
+			bt.time += 1
+		//not pressed
+		else
+			//up frame
+			if bt.press then
+				bt.up = true
+			else
+				bt.up = false
+				bt.time = 0
+			end
+			bt.press = false
+		end
+ end
+	//btn5
+	bfunc(btn(5),btn5)
+	//btn4
+	bfunc(btn(4),btn4)
+	//btn01
+	bfunc(btn(0,1),btn01)
+end
+
+function setface(o)
+	local prev = o.face
+		
+	if o.dx == 0 then
+		o.face = 4
+	elseif o.dx < 0 then
+		o.face = 3
+	else
+		o.face = 5
+	end
+	
+	if o.dy > 0 then
+		o.face +=3
+	elseif o.dy < 0 then
+	 o.face -=3
+	end
+	
+	if o.face == 4 then
+		o.face = prev
+	elseif o.face > 4 then
+		o.face -=1
+	end
+end
+
+function execute(f,...)
+ return f(...)
+end
+
+
+-->8
 --enemies
 
-
--- enemy1
+--enemy1
 function make_enemy1(x,y, hp, target)
 	enemy = add_object(x,y,1,1,-2,hp,
 	 nil,true,43,update_enemy1,nil)
 	
 	//target player by default
 	enemy.target = player
-	
+	enemy.face = 4
  enemy.dcv = -1
  enemy.dcs = -1
 	enemy.hb = add_hitbox(5,4,4,6,6,
 		-1,true,50,0,0,5,nil,nil,enemy)
 	
+	add(enemies,enemy)
+	
 	enemy.hp = hp
-	add(enemies, enemy)
 	return enemy
 end
-
 
 function update_enemy1(enm1)
 	local path = astar(enm1.mapcellx,enm1.mapcelly,
@@ -1496,9 +1430,11 @@ function update_enemy1(enm1)
 			local pointx,pointy = map_coord(path[1].x, path[1].y)
 			move_toward(enm1, pointx,pointy, .25)
 		end
-		stripanim(enm1,96,4,2,lunge,8)
+		setface(enm1)
+		stripanim(enm1,96,4,2,lunge,2)
+	 //stripanim(enm1,96,4,2,add_arrow)
 	else --add idle behavior here
-		lunge(enm1,0)
+		setdxdy(enm1,0)
 	end
 	--set attack kb
 	enm1.hb.kbx = (4*enm1.dx) + sgn(enm1.dx)
@@ -1507,18 +1443,10 @@ end
 
 //move obj toward x,y world coord
 function move_toward(obj, x,y, speed)
-	if x-obj.x != 0 then
-		obj.dx = sgn(x-obj.x) * speed
-	else
-		obj.dx = 0
-	end
-	if y-obj.y != 0 then
-		obj.dy = sgn(y-obj.y) * speed
-	else
-		obj.dy = 0
-	end
-	
-	//if (obj.dx * obj.dy == 0) lunge(obj,0.75)
+	setdxdy(obj,0)
+	if (x-obj.x != 0) obj.dx = sgn(x-obj.x) * speed
+	if (y-obj.y != 0)	obj.dy = sgn(y-obj.y) * speed
+	//if (obj.dx*obj.dy == 0) setdxdy(obj,1.3)
 end
 
 
@@ -1529,18 +1457,13 @@ function stripanim(_o,mx,n,bfr,act,...)
 		if dcv == mx then
 			_o.dcv = 0
 			if act then
-			 local args = {...}
-			 for k,v in pairs(args) do
-					act(_o,v)
-				end
+			 act(_o,...)
 			end
 		end
 		_o.dcs *= -1
 	end
 	local dcs = _o.dcs 
-	if (dcv%n) == 0 then
-		_o.sprite += dcs
-	end
+	if ((dcv%n) == 0) _o.sprite += dcs
 end
 
 __gfx__
@@ -1568,22 +1491,22 @@ f77ffff2dd0000dd051111505007700560000000cc676cccf6ff2fff2ffef6ff400aa004444aa444
 1ccccc411cccc4c11cdcccc11cdcccc114cdccc11ccccc411ccccc410000f00000000f7000000000007000400bbbbbb00bbbbbb0b7bbbb7b0bbbbbb050000005
 11cc144111c1c41111c1cc1114c11c1114cc1c1111cc1c4111c1c4410007f700000007f700000000007004000bbbbbb00bbbbbb0bbbbbbbbb7bbbb7b50000005
 11c11c1111c11c1111c11c1111c11c1111c11c1111c11c1111c11c110007070000000070000000000054400000bbbb0000bbbb0000bbbb000bbbbbb050000005
-f544445f00000000000000000555d55000a660000222200000022222000222200222220000e007e00000000000000066000000005d5705d5bbbbbbbb45444454
-55ffff550099990000999900555d555500700600002222000022222000222200000222200e3e737004440000000006760000000005d07d50bbbbbbbb55555555
-f444444f0975579009999990555d55550070006000272700007272000072700000027270e33333370044600000006760064000005d5705d5bbbbbbbb45444454
-f444444f97755779999559995555d555007000a00320f030030f0230030f033000330f00073993700006640000067600644600005d5075d5bbbbbbbb52aa5555
-f444444f977557799955559955555dd50070006003333330033333300333333000f333300e39933e004e3e40906760006444660005d70d50bbbbbbbb42aa4454
-f444444f0975579009999990555dd55d007000600f3334f00f3334f00f3334f000f333400733333704439340099600006444446705d07d50bbbbbbbb45444454
-55ffff55009999000099990055d55555007006000f5555f00f5555f00f5555f000055500733776e00043374005900000644c4cc75d5705d5bbbbbbbb55555555
-f544445f00000000000000000d55555000a660000050050000500500005005000005050007e00000000444005009000007c7c77005d07d50bbbbbbbb45444454
-55555555000000000000000000000000000000000dddddd00dddddd0000000000000000000000000000000000000000000000000000000000000000000000000
-5700007500000000005005000050050000500500dd9999ddddbbbbdd000000000000000000000000000000000000000000000000000000000000000000000000
-5770007506400000505555050055550000555500d999999ddbbbbbbd000000000000000000000000000000000000000000000000000000000000000000000000
-5707007564460000507557050075570000755700d999999ddbbbbbbd000000000000000000000000000000000000000000000000000000000000000000000000
-5700707564446600558558555085580500855800d999999ddbbbbbbd000000000000000000000000000000000000000000000000000000000000000000000000
-5700077564444467055555505555555505555550d999999ddbbbbbbd000000000000000000000000000000000000000000000000000000000000000000000000
-57000075644c4cc7005555000555555055555555dd9999ddddbbbbdd000000000000000000000000000000000000000000000000000000000000000000000000
-5555555507c7c7700005500000055000500550050dddddd00dddddd0000000000000000000000000000000000000000000000000000000000000000000000000
+f544445f00000000000000000555d55000a660000222200000022222000222200222220000e007e00444000000000066000000005d5705d5bbbbbbbb45444454
+55ffff550099990000999900555d555500700600002222000022222000222200000222200e3e737000446000000006760640000005d07d50bbbbbbbb55555555
+f444444f0975579009999990555d55550070006000272700007272000072700000027270e33333370006640000006760644600005d5705d5bbbbbbbb45444454
+f444444f97755779999559995555d555007000a00320f030030f0230030f033000330f0007399370004e3e4000067600644466005d5075d5bbbbbbbb52aa5555
+f444444f977557799955559955555dd50070006003333330033333300333333000f333300e39933e04439340906760006444446705d70d50bbbbbbbb42aa4454
+f444444f0975579009999990555dd55d007000600f3334f00f3334f00f3334f000f33340073333370043374009960000644c4cc705d07d50bbbbbbbb45444454
+55ffff55009999000099990055d55555007006000f5555f00f5555f00f5555f000055500733776e0000444000590000007c7c7705d5705d5bbbbbbbb55555555
+f544445f00000000000000000d55555000a660000050050000500500005005000005050007e0000000000000500900000000000005d07d50bbbbbbbb45444454
+55555555000000000000000000000000000000000dddddd00dddddd066666666a35555390000006c0aa0aa000000000000000000000000000000000000000000
+5700007500000000005005000050050000500500dd9999ddddbbbbdd655595563366663300000c760a696a0000aaa00000000000000000000000000000000000
+5770007506400000505555050055550000555500d999999ddbbbbbbd6555995656666665000067c00aa6aa000aa2aa0000000000000000000000000000000000
+5707007564460000507557050075570000755700d999999ddbbbbbbd6999999656666665000cc60000aaa00000a6a00000000000000000000000000000000000
+5700707564446600558558555085580500855800d999999ddbbbbbbd6999999656666665a0c7c000000a0000000a000000000000000000000000000000000000
+5700077564444467055555505555555505555550d999999ddbbbbbbd655599565666666509ac0000000aa000000aa00000000000000000000000000000000000
+57000075644c4cc7005555000555555055555555dd9999ddddbbbbdd655595563366663305900000000a0000000a000000000000000000000000000000000000
+5555555507c7c7700005500000055000500550050dddddd00dddddd06666666693555539500a0000000aa000000aa00000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -1803,19 +1726,19 @@ __label__
 22222222222222222ffff2221111111111111111222f7f2222222222222222222222222222222222222222222ffff22211111111111111111111111111111111
 
 __gff__
-0003000001010101010101010101010101010001000101010123252931050101000000000000000000000100000000000100000901000000000001010100000501000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0003000001010101010101010101010101010001000101010123252931050101000000000000000000000100000000000100000901000000000001010100000501000000000000000101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 08040404040404041004040404040410100404040404040404040404040404041f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f0404040404040404040404040404040408040404040404040404040404040409080404040404040404040404040404090804040404040404040404040404040404040404040404040404040404040409
-06030303030303030603030303010106060303030303191a1b1c0303030303031f133e3e403e3e3e3e3e3e3e3e3e3e1f0000000000000000000000000000000003030303030303030303030303030306060303030303030303030303030303060603030303030303030303030303030303030303030304040403030303030306
-0603030119031b1b062a010303013c06060103030303030303030303030303033e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e0000000000000000000000000000000003151515030303030303030303030306060303010303030303030301030103060603030303030303030303030303030303030303030303030303030303030306
+06030303030303030603030303010106060303030303000000000003030303031f133e3e403e3e3e3e3e3e3e3e3e3e1f0000000000000000000000000000000003030303030303030303030303030306060303030303030303030303030303060603030303030303030303030303030303030303030304040403030303030306
+0603030119031b1b062a010303013c06060103030303030303030303030303031d3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e0000000000000000000000000000000003151515030303030303030303030306060303010303030303030301030103060603030303030303030303030303030303030303030303030303030303030306
 0603030303010303050409030303030606031a030809030303030101010103031f3e3e3e3e3e3e3e3e3e3e3e3e3e3e1f0000000000000000000000000000000003151503031503030303030303030306060103030303030103030303010303060603030303030303030303030303030303030303030303030303030303030306
-0603010303030303033a050d0303030606030804070f030303014747474701031f3e3e3e3e3e3e3e3e3e3e3e3e3e3e1f0000000000000000000000000000000003030303150303030303030303030303060303030301030303030103030303060603030303030303030303030303030303030303030303030303030303030306
-06030303030303010303030303030305160407030303030301474747474747011f3e3e3e3e3e3e3e3e3e3e3e3e3e3e1f0000000000000000000000000000000003031515030303030303030303030303060303030303030303030303030303060603030303030303030303030303030303030303030303030303030303030306
-05040409030303030303080409030303030303030303030301474747474747011e3e3e3e3e3e3e3e3e3e3e3e3e3e3e1e0000000000000000000000000000000003031515030303390303030303030303060303030303030103010301030303030303030303030303030303030303030303030303030303030303030303030306
-0b0c0c05040903030804070807030303030303030303030301474747334747011e3e3e3e3e3e3e3e3e3e3e3e3e3e3e1e000000000000000000000000000000000303030303030303033b030303030303030301030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
-0c0b0804040703030504040703030303030303030303030301474747474747011e3e3e3e3e3e3e3e3e3e3e3e3e3e3e1e0000000000000000000000000000000003030303030303030303030303030303030303030103030303010301030303030303030303030303030303030303030303030303030303030303030303030306
-080407030303030303033b010303030810040d030303030303014747474701031e3e3e3e3e3e3e3e3e3e3e3e3e3e3e1e0000000000000000000000000000000003030303030303030303030303030303060303030303030103030303030303030303030303030303030303030303030303030303030303030303030303030306
+0603010303030303033a050d0303030606030804070f030303010000000001031f3e3e3e3e3e3e3e00003e3e3e3e3e1f0000000000000000000000000000000003030303150303030303030303030303060303030301030303030103030303060603030303030303030303030303030303030303030303030303030303030306
+06030303030303010303030303030305160407030303030301000000000000011f3e3e3e3e3e3e3e00003e3e3e3e3e1f0000000000000000000000000000000003031515030303030303030303030303060303030303030303030303030303060603030303030303030303030303030303030303030303030303030303030306
+05040409030303030303080409030303030303030303030301000000000000011e3e0000000000000000000000003e1e0000000000000000000000000000000003031515030303390303030303030303060303030303030103010301030303030303030303030303030303030303030303030303030303030303030303030306
+0b0c0c05040903030804070807030303030303030303030301000000330000011e3e3e3e3e3e3e3e3e3e3e3e3e3e3e1e000000000000000000000000000000000303030303030303033b030303030303030301030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306
+0c0b0804040703030504040703030303030303030303030301000000000000011e3e3e3e3e3e3e3e3e3e3e3e3e3e3e1e0000000000000000000000000000000003030303030303030303030303030303030303030103030303010301030303030303030303030303030303030303030303030303030303030303030303030306
+080407030303030303033b010303030810040d030303030303010000000001031e3e3e3e3e3e3e3e3e3e3e3e3e3e3e1e0000000000000000000000000000000003030303030303030303030303030303060303030303030103030303030303030303030303030303030303030303030303030303030303030303030303030306
 06110301030303030303030303030106060303030303030303030101010103031f3e3e3e3e3e3e3e3e3e3e3e3e3e3e1f0000000000000000000000000000000303030303030303030303030303030303060303030103030303030303030303060603030303030303030303030303030303030303030303030303030303030306
 06030301010303030303030300030105070303030303030303030303030303031f3e3e3e3e3e3e3e3e3e3e3e3e3e3e1f0000000000000000000000000000000003030303030303030303030303030303060303030301030103010303030103060603030303030303030303030303030303030303030303030303030303030306
 06190303010303030300000000030301030303030303030303030303030303031f3e3e3e3e3e3e3e3e3e3e3e3e3e3e1f0000000000000000000000000000000003030303030303030303030303030303060303030303030303030103030303060603030303030303030303030303030303030303030303030303030303030306
@@ -1824,31 +1747,31 @@ __map__
 05040903030804040404040901000303030303030303030303030303030303031f1f1f1f1e1f1f1d3f1f1f1e1f1f1f1f0000000000000000000000000000000003030303030303030303030303030303050404040404040404040404040404070504040404040404040404040404030303030303030303030303030303030306
 0804070303050404040404070303030303030303030303030303030303030303030303000303030303030303030303030303030303030303030303030303000303030303030303030303030303030303080404100404040404040404040404090000000000000000000000000000000003030303030303030303030303030306
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303061508071515000000000000011414060000000000000000000000000000000003030303030303030303030303030306
-0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303060c06151515000000000000010000060000000000000000000000000000000003030303030303030303030303030306
-060303030303030303030303030303030303030308040d0317040409030303030303031f1f1f1f1f1f1f0303030303030303030303030303030303030303030303030303030303030303030303030303061506151515000000000000000001060000000000000000000000000000000003030303030303030303030303030306
-0603030303031f1e1f1e1f0303030303030303030601010101010106030303030303031f30303030301f0303030303030303030303030303030303030303030303030303030303030303030303030303061506151515000000000000000000060000000000000000000000000000000003030303030303030303030303030306
-0603030303031f0319031f030303030303030303060101010101010f030303030303031f30303030301f0303030303030303030303030303030303030303030303030303030303030303030303030303050906151500000000000000000000060000000000000000000000000000000003030303030303030303030303030306
-0603030303031f0303031f0303030303030303030f01010101010103030303030303031f30303030301f0303030303030303030303030303030303030303030303030303030303030303030303030303081607150000393939390000000000060000000000000000000000000000000003030303030303030303030303030306
-0603030303031f1e1d1e1f030303030303030303030101013401010e030303030303031f30303030301f0303030303030303030303030303030303030303030303030303030303030303030303030303060000000000393939390000000000060000000000000000000000000000000003030303030303030303030303030306
-06030303030303030303030303030303030303030e01010101010106030303030303031f1f1f2f1f1f1f0303030303030303030303030303030303030303030303030303030303030303030303030303060000000000393939390000000000060000000000000000000000000000000003030303030303030303030303030306
-0603030303030303030303030303030303030303060101010101010603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303060000000000393939390000000008070000000000000000000000000000000003030303030303030303030303030306
-060303030303030303030303030303030303031b0504040d031704070303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306000e010000000000000000000816090000000000000000000000000000000003030303030303030303030303030306
-060303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306010601010000000000000000060b060000000000000000000000000000000003030303030303030303030303030306
+0603030303030303030303030303030303030315151515151515151515030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303060c06151515000000000000010000060000000000000000000000000000000003030303030303030303030303030306
+060303030303030303030303030303030303031508040d0317040409150303030303031f1f1f1f1f1f1f0303030303030303030303030303030303030303030303030303030303030303030303030303061506151515000000000000000001060000000000000000000000000000000003030303030303030303030303030306
+0603030303031f1e1f1e1f0303030303030303150601010101010106150303030303031f30303030301f0303030303030303030303030303030303030303030303030303030303030303030303030303061506151515000000000000000000060000000000000000000000000000000003030303030303030303030303030306
+0603030303031f0319031f030303030303030315060101010101010f150303030303031f30303030301f0303030303030303030303030303030303030303030303030303030303030303030303030303050906151500000000000000000000060000000000000000000000000000000003030303030303030303030303030306
+0603030303031f0303031f0303030303030303150f01010101010103150303030303031f30303030301f0303030303030303030303030303030303030303030303030303030303030303030303030303081607150000393939390000000000060000000000000000000000000000000003030303030303030303030303030306
+0603030303031f1e1d1e1f030303030303030315030101013401010e150303030303031f30303030301f0303030303030303030303030303030303030303030303030303030303030303030303030303060000000000393939390000000000060000000000000000000000000000000003030303030303030303030303030306
+06030303030303030303030303030303030303150e01010101010106150303030303031f1f1f2f1f1f1f0303030303030303030303030303030303030303030303030303030303030303030303030303060000000000393939390000000000060000000000000000000000000000000003030303030303030303030303030306
+0603030303030303030303030303030303030315060101010101010615030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303060000000000393939390000000008070000000000000000000000000000000003030303030303030303030303030306
+06030303030303030303030303030303030303150504040d031704071503030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306000e010000000000000000000816090000000000000000000000000000000003030303030303030303030303030306
+060303030303030303030303030303030303031515151515151515151503030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306010601010000000000000000060b060000000000000000000000000000000003030303030303030303030303030306
 060303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306010601010000000000000000060e060000000000000000000000000000000003030303030303030303030303030306
 060303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030306010504040900000000000804070f060000000000000000000000000000000003030303030303030303030303030306
 0603030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303060101010b0509000000000608170d060000000000000000000000000000000003030303030303030303030303030306
 06030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030617040d0b0b0600000804070b0b0c060000000000000000000000000000000003030303030303030303030303030306
 __sfx__
 49010400170501105017050030000d0001f0001f0001d0001d0001d0001d0001d0001d0001d0001d000210001f000210001f000210002100021000210001f0001f0001f0001f0001f0001f0001f0001f00000000
-150308003f6433f6303f6203361033610336151b0001b0001b0001b0001b0001b0001b0001b0001f0001f0001d0001f000220002200022000220001d0001d0001d0001d0001d0001d0001d0001d0000000000000
-0d0c04003363035635136001360007000130001360013000070001300013000130001360011000136001100007000000001460016600070000000014600166000700000000070001460014600146001460000000
-011000100500011000116001360005000130001360011000050000000000000000001360011000136001100000000000000000000000000000000000000000000000000000000000000000000000000000000000
+110306003f6433f6303f6203361033610336151b0001b0001b0001b0001b0001b0001b0001b0001f0001f0001d0001f000220002200022000220001d0001d0001d0001d0001d0001d0001d0001d0000000000000
+0d0c04003362435625136001360007000130001360013000270003360033600130001360011000136001100007000000001460016600070000000014600166000700000000070001460014600146001460000000
+011000003360033600336003560035600130001360011000050000000000000000001360011000136001100000000000000000000000000000000000000000000000000000000000000000000000000000000000
 011000001f0001f0001f0001f0001f0001f0001f0001f0001d0001d0001d0001d0001d0001d0001d0001d000210001f000210001f000210002300026000240002300023000230002300023000230002300023000
 011000001d0001d0001d0001d0001d0001d0001d0001d0001b0001b0001b0001b0001b0001b0001b0001b0001f0001d0001b000180001d0001b00018000110002100021000210002100021000210002100021000
 030700001064015640176301063017620136201761010610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 110700001364010640106301063010620106201061010610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-490c00000f655000000000000000000000000000000000001f5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-010c00002d6232d625000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+490c00000f6540f6550000000000000000000000000000001f5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+010c00002d6132d635356332d61500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0103000027610276102a6202c6332e6551a0001a0001a0001a0001a0001a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 011900002c624206152061314615206132061508035206152c645206452063520635206252062508615206152c623206152061320615206132061508035206152c62420615206152061508032080330803514135
 9119000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001c10000000181301b1301d1301f130
