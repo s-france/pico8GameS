@@ -10,9 +10,9 @@ __lua__
 function _init()
  cls()
  //init input
- btn5 = {}
- btn4 = {}
- btn01 = {}
+ btn5,btn4,btn01 = {},{},{}
+ //btn4 = {}
+ //btn01 = {}
  
  // init coroutines + pools
  coroutines = {}
@@ -131,14 +131,18 @@ function _init()
 	
 	
 	// level slots for storing
-	// current level info. 
-	
+	// current level info.
 	curregion = "overworld"
  curpallete = {1,2,3,4,5,6,7,8,9,10,132,12,13,14,15,0}
 	curmusic,prevmusic,curbg = 11,0,0
 	
 	menuitem(1,"inventory", openinv)
 	menuitem(2,"save game", opensaveprompt)
+ 
+ //newstr = "「⁘⁘⁘⁘⁘⁘⁘ ⁘⁘⁘⁘⁘⁘ ◀⁙⁙⁙⁙⁙⁙⁙◀⁙⁙⁙⁙■■◀◀⁙⁙■)⁙++◀:■⁙⁙■l◀◀⁙⁙⁙⁙■⁙⁙‖⁘」⁙⁙⁙⁙◀◀⁙■⁙⁙⁙⁙⁙⁙j‖。⁙⁙⁙◀◀⁙⁙⁙⁙⁙⁙■⁙⁙⁙⁙⁙⁙⁙‖‖⁘⁘」⁙⁙⁙⁙⁙⁙「⁘」⁙⁙⁙•、、‖⁘」⁙⁙「⁘▶「▶⁙⁙⁙、•「⁘⁘▶⁙⁙‖⁘⁘▶⁙⁙⁙⁙「⁘▶⁙⁙⁙⁙⁙⁙⁙k■⁙⁙⁙「◀!⁙■⁙⁙⁙⁙⁙⁙⁙⁙⁙⁙■◀◀⁙⁙■■⁙⁙⁙⁙⁙⁙⁙▮⁙■‖◀)⁙⁙■⁙⁙⁙⁙▮▮▮▮⁙⁙■◀⁙⁙⁙⁙⁙⁙⁙⁙▮▮▮▮⁙▮■◀⁙■⁙⁙⁙⁙⁙⁙▮▮▮▮▮▮⁙‖⁘」⁙⁙「⁘⁘⁘⁘⁘」■▮⁙⁙"
+ 
+ //set_mapdata2(32,0,16,16,newstr)
+ 
 end
 
 // routine updates every frame
@@ -147,7 +151,7 @@ function _update()
 	//process input
 	update_input()
  //copy mapdata
-	//get_mapdata(0,0,32,32) 
+	//get_mapdata2(0,0,16,16)
 	
 	//pause
 	initialmenu()
@@ -182,7 +186,7 @@ function _draw()
  draw_player()
  foreach(hitboxes, draw_hitbox)
 	pal(make_kv(16,curpallete))
-	print(player.hp)
+	//print(player.hp)
 	//print(testenmy.hp)
 end
 -->8
@@ -889,6 +893,24 @@ function set_mapdata(x,y,w,h,data)
 		mset(x+i\2%w,y+i\2\w,"0x"..sub(data,i,i+1))
 	end
 end
+
+function get_mapdata2(x,y,w,h)
+	local reserve=""
+		for i=0,w*h-1 do
+			reserve..=chr(mget(x+i%w,y+flr(i/w))+16)
+		end
+	printh(reserve,"@clip")
+end
+
+function set_mapdata2(x,y,w,h,data)
+	for i=0,#data-1 do
+		mset(x+i%w,y+flr(i/w),(ord(sub(data,i+1,i+1)))-16)
+	end
+end
+
+function getord(val)
+return tonum(ord(val))
+end
 -->8
 -- menu(inventory) code
 function initialmenu()
@@ -1066,10 +1088,10 @@ function add_rock(x,y)
 end
 
 -- button
-function add_switch(x,y,gx,gy)
+function add_switch(x,y,gx,gy,f)
  switch = add_object(x,y,0,0,-2,10000,nil,true,69,update_switch,nil)
  switch.hb = add_hitbox(7,4,4,5,5,-1, true, 0, 0,0,0, nil, nil, switch)
- switch.gx,switch.gy,switch.truth,switch.call = gx,gy,false,true
+ switch.gx,switch.gy,switch.truth,switch.call,switch.flag = gx,gy,false,true,f
 end
 
 function update_switch(switch)
@@ -1077,7 +1099,7 @@ function update_switch(switch)
 	if (t == true) then
 		if (c == true) add_hitbox(10,switch.gx+4,switch.gy+4,4,4,1,true,0,0,0,0,nil,swtchboxmpcol) switch.call = false switch.sprite = 70
 	else
-	 if (c == false) add_hitbox(12,switch.gx+4,switch.gy+4,4,4,1,true,0,0,0,0,nil,swtchboxfalcol) switch.call = true switch.sprite = 69
+	 if (c == false and not(switch.flag)) add_hitbox(12,switch.gx+4,switch.gy+4,4,4,1,true,0,0,0,0,nil,swtchboxfalcol) switch.call = true switch.sprite = 69
 	end
 	switch.truth = false
 end
