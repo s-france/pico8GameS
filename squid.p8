@@ -7,46 +7,60 @@ __lua__
 // date created ~ sept. 2024
 // initialize all tables, 
 // objects and objectpools
+
+regions = {
+	["cave"] = {
+	 enemies={make_enemy1},
+	 track=35,
+	 bg=0
+	},
+	["example"] = {
+	 enemies={make_enemy1},
+	 track=13,
+	 bg=0,
+	 palette={128,131,0,132,131,133,134,7,138,9,10,11,140,13,14,15}
+	},
+	["homes"] = {
+		track=35,
+		bg=0
+	}
+}
+
+new_levels = {
+//string,space,espawns,objects,loadcoord
+	["firstcave"]={
+	w = 16,
+	data = "「⁘⁘ ⁘⁘⁘⁘⁘⁘⁘⁘⁘⁘⁘」◀%「▶%%▮▮▮▮▮▮■$$◀◀、◀%%%▮▮▮▮▮▮■▮▮◀◀%◀%%%▮▮▮▮▮▮▮▮■◀◀%◀%%%▮▮▮▮▮▮▮▮▮◀‖」◀%%▮▮▮▮▮▮▮▮▮▮◀「&▶%▮▮iiii▮▮▮▮▮◀◀▮▮▮▮▮iiii▮▮▮▮▮◀◀▮▮▮▮▮iiii▮▮▮▮▮◀◀▮▮▮▮▮iiii▮▮▮▮「▶◀▮゛■▮▮▮▮▮▮▮▮▮「&」◀■◀■■▮▮▮▮▮▮▮▮◀•◀◀■◀■■▮▮▮▮▮▮▮▮◀゛◀◀■‖⁘⁘」▮▮▮▮▮「⁘▶゜◀◀■■■•‖」▮▮▮▮◀「'。◀◀'⁘。••◀▮▮「⁘▶••、◀「。▮'⁘⁘」▮▮⁘⁘⁘⁘⁘⁘」◀%%▮▮■◀▮▮▮▮▮▮▮▮◀◀%▮▮▮▮‖」▮▮▮▮▮▮▮◀◀▮▮▮iii◀▮▮▮▮▮▮▮◀◀▮▮▮iii◀▮▮▮▮▮▮▮◀◀▮▮▮ii▮◀▮▮▮▮▮▮▮◀◀■▮▮▮▮▮◀▮▮▮▮▮▮▮◀‖⁘」■■「⁘▶▮▮▮▮▮▮▮◀•「▶■■‖⁘」▮▮▮▮▮▮▮◀ ▶▮▮▮▮▮◀▮▮▮▮▮▮▮◀▶▮▮▮▮▮▮゜$$▮▮▮▮▮◀■▮▮▮▮▮▮■$▮▮▮▮▮▮◀▮▮▮▮▮▮$$▮▮▮▮▮▮▮◀」▮▮▮▮▮▮゛▮▮▮▮▮▮▮◀◀▮▮▮▮▮▮◀▮▮▮▮▮▮▮◀‖⁘⁘⁘」▮「▶⁘⁘⁘⁘⁘⁘⁘▶",
+	objects = {add_warpbox,48,24,"example",48,16,1,1,"homes"}
+},
+	["example"]={
+	w = 16,
+	data = "「⁘⁘⁘⁘⁘⁘⁘ ⁘⁘⁘⁘⁘⁘ ◀⁙⁙⁙⁙⁙⁙⁙◀⁙⁙⁙⁙■■◀◀⁙⁙■)⁙++◀:■⁙⁙■l◀◀⁙⁙⁙⁙■⁙⁙‖⁘」⁙⁙⁙⁙◀◀⁙■⁙⁙⁙⁙⁙⁙j‖。⁙⁙⁙◀◀⁙⁙⁙⁙⁙⁙■⁙⁙⁙⁙⁙⁙⁙‖‖⁘⁘」⁙⁙⁙⁙⁙⁙「⁘」⁙⁙⁙•、、‖⁘」⁙⁙「⁘▶「▶⁙⁙⁙、•「⁘⁘▶⁙⁙‖⁘⁘▶⁙⁙⁙⁙「⁘▶⁙⁙⁙⁙⁙⁙⁙k■⁙⁙⁙「◀!⁙■⁙⁙⁙⁙⁙⁙⁙⁙⁙⁙■◀◀⁙⁙■■⁙⁙⁙⁙⁙⁙⁙▮⁙■‖◀)⁙⁙■⁙⁙⁙⁙▮▮▮▮⁙⁙■◀⁙⁙⁙⁙⁙⁙⁙⁙▮▮▮▮⁙▮■◀⁙■⁙⁙⁙⁙⁙⁙▮▮▮▮▮▮⁙‖⁘」⁙⁙「⁘⁘⁘⁘⁘」■▮⁙⁙"
+	}
+}
 function _init()
  cls()
  //init input
  btn5,btn4,btn01 = {},{},{}
- //btn4 = {}
- //btn01 = {}
  
  // init coroutines + pools
- coroutines = {}
-	hitboxes = {}
-	objectpool = {}
-	enemies = {}
-	//memset(0x1000,0,0x2000)
-	// init player
-	make_player()
-	// init enemies, this will later
-	// be done with a table of refs
-	add_switch(296,86,32*8,2*8)
-	testenmy  = make_enemy1(60,96, 100, player)
-	testenmy2 = make_enemy1(68,10*8, 50, player)
-	testenmy3 = make_enemy1(50,13*8, 50, player)
-	add_rock(280,86)
-	add_warpbox(47*8,16,1,1,"firstcave")
+ coroutines,hitboxes,objectpool,enemies = {},{},{},{}
 	
 	//tempitems
-	add_item(35*8,6*8,"satchel",58)
-	add_item(36*8,6*8,"bow",42)
-	add_item(37*8,6*8,"bow",52)
-	add_item(14*8-4,1*8+4,"sword",59)
-	add_item(39*8,6*8,"sword",73)
-	add_item(40*8,6*8,"bombs",18,5)
-	add_item(40*8,5*8,"bombs",18,5)
-	add_item(40*8,4*8,"bombs",18,5)
-	add_item(41*8,6*8,"arrows",40,20)
-	add_item(41*8,5*8,"arrows",40,20)
-	add_item(41*8,4*8,"arrows",40,20)
-	add_item(42*8,6*8,"magnet",17)
- add_item(43*8,6*8,"skates",60)
- add_item(44*8,6*8,"bigkeys",74)
- add_item(45*8,6*8,"keys",75)
+	//add_item(35*8,6*8,"satchel",58)
+	//add_item(36*8,6*8,"bow",42)
+	//add_item(37*8,6*8,"bow",52)
+	//add_item(14*8-4,1*8+4,"sword",59)
+	//add_item(39*8,6*8,"sword",73)
+	//add_item(40*8,5*8,"bombs",18,5)
+	//add_item(40*8,4*8,"bombs",18,5)
+	//add_item(41*8,6*8,"arrows",40,20)
+	//add_item(41*8,5*8,"arrows",40,20)
+	//add_item(41*8,4*8,"arrows",40,20)
+	//add_item(42*8,6*8,"magnet",17)
+ //add_item(43*8,6*8,"skates",60)
+ //add_item(44*8,6*8,"bigkeys",74)
+ //add_item(45*8,6*8,"keys",75)
 	
 	collisions = {
 		[0] = {
@@ -105,53 +119,50 @@ function _init()
 	["bombs"] = {use = use_bomb},
 	["bow"] = {use = use_bow},
 	["sword"] = {use = use_sword} }
-	
-	//levels
-	levels = {
-	["testing"] = {32,32,"080404040404040410040404040404101004040404040404040404040404040406030303030303030603030303010106060303030303191a1b1c0303030303030603030119031b1b062a010303013c06060103030303030303030303030303030603030303010303050409030303030606031a030809030303030101010103030603010303030303033a050d0303030606030804070f03030301030303030103060303030303030103030303030303051604070303030303010303030303030105040409030303030303080409030303030303030303030301030303030303010b0c0c05040903030804070807030303030303030303030301030303330303010c0b080404070303050404070303030303030303030303030103030303030301080407030303030303033b010303030810040d03030303030301030303030103061103010303030303030303030301060603030303030303030301010101030306030301010303030303030300030105070303030303030303030303030303030619030301030303030000000003030103030303030303030303030303030303060303030303030303000000000300010303030303030303030303030303030306030103030303030300000000000003030303030303030303030303030303030504090303080404040404090100030303030303030303030303030303030303080407030305040404040407030303030303030303030303030303030303030306030303030303030303030303030303030303030303030303030303030303030603030303030303030303030303030303030303030303030303030303030303060303030303030303030303030303030303030308040d0317040409030303030603030303031f1e1f1e1f0303030303030303030601010101010106030303030603030303031f0319031f030303030303030303060101010101010f030303030603030303031f0303031f0303030303030303030f01010101010103030303030603030303031f1e1d1e1f030303030303030303030101013401010e0303030306030303030303030303030303030303030303030e01010101010106030303030603030303030303030303030303030303030303060101010101010603030303060303030303030303030303030303030303031b0504040d031704070303030306030303030303030303030303030303030303030303030303030303030303030603030303030303030303030303030303030303030303030303030303030303060303030303030303030303030303030303030303030303030303030303030306030303030303030303030303030303030303030303030303030303030303030603030303030303030303030303030303030303030303030303030303030303", {128, 131, 0, 132, 131, 133, 134, 7, 138, 9, 10, 11, 140, 13, 14, 15}, 11, 110, 60, 1},
-	["firstcave"] = {16,32, "0804041004040404040404040404040906150807151500000000000001141406060c06151515000000000000010000060615061515150000000000000000010606150615151500000000000000000006050906151500000000000000000000060816071500003939393900000000000606000000000039393939000000000006060000000000393939390000000000060600000000003939393900000000080706000e0100000000000000000008160906010601010000000000000000060b0606010601010000000000000000060e0606010504040900000000000804070f06060101010b0509000000000608170d060617040d0b0b0600000804070b0b0c06080d0017040409000004040404040409061515001a01060000000000000000060615000000000509000000000000000606000000393939060000000000000006060000003939390600000000000000060600000039390006000000000000000606010000000000060000000000000006050409010108040700000000000000060804070101050409000000000000000606000000000000060000000000000006060000000000000f141400000000000601000000000000011400000000000006000000000000141400000000000000060e0000000000000e00000000000000060600000000000006000000000000000605040404090008070404040404040407", {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}, 13, 48,48, 13}
-	}
-	
-	regions = {
-	 ["cave"] = {
-	  enemies = {make_enemy1},
-	  track = 25
-	 },
-	 ["example2"] = {
-	  enemies = {make_enemy1},
-	  track = 13,
-	  palette = {128, 131, 0, 132, 131, 133, 134, 7, 138, 9, 10, 11, 140, 13, 14, 15}
-	 }
-	}
-	
-	new_levels = {
-	 ["firstcave"] = {"0804041004040404040404040404040906150807151500000000000001141406060c06151515000000000000010000060615061515150000000000000000010606150615151500000000000000000006050906151500000000000000000000060816071500003939393900000000000606000000000039393939000000000006060000000000393939390000000000060600000000003939393900000000080706000e0100000000000000000008160906010601010000000000000000060b0606010601010000000000000000060e0606010504040900000000000804070f06060101010b0509000000000608170d060617040d0b0b0600000804070b0b0c06080d0017040409000004040404040409061515001a01060000000000000000060615000000000509000000000000000606000000393939060000000000000006060000003939390600000000000000060600000039390006000000000000000606010000000000060000000000000006050409010108040700000000000000060804070101050409000000000000000606000000000000060000000000000006060000000000000f141400000000000601000000000000011400000000000006000000000000141400000000000000060e0000000000000e00000000000000060600000000000006000000000000000605040404090008070404040404040407"},
-  ["example"] = {}
-	}
-	
-	
+
 	// level slots for storing
 	// current level info.
-	curregion = "overworld"
+	dfltbg = 0
+	dfltpal = {1,2,3,4,5,6,7,8,9,10,132,12,13,14,15,0}
+	curregion,curlevel = "homes","example"
  curpallete = {1,2,3,4,5,6,7,8,9,10,132,12,13,14,15,0}
 	curmusic,prevmusic,curbg = 11,0,0
 	
 	menuitem(1,"inventory", openinv)
 	menuitem(2,"save game", opensaveprompt)
  
- //newstr = "「⁘⁘⁘⁘⁘⁘⁘ ⁘⁘⁘⁘⁘⁘ ◀⁙⁙⁙⁙⁙⁙⁙◀⁙⁙⁙⁙■■◀◀⁙⁙■)⁙++◀:■⁙⁙■l◀◀⁙⁙⁙⁙■⁙⁙‖⁘」⁙⁙⁙⁙◀◀⁙■⁙⁙⁙⁙⁙⁙j‖。⁙⁙⁙◀◀⁙⁙⁙⁙⁙⁙■⁙⁙⁙⁙⁙⁙⁙‖‖⁘⁘」⁙⁙⁙⁙⁙⁙「⁘」⁙⁙⁙•、、‖⁘」⁙⁙「⁘▶「▶⁙⁙⁙、•「⁘⁘▶⁙⁙‖⁘⁘▶⁙⁙⁙⁙「⁘▶⁙⁙⁙⁙⁙⁙⁙k■⁙⁙⁙「◀!⁙■⁙⁙⁙⁙⁙⁙⁙⁙⁙⁙■◀◀⁙⁙■■⁙⁙⁙⁙⁙⁙⁙▮⁙■‖◀)⁙⁙■⁙⁙⁙⁙▮▮▮▮⁙⁙■◀⁙⁙⁙⁙⁙⁙⁙⁙▮▮▮▮⁙▮■◀⁙■⁙⁙⁙⁙⁙⁙▮▮▮▮▮▮⁙‖⁘」⁙⁙「⁘⁘⁘⁘⁘」■▮⁙⁙"
  
- //set_mapdata2(32,0,16,16,newstr)
- 
+ //pval1 = 0
+ //pval2 = 0
+ //init player
+ make_player()
+ testenmy  = make_enemy1(60,96, 100, player)
+	
+	add_warpbox(47*8,16,"firstcave",48,16,1,1,"cave")
+
+	add_item(40*8,6*8,"bombs",18,5)
+	add_switch(296,86,32*8,2*8)
+	add_rock(280,86)
+	add_item(36*8,6*8,"bow",42)
+	add_item(41*8,6*8,"arrows",40,20)
+	add_item(41*8,5*8,"arrows",40,20)
+	add_item(41*8,4*8,"arrows",40,20)
+	add_item(39*8,6*8,"sword",73)
+	//testenmy2 = make_enemy1(68,10*8, 50, player)
+	--[[
+	testenmy3 = make_enemy1(50,13*8, 50, player)
+	--]]
 end
 
 // routine updates every frame
 // using designed update funcs.
 function _update()
+	buffer = {0,0,0,0}
 	//process input
 	update_input()
+	
  //copy mapdata
-	//get_mapdata2(0,0,16,16)
+	if (btnp(2,1)) get_mapdata2(80,16,16,32)
 	
 	//pause
 	initialmenu()
@@ -169,25 +180,23 @@ function _update()
 	if ((btn5.press or btn5.up) and player.interaction == false)  use_item_in_slot(1, btn5)
 	if (btn4.press or btn4.up) use_item_in_slot(2, btn4)
 	if (btn01.press or btn01.up) use_item_in_slot(3, btn01) 
-	
-	if (prevmusic != curmusic) then
-		music(curmusic)
-		prevmusic = curmusic
-	end
+
+	if (prevmusic != curmusic) music(curmusic) prevmusic = curmusic
 end
 
 // routine updates every frame
 // using designed update funcs.
 function _draw()
 	cls(curbg)
-	//bomb_animation()
 	draw_map()
 	foreach(objectpool,function(obj) obj:draw_object() end)
  draw_player()
  foreach(hitboxes, draw_hitbox)
 	pal(make_kv(16,curpallete))
-	//print(player.hp)
-	//print(testenmy.hp)
+	print(curlevel)
+	print(curregion)
+ //print(pval1)
+ //print(pval2)
 end
 -->8
 --objects
@@ -201,11 +210,11 @@ function add_object(x,y,
 	local obj = {}
 	obj.x,obj.y,obj.dx,obj.dy,
 	obj.sprite,obj.duration,
-	obj.hp,obj.update,obj.isalive = x,
-	y,dx,dy,sprite,duration,hp,update,true
+	obj.hp,obj.update,obj.isalive,obj.level = x,
+	y,dx,dy,sprite,duration,hp,update,true,curlevel
 	// draw
 	function obj:draw_object()
-	 if (self.sprite and player.mapposx == self.mapposx and player.mapposy == self.mapposy) spr(self.sprite,flr(self.x)%128,flr(self.y)%128,1.0,1.0,self.flipx,self.flipy)
+	 if (self.level==curlevel and self.sprite and player.mapposx == self.mapposx and player.mapposy == self.mapposy) spr(self.sprite,flr(self.x)%128,flr(self.y)%128,1.0,1.0,self.flipx,self.flipy)
 	end
 	// init mappos/cell
 	obj.mapposx, obj.mapposy = map_pos(x,y)
@@ -232,6 +241,9 @@ function update_object(obj)
 	 del(objectpool, obj)
 		del(hitboxes, obj.hb)
 	end
+	
+	if (obj.level != curlevel) return
+	
 	// track lifetime based on hp
 	if obj.hp <= 0 then
 		obj.duration = 0
@@ -336,6 +348,7 @@ function add_hitbox(tag,x,y,xlen,
 	hitbox.y = y
 	hitbox.xlen = xlen
 	hitbox.ylen = ylen
+	hitbox.level = curlevel
 	
 	hitbox.issolid = issolid
 	
@@ -391,6 +404,7 @@ end
 // update hitbox updates hbs
 function update_hitbox(hb)
 	--track lifetime
+	if (hb.level != curlevel) return
 	--lifetime based on duration
 	if hb.duration > 0 then
 		hb.duration -= 1
@@ -433,7 +447,7 @@ end
 
 function process_collisions(hb1)
 	for i,hb2 in pairs(hitboxes) do
-		if hbcollision(hb1,hb2) and hb1 != hb2 then
+		if (hb1.level==hb2.level) and hbcollision(hb1,hb2) and hb1 != hb2 then
 			//oncol
 			if (hb1.oncollision) hb1.oncollision(hb1,hb2)
 			//coltbl
@@ -482,7 +496,10 @@ function searchmapcols(hb, flags, tlxoff,tlyoff, brxoff,bryoff)
 	return results
 end
 
-
+function setlevel(o,level)
+ o.level = level
+ if (o.parent) return setlevel(o.parent,level)
+end
 
 --visualize hitbox for debugging 
 function draw_hitbox(hb)	
@@ -493,8 +510,7 @@ function knockback(
 obj,dx,dy, duration)
   
  local c = cocreate(function()
-	 local initdx = obj.dx
-		local initdy = obj.dy
+	 local initdx,initdy = obj.dx,obj.dy
     
  	for i=1,duration do
    if dx != 0 then
@@ -562,43 +578,26 @@ hb2.parent.isalive = false
 end
 
 function _ll(hb1,hb2)
-load_level(hb2.parent.level)
+local wb = hb2.parent
+setlevel(hb1,wb.nlevel)
+loadlevel2(wb.nlevel,wb.nregion)
+hb1.parent.x,hb1.parent.y = wb.sx,wb.sy
 end
 -->8
 -- particle effects
 
 --creates a particle system
-function add_partsys(x,y,
-																					xrange,
-																					yrange,
-																					sduration,
-																					pduration,
-																					dx,dy,
-																					dxrange,
-																					dyrange,
-																					freq,
-																					parent,
-																					isglobal,
-																					partisglobal,
-																					hb,
-																					col)
+function add_partsys(x,y,xrange,
+	yrange,sduration,pduration,dx,
+	dy,dxrange,dyrange,freq,parent,
+	isglobal,partisglobal,hb,col)
 	
 	local partsys = add_object(x,y,
-																											0,0,
-																											sduration,
-																											1,
-																											parent,
-																											isglobal,
-																											nil,
-																											update_partsys,
-																											draw_partsys
-																											)
+	0,0,sduration,1,parent,isglobal,
+	nil,update_partsys,draw_partsys)
 																											
-	partsys.partisglobal = partisglobal
-	
-	partsys.partdx = dx
-	partsys.partdy = dy
-	
+	partsys.partisglobal,partsys.partdx,
+	partsys.partdy = partisglobal,dx,dy
 
 	--range of spawn position
 	--variation for particles:
@@ -613,18 +612,12 @@ function add_partsys(x,y,
  partsys.dyrange = dyrange
  --frequency of particle spawns
  --spawns every freq frames
- partsys.freq =freq
+ partsys.freq = freq
 	
-	if col == nil then
-	 partsys.color = 7
-	else 
-	 partsys.color = col
-	end
+	partsys.color = 7
+	if (col) partsys.color = col
 	
-	if hb != nil then
-		partsys.hb = hb
-		--hb.parent = partsys
-	end
+	if (hb) partsys.hb = hb
 	
 	return partsys
 end
@@ -644,43 +637,26 @@ function update_partsys(partsys)
 	--spawn particle
 	if partsys.freq <=1 then
 		local flag = false
-		if type(partsys.color) == "table" then
-			flag = true
-		end
+		if (type(partsys.color) == "table") flag = true
 		for i=0, 1/partsys.freq do
 		 local col = partsys.color
-			if (flag == true) then
-				col = rnd(partsys.color)
-			end	
-			add_particle(offset.x,//-partsys.xrange + rnd(partsys.xrange*2),
-																offset.y,//-partsys.yrange + rnd(partsys.yrange*2),
-																partsys.pduration,
-																partsys.partdx-partsys.dxrange + rnd(partsys.dxrange*2),
-																partsys.partdy-partsys.dyrange + rnd(partsys.dyrange*2),
-																partsys.parent,
-																partsys.partisglobal,
-																partsys.hb,
-																col)
+			if (flag == true) col = rnd(partsys.color)	
+			add_particle(offset.x,offset.y,
+				partsys.pduration,partsys.partdx-partsys.dxrange + rnd(partsys.dxrange*2),
+				partsys.partdy-partsys.dyrange + rnd(partsys.dyrange*2),
+				partsys.parent,partsys.partisglobal,
+				partsys.hb,col)
 		end
 	elseif partsys.duration % partsys.freq == 0 then
 		add_particle(offset.x-partsys.xrange + rnd(partsys.xrange*2),
-															offset.y-partsys.yrange + rnd(partsys.yrange*2),
-															partsys.pduration,
-															partsys.partdx-partsys.dxrange + rnd(partsys.dxrange*2),
-															partsys.partdy-partsys.dyrange + rnd(partsys.dyrange*2),
-															partsys.parent,
-															partsys.partisglobal,
-															partsys.hb,
-															partsys.color)
+			offset.y-partsys.yrange + rnd(partsys.yrange*2),
+			partsys.pduration,
+			partsys.partdx-partsys.dxrange + rnd(partsys.dxrange*2),
+			partsys.partdy-partsys.dyrange + rnd(partsys.dyrange*2),
+			partsys.parent,partsys.partisglobal,
+			partsys.hb,partsys.color)
 	end
-	
 end
-
-
-//debugging partsys position
-//function draw_partsys(partsys)	
-	//pset(partsys.x%128, partsys.y%128, 14)
-//end
 
 --creates a single particle
 --from particle system
@@ -702,21 +678,15 @@ function add_particle(x,y,duration,
 end
 
 function draw_particle(part)
-	pset(part.x%128, part.y%128, part.color)
+	if (player.mapposx == part.mapposx and player.mapposy == part.mapposy) pset(part.x%128, part.y%128, part.color)
 end
 -->8
 -- player info
 
 function make_player()
 	player = add_object(300,60,
-																				0,0,
-																				-2,
-																				1000, //hp
-																				nil,true,
-																				2,
-																				update_player)
-	player.diag = false
-	player.prev_face = 0
+		0,0,-2,1000,nil,true,2,
+		update_player)
  player.face = 6
  player.interaction = false
  // player items
@@ -740,8 +710,8 @@ function make_player()
  player.working_inventory = {}
  player.slotflag = 0
 	player.invis = false
-	--player hurtbox, tag = 0
- player.hb = add_hitbox(0, 4,4, 6,6, -1, true, 0, 1,1,2, nil, nil, player)
+ -- hb tag = 0
+ player.hb = add_hitbox(0,4,4,6,6,-1,true,0,1,1,2,nil,nil,player)
 end
 
 // move player
@@ -754,9 +724,7 @@ function move_player()
 	if (btn(1)) player.dx+=1.001
 	if (btn(2)) player.dy-=1.001
 	if (btn(3)) player.dy+=1.001
-	
-	//if (player.dx*player.dy == 0) setdxdy(player,1.3)
-	
+
 	player.hb.kbx = player.dx*2
 	player.hb.kby = player.dy*2
 end
@@ -786,7 +754,6 @@ function update_player(p)
 	elseif p.face >4 then
 		p.face -=1
 	end
-	
 	p.interaction = false
 	if (btn5.press or btn5.up) then
 		local t = global_faces[p.face]
@@ -794,8 +761,6 @@ function update_player(p)
  	 (4+t[15]+t[2]*6),3,3,1,false,
  		50,0,0,2,nil,pib_ompcol,player)
  end
- 
-	--update world pos
 	// called from above
 	move_player()
 end
@@ -805,9 +770,9 @@ end
 function draw_player()
  local t = make_kv(8,{36,35,34,33,32,38,2,37})
 	player.sprite = t[player.face+1]
-	if (player.invis) player.sprite = 3	
-	palt(0, false) 
-	palt(1, true) 
+	if (player.invis) player.sprite = 3
+	palt(0, false)
+	palt(1, true)
 	spr(player.sprite, player.x%128, player.y%128)
 	pal()
 end
@@ -863,53 +828,34 @@ end
 -->8
 -- levels and map
 
-function load_level(level_name)
-	set_mapdata(0,0,levels[level_name][1],levels[level_name][2],levels[level_name][3])
- curregion = level_name
- curpallete = levels[level_name][4]
-	curmusic = levels[level_name][5]
-	curbg = levels[level_name][8]
-	player.x = levels[level_name][6]
- player.y = levels[level_name][7]
-end
-
---copy mapdata string to clipboard
-function get_mapdata(x,y,w,h)
-	local reserve=""
-	for i=0,w*h-1 do
-		reserve..=num2hex(mget(x+i%w,y+i\w))
-	end
-	printh(reserve,"@clip")
-end
-
---convert mapdata to memory data
-function num2hex(v)
-	return sub(tostr(v,true),5,6)
-end
-
---replace mapdata with hex
-function set_mapdata(x,y,w,h,data)
-	for i=1,#data,2 do
-		mset(x+i\2%w,y+i\2\w,"0x"..sub(data,i,i+1))
-	end
-end
-
 function get_mapdata2(x,y,w,h)
 	local reserve=""
-		for i=0,w*h-1 do
-			reserve..=chr(mget(x+i%w,y+flr(i/w))+16)
-		end
+	for i=0,w*h-1 do
+		reserve..=chr(mget(x+i%w,y+flr(i/w))+16)
+	end
 	printh(reserve,"@clip")
 end
 
-function set_mapdata2(x,y,w,h,data)
+function set_mapdata2(x,y,w,data)
 	for i=0,#data-1 do
-		mset(x+i%w,y+flr(i/w),(ord(sub(data,i+1,i+1)))-16)
+		mset(x+i%w,y+i/w,(ord(sub(data,i+1,i+1)))-16)
 	end
 end
 
-function getord(val)
-return tonum(ord(val))
+function loadlevel2(level,region)
+ memset(0x2000,0,0x1000)
+ if (region) then
+  local rt = regions[region]
+  curregion,curmusic=region,rt.track
+  curpallete = dfltpal
+  if (rt.pallete) curpallete = rt.pallete
+  curbg = rt.bg
+ end
+ curlevel = level
+ local lt = new_levels[level]
+ local tx,ty = 0,0
+ if (lt.x) tx,ty = lt.x,lt.y
+ set_mapdata2(tx,ty,lt.w,lt.data)
 end
 -->8
 -- menu(inventory) code
@@ -950,7 +896,6 @@ function openstats()
 	menuitem(2, "♥  "..player.hp)
 	menuitem(3, "keys "..player.ninventory["keys"][1])
 	menuitem(4, "money "..player.ninventory["money"][1])
- 
  return true
 end
 
@@ -983,24 +928,21 @@ function opensaveprompt(b)
 end
 
 function clearmenu()
-	for i = 1,5,1 do
+	for i = 1,5 do
 		menuitem(i)
 	end
 	return true
 end
 
 function additemtoslot(x)
- for i = 1,3,1 do
+ for i = 1,3 do
   if (player.slotflag == i) player.slots[i] = player.working_inventory[x]
  end
 end
 
 function displayitemtwo(x,table)
-	if (table[x] == nil) then
-		menuitem((x%4)+1, "empty")
-	else
-		menuitem((x%4)+1, ""..table[x],function() additemtoslot(x) displayitemtwo(x,table) return true end)	
-	end
+	menuitem((x%4)+1, "empty")
+	if (table[x]) menuitem((x%4)+1, ""..table[x],function() additemtoslot(x) displayitemtwo(x,table) return true end)	
 	return true
 end
 -->8
@@ -1010,7 +952,7 @@ end
 // add_bomb makes a bomb
 function add_bomb(origin)														
 local	bomb = add_object(origin.x,origin.y,0,
-	0,100,1000000,nil,true,18,update_bomb)
+	0,100,1000000,nil,true,18)
 local input_face = origin.face
 smff(bomb,input_face,0)
 bomb.hb = add_hitbox(2,4,5,5,5,-1,false,0,0,0,0,nil,nil,bomb)
@@ -1020,11 +962,9 @@ end
 
 function explode(bomb)
 add_partsys(bomb.x+4,bomb.y+4,1,1,2,5,0,0,2,2, 0.0625)
-
 //hb damage hitbox larger
 add_hitbox(3,bomb.x+4,bomb.y+4,
 	24,24,3,false,50,0,0,2)
-
 //mapcell demo hitbox smaller
 add_hitbox(3,bomb.x+4,bomb.y+4,
 	16,16,3,false,17,0,0,2,nil,
@@ -1089,7 +1029,7 @@ end
 
 -- button
 function add_switch(x,y,gx,gy,f)
- switch = add_object(x,y,0,0,-2,10000,nil,true,69,update_switch,nil)
+ switch = add_object(x,y,0,0,-2,10000,nil,true,69,update_switch)
  switch.hb = add_hitbox(7,4,4,5,5,-1, true, 0, 0,0,0, nil, nil, switch)
  switch.gx,switch.gy,switch.truth,switch.call,switch.flag = gx,gy,false,true,f
 end
@@ -1105,17 +1045,20 @@ function update_switch(switch)
 end
 
 function swtchboxfalcol(sb)
-foreach(searchmapcols(sb,0b0,0,0,0,0),close_door)
+foreach(searchmapcols(sb,0b100,0,0,0,0),close_door)
 end
 
 function swtchboxmpcol(sb)
 foreach(searchmapcols(sb,0b101,0,0,0,0),open_door)
 end
 
-function add_warpbox(x,y,w,h,level)
+function add_warpbox(x,y,nlevel,sx,sy,w,h,nregion)
 warpbox = add_object(x,y,0,0,-2,10000,nil,false)
-warpbox.level = level
-warpbox.hb = add_hitbox(11,4,4,w,h,-1, true, 0, 0,0,0, nil, nil, warpbox)
+warpbox.nlevel,warpbox.sx,warpbox.sy,warpbox.nregion = nlevel,sx,sy,nregion
+local tw,th = 1,1
+if (w and h) tw,th = w,h
+warpbox.hb = add_hitbox(11,4,4,tw,th,-1, true, 0, 0,0,0, nil, nil, warpbox)
+return warpbox
 end
 
 function add_sword(o)
@@ -1140,21 +1083,17 @@ end
 -- pathfinding
 --mapcell navigation
 function astar(startx,starty,
-															goalx,goaly)
-															
-	if fget(mget(goalx,goaly), 0)  then
-		print("impossible goal!!")
-		return
-	end
+															goalx,goaly)							
+	
+	if (fget(mget(goalx,goaly), 0)) print("impossible goal!!") return
 	
 	local frontier = {}
 	local start = {x=startx,y=starty}
 	local goal = {x=goalx,y=goaly}
 	insert(frontier, start, 0)
 	
-	came_from = {}
+	came_from,cost_so_far = {},{}
  came_from[vectoidx(start)] = start
- cost_so_far = {}
  cost_so_far[vectoidx(start)] = 0
  
  while (#frontier > 0 and #frontier < 15) do
@@ -1175,7 +1114,7 @@ function astar(startx,starty,
   
   	local newcost = cost_so_far[vectoidx(current)] + 1
   	
-  	if (cost_so_far[nxt] == nil) or (newcost < cost_so_far[nxt]) then
+  	if not(cost_so_far[nxt]) or (newcost < cost_so_far[nxt]) then
   		cost_so_far[nxt] = newcost
     local priority = heuristic(goal, nxtvec) + newcost
     insert(frontier, nxtvec, priority)
@@ -1194,10 +1133,7 @@ function astar(startx,starty,
 	local current = came_from[vectoidx(goal)]
  path = {}
  
- if current == nil then
- 	print("path not found!")
- 	return
- end
+ if (not(current)) print("path not found!") return
  
  local cidx = vectoidx(current)
  local sidx = vectoidx(start)
@@ -1222,7 +1158,7 @@ function draw_path(path)
 end
 
 -- insert into table and sort by priority
-function insert(t, val, p)
+function insert(t,val,p)
  if #t >= 1 then
   add(t, {})
   for i=(#t),2,-1 do  
@@ -1256,16 +1192,12 @@ end
 
 -- manhattan distance on a square grid
 function heuristic(a, b)
-	--[[local xsqr = abs(a.x - b.x)^2
-	local ysqr = abs(a.y-b.y)^2
- return sqrt(xsqr+ysqr)--]]
  return (abs(a.x-b.x)+abs(a.y-b.y))
 end
 
 function reverse(t)
  for i=1,(#t/2) do
-  local temp = t[i]
-  local oppindex = #t-(i-1)
+  local temp,oppindex = t[i],#t-(i-1)
   t[i] = t[oppindex]
   t[oppindex] = temp
  end
@@ -1274,8 +1206,7 @@ end
 //fuck my life
 -- translate a 2d x,y coordinate to a binary idx
 function vectoidx(vec)
-	local x = flr(vec.x) >>> 11
-	local y = flr(vec.y) --<< 11
+	local x,y = flr(vec.x) >>> 11, flr(vec.y) --<< 11
 	return x | y
 end
 
@@ -1305,20 +1236,17 @@ function make_kv(size,input)
  local t = {}
  for i = 1,size,1 do
  	t[i] = input[i]
- end
- return t
+ end return t
 end
 
 function map_cell(x,y)
-	local mx = (x-(x%8))/8
-	local my = (y-(y%8))/8
+	local mx,my = (x-(x%8))/8,(y-(y%8))/8
 	return mx, my
 end
 
 function map_pos(x,y)
 	local mx, my = map_cell(x,y)
-	local mpx = (mx-(mx%16)) / 16
-	local mpy = (my-(my%16)) / 16
+	local mpx,mpy = (mx-(mx%16))/16,(my-(my%16))/16 
 	return mpx, mpy
 end
 
@@ -1424,21 +1352,18 @@ end
 --enemies
 
 --enemy1
-function make_enemy1(x,y, hp, target)
+function make_enemy1(x,y,hp,target)
 	enemy = add_object(x,y,1,1,-2,hp,
 	 nil,true,43,update_enemy1,nil)
 	
 	//target player by default
-	enemy.target = player
-	enemy.face = 4
- enemy.dcv = -1
- enemy.dcs = -1
+	enemy.target,enemy.face,enemy.dcv,
+		enemy.dcs = player,4,-1,-1
+
 	enemy.hb = add_hitbox(5,4,4,6,6,
 		-1,true,50,0,0,5,nil,nil,enemy)
 	
 	add(enemies,enemy)
-	
-	enemy.hp = hp
 	return enemy
 end
 
@@ -1468,7 +1393,6 @@ function move_toward(obj, x,y, speed)
 	setdxdy(obj,0)
 	if (x-obj.x != 0) obj.dx = sgn(x-obj.x) * speed
 	if (y-obj.y != 0)	obj.dy = sgn(y-obj.y) * speed
-	//if (obj.dx*obj.dy == 0) setdxdy(obj,1.3)
 end
 
 
@@ -1516,9 +1440,9 @@ f77ffff2dd0000dd051111505007700560000000cc676cccf6ff2fff2ffef6ff400aa004444aa444
 f544445f00000000000000000555d55000a660000222200000022222000222200222220000e007e00444000000000066000000005d5705d5bbbbbbbb45444454
 55ffff550099990000999900555d555500700600002222000022222000222200000222200e3e737000446000000006760640000005d07d50bbbbbbbb55555555
 f444444f0975579009999990555d55550070006000272700007272000072700000027270e33333370006640000006760644600005d5705d5bbbbbbbb45444454
-f444444f97755779999559995555d555007000a00320f030030f0230030f033000330f0007399370004e3e4000067600644466005d5075d5bbbbbbbb52aa5555
-f444444f977557799955559955555dd50070006003333330033333300333333000f333300e39933e04439340906760006444446705d70d50bbbbbbbb42aa4454
-f444444f0975579009999990555dd55d007000600f3334f00f3334f00f3334f000f33340073333370043374009960000644c4cc705d07d50bbbbbbbb45444454
+f444444f97755779999559995555d555007000a00320f030030f0230030f033000330f0007399370004e3e4000067600644466005d5075d5bbbbbbbb59aa5555
+f444444f977557799955559955555dd50070006003333330033333300333333000f333300e39933e04439340906760006444446705d70d50bbbbbbbb49aa4454
+f444444f0975579009999990555dd55d007000600f3334f00f3334f00f3334f000f33340073333370043374009960000644c4cc705d07d50bbbbbbbb49aa4454
 55ffff55009999000099990055d55555007006000f5555f00f5555f00f5555f000055500733776e0000444000590000007c7c7705d5705d5bbbbbbbb55555555
 f544445f00000000000000000d55555000a660000050050000500500005005000005050007e0000000000000500900000000000005d07d50bbbbbbbb45444454
 55555555000000000000000000000000000000000dddddd00dddddd066666666a35555390000006c0aa0aa000000000000000000000000000000000000000000
@@ -1556,7 +1480,7 @@ f544445f00000000000000000d55555000a660000050050000500500005005000005050007e00000
 999930303030303030303030303030303030303030303030303030303030303080d0007140404001404040404040409030303030303030303030303030303030
 0000000000303030303030303030303080d000714040900000404040404040903030303030303030303030303030303030303030303030303030303030303060
 99999999303030303030303030303030303030303030303030303030303030306051510000101060000000000000006030303030303030303030303030303030
-0000000000303030303030303030303060515100a110600000000000000000603030303030303030303030303030303030303030303030303030303030303060
+00000000003030303030303030303030605151000010600000000000000000603030303030303030303030303030303030303030303030303030303030303060
 99999990303030303030303030303030303030303030303030303030303030306051000000000060000000000000006030303030303030303030303030303000
 00000000003030303030303030303030605100000000509000000000000000603030303030303030303030303030303030303030303030303030303030303060
 99999990305252525252303030303030303030303030303030303030303030306000000093939360000000000000006030303030303030303030303030303030
@@ -1570,21 +1494,21 @@ f544445f00000000000000000d55555000a660000050050000500500005005000005050007e00000
 60303030305230303030303052525252303030303030303030303030303030305040900000804070000052525252006030303030303030303030305230303030
 30303030303030303030303030303030504090101080407000000000000000603030303030303030303030303030303030306060606060603030303030303060
 60303030305252525252525230303030303030303030303030303030303030308040700000504090005252525252006030303030303030303030305230303030
-30303030303030303030303030303030804070101050409000000000000000603030303030303030303030303030603030306060606060603030303030303060
+303030303030000000000000000000e0b08070101050409000000000000000603030303030303030303030303030603030306060606060603030303030303060
 60303030303030303030303030303030303030303030303030303030303030306000000000000060005252525252005252525252525252523030305252303030
-30303030303030303052525252523030600000000000006000000000000000603030303030303030303030303030603030306060606060603030303030303060
+30303030303000000000000000000050017000000000006000000000000000603030303030303030303030303030603030306060606060603030303030303060
 603030303030303030303030303030303030303030303030303030303030303060000000000000f0005252525252006030303030303030303030303052525252
-3030303030303030303052525252303060000000000000f041410000000000603030303030303030303030303030603030306060606060603030303030303060
+3030303030300000000000000000008070000000000000f041410000000000603030303030303030303030303030603030306060606060603030303030303060
 60303030303030303030303030303030303030303030303030303030303030301000000000000010005252000000006030303030303030303030303030303030
-30303030303030303030303030523030100000000000001041000000000000603030303030303030303030303030603030306060606060603030303030303060
+303030303030000000000000000000f0100000000000001041000000000000603030303030303030303030303030603030306060606060603030303030303060
 60303030303030303030303030303030303030303030303030303030303030300000000000000010000000000000006030303030303030303030303030303030
-30303030303030303030303030523030000000000000414100000000000000603030303030303030303030303030603030306060606060603030303030303060
+30303030303000000000000000000000000000000000414100000000000000603030303030303030303030303030603030306060606060603030303030303060
 6030303030303030303030303030303030303030303030303030303030303030e0000000000000e0000000000000006030303030303030303030303030303030
-30303030303030305252525252523030e0000000000000e000000000000000603030303030303030303030303030603030306060606060603030303030303060
+3030303030300000000000000000008090000000000000e000000000000000603030303030303030303030303030603030306060606060603030303030303060
 60303030303030303030303030303030303030303030303030303030303030306000000000000060000000000000006030303030303030303030303030303030
-30303030303030303030303030303030600000000000006000000000000000603030303030303030303030303030603030306060606060603030303030303060
+30303030303000000000000000000060600000000000006000000000000000603030303030303030303030303030603030306060606060603030303030303060
 60303030303030303030303030303030303030303030303030303030303030305040404090008070404040404040407030303030303030303030303030303030
-30303030303030303030303030303030504040409000807040404040404040703030303030303030303030303030603030306060606060603030303030303060
+30303030303000000000000040404070504040409000807040404040404040703030303030303030303030303030603030306060606060603030303030303060
 60303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030
 30303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030603030306060606060603030303030303060
 60303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030
@@ -1748,7 +1672,7 @@ __label__
 22222222222222222ffff2221111111111111111222f7f2222222222222222222222222222222222222222222ffff22211111111111111111111111111111111
 
 __gff__
-0003000001010101010101010101010101010001000101010123252931050101000000000000000000000100000000000100000901000000000001010100000501000000000000000101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0003000001010101010101010101010101010001000101010000000000050101000000000000000000000100000000040100000901000000000001010100000501000000000000000101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 08040404040404041004040404040410100404040404040404040404040404041f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f0404040404040404040404040404040408040404040404040404040404040409080404040404040404040404040404090804040404040404040404040404040404040404040404040404040404040409
@@ -1785,7 +1709,7 @@ __map__
 06030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030617040d0b0b0600000804070b0b0c060000000000000000000000000000000003030303030303030303030303030306
 __sfx__
 49010400170501105017050030000d0001f0001f0001d0001d0001d0001d0001d0001d0001d0001d000210001f000210001f000210002100021000210001f0001f0001f0001f0001f0001f0001f0001f00000000
-110306003f6433f6303f6203361033610336151b0001b0001b0001b0001b0001b0001b0001b0001f0001f0001d0001f000220002200022000220001d0001d0001d0001d0001d0001d0001d0001d0000000000000
+110307003f6433f6303f6203361033610336151b0001b0001b0001b0001b0001b0001b0001b0001f0001f0001d0001f000220002200022000220001d0001d0001d0001d0001d0001d0001d0001d0000000000000
 0d0c04003362435625136001360007000130001360013000270003360033600130001360011000136001100007000000001460016600070000000014600166000700000000070001460014600146001460000000
 011000003360033600336003560035600130001360011000050000000000000000001360011000136001100000000000000000000000000000000000000000000000000000000000000000000000000000000000
 011000001f0001f0001f0001f0001f0001f0001f0001f0001d0001d0001d0001d0001d0001d0001d0001d000210001f000210001f000210002300026000240002300023000230002300023000230002300023000
@@ -1884,6 +1808,7 @@ __music__
 00 33343544
 00 32343644
 02 33346944
-00 62647144
-00 62647144
+00 32647144
+01 33347144
+02 32344344
 
