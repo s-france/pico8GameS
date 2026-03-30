@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 42
+version 43
 __lua__
 -- main functions
 // the mountain of carols
@@ -132,8 +132,7 @@ function _init()
 	menuitem(2,"save game", opensaveprompt)
  
  
- //pval1 = 0
- //pval2 = 0
+ 
  //init player
  make_player()
  testenmy  = make_enemy1(60,96, 100, player)
@@ -156,13 +155,12 @@ end
 
 // routine updates every frame
 // using designed update funcs.
-function _update()
-	buffer = {0,0,0,0}
+function _update60()
 	//process input
 	update_input()
 	
  //copy mapdata
-	if (btnp(2,1)) get_mapdata2(80,16,16,32)
+	//if (btnp(2,1)) get_mapdata2(80,16,16,32)
 	
 	//pause
 	initialmenu()
@@ -190,13 +188,10 @@ function _draw()
 	cls(curbg)
 	draw_map()
 	foreach(objectpool,function(obj) obj:draw_object() end)
- draw_player()
  foreach(hitboxes, draw_hitbox)
 	pal(make_kv(16,curpallete))
 	print(curlevel)
 	print(curregion)
- //print(pval1)
- //print(pval2)
 end
 -->8
 --objects
@@ -342,7 +337,7 @@ function add_hitbox(tag,x,y,xlen,
 		kbx,kby,kbduration,oncolfunc, 
 		onmapcolfunc,parent)
 	
-	hitbox = {}
+	local hitbox = {}
 	hitbox.tag = tag
 	hitbox.x = x
 	hitbox.y = y
@@ -856,6 +851,7 @@ function loadlevel2(level,region)
  local tx,ty = 0,0
  if (lt.x) tx,ty = lt.x,lt.y
  set_mapdata2(tx,ty,lt.w,lt.data)
+
 end
 -->8
 -- menu(inventory) code
