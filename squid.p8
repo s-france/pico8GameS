@@ -131,14 +131,15 @@ function _init()
 	menuitem(1,"inventory", openinv)
 	menuitem(2,"save game", opensaveprompt)
  
- 
- 
  //init player
  make_player()
+ --[[
  testenmy  = make_enemy1(60,96, 100, player)
 	
+	test = add_object2{x=300,y=60,sprite=53}
+	
 	add_warpbox(47*8,16,"firstcave",48,16,1,1,"cave")
-
+	
 	add_item(40*8,6*8,"bombs",18,5)
 	add_switch(296,86,32*8,2*8)
 	add_rock(280,86)
@@ -147,6 +148,8 @@ function _init()
 	add_item(41*8,5*8,"arrows",40,20)
 	add_item(41*8,4*8,"arrows",40,20)
 	add_item(39*8,6*8,"sword",73)
+	--]]
+	
 	//testenmy2 = make_enemy1(68,10*8, 50, player)
 	--[[
 	testenmy3 = make_enemy1(50,13*8, 50, player)
@@ -155,7 +158,7 @@ end
 
 // routine updates every frame
 // using designed update funcs.
-function _update60()
+function _update()
 	//process input
 	update_input()
 	
@@ -166,12 +169,17 @@ function _update60()
 	initialmenu()
 	
 	// update objects with local func
-	foreach(objectpool,type_update)
+	foreach(objectpool,function(obj) obj:type_update() end)
+	--foreach(objectpool,type_update)
+ 
  // update coroutines
  foreach(coroutines, update_coroutine)
+ 
  // update objects and hitboxes
+	--foreach(objectpool,function(obj) obj:update_object() end)
 	foreach(objectpool,update_object)
 	foreach(hitboxes,update_hitbox)
+	
 	// run collision coroutine
 	foreach(hitboxes,process_collisions)
 	
@@ -192,6 +200,7 @@ function _draw()
 	pal(make_kv(16,curpallete))
 	print(curlevel)
 	print(curregion)
+	print(player.hb.issolid)
 end
 -->8
 --objects
@@ -320,7 +329,7 @@ function update_object(obj)
 	
 	//update position
 	obj.mapposx, obj.mapposy = map_pos(obj.x,obj.y)
-	obj.mapcellx, obj.mapcelly = map_cell(obj.x+4,obj.y+4)	
+	obj.mapcellx, obj.mapcelly = map_cell(obj.x+4,obj.y+4)
 end
 
 // type update
@@ -679,13 +688,19 @@ end
 -- player info
 
 function make_player()
-	player = add_object(300,60,
+	--[[player = add_object(300,60,
 		0,0,-2,1000,nil,true,2,
-		update_player)
+		update_player)--]]
+		
+	player = add_object2{x=300,y=60,
+	duration=-2,hp=1000,
+	type_update=update_player,
+	sprite=2,draw=draw_player}
+	
  player.face = 6
  player.interaction = false
  // player items
- player.draw_object = draw_player
+ //player.draw_object = draw_player
  player.slots = {
   [1] = "none",
   [2] = "none",
@@ -981,7 +996,7 @@ function add_arrow(origin)
  arrow = add_object(origin.x,
  	origin.y,0,0,40,1,nil,true,40)
 	//sets dx,dy
-	local cx,cy = smff(arrow,origin.face,2.002)
+	local cx,cy = smff(arrow,origin.face,2)
 	
 	if (cx*cy == 0) then
 		//setdxdy(arrow,1.3)
@@ -1408,6 +1423,164 @@ function stripanim(_o,mx,n,bfr,act,...)
 	if ((dcv%n) == 0) _o.sprite += dcs
 end
 
+-->8
+function add_object2(data)
+	--init
+	local obj = {}
+	
+	--init alive
+	obj.isglobal = data.isglobal or true
+	obj.isalive = true
+	obj.type_update = data.type_update or nil
+	obj.level = curlevel
+	
+	--attach to parent obj
+	obj.parent = data.parent or nil
+	--object is a child
+	if obj.parent then
+		--position is relative to parent
+		obj.xoff = data.x or 0
+		obj.yoff = data.y or 0
+		obj.x = obj.parent.x + obj.xoff
+		obj.y = obj.parent.y + obj.yoff
+		--duration tied to parent by default
+		obj.duration = data.duration or -2
+	else --no parent
+		--init position
+		obj.x = data.x or 0
+		obj.y = data.y or 0
+		--duration is infinite by default
+		obj.duration = data.duration or -3
+	end
+	
+	--default object speed = 0
+	obj.dx = data.dx or 0
+	obj.dy = data.dy or 0
+	
+	--default hp is inifinite --fix this not safe!!! --need to add infinite/no hp case
+	obj.hp = data.hp or 9999 
+	
+	--default sprite is invisible
+	obj.sprite = data.sprite or nil
+	
+	
+	--unique update/draw funcs
+	function obj:update_object()
+		if (self.isalive == false) then
+			del(objectpool, self)
+			del(objectpool, self.hb)
+			del(hitboxes, self.hb)
+		end
+		if (self.hp <= 0) then
+			self.duration = 0
+		end
+	
+		-- lifetime based on duration
+		if (self.duration > 0) then
+		-- subtract 1 from duration
+			self.duration -= 1
+		-- lifetime based on parent
+		elseif (self.duration == -2) and self.parent then
+			if self.parent and self.parent.isalive == false then
+				--delete object
+				self.duration = 0
+			end
+		-- lifetime independent of parent
+		elseif self.duration == -3 then
+			if self.parent and self.parent.isalive == false then
+				--delete object
+				self.parent = nil
+			end
+		-- kill at duration=0
+		elseif self.duration == 0 then
+			self.isalive = false
+		end
+		
+		--map collisions
+	
+		--prevent solid objects from entering walls
+		if self.hb and self.hb.solid==true then
+			
+			-- if |dx|>0 and checking a bitwise flag for spriteflag1
+			while self.dx<0 and 0 < #searchmapcols(self.hb, 0b1, 0+(flr(abs(self.dx+.5))*sgn(self.dx)),1, -(self.hb.right-self.hb.left),-1) do
+				-- if dx is negative halt
+				if self.dx>-1 then
+					self.dx = 0
+				else
+					self.dx = mid(self.dx+1,0,-10000)
+				end
+			end
+			--right collision
+			while self.dx>0 and 0 < #searchmapcols(self.hb, 0b1, (self.hb.right-self.hb.left),1, -1+(flr(abs(self.dx+.5))*sgn(self.dx)),-1) do
+				if self.dx<1 then
+					self.dx = 0
+				else
+					self.dx = mid(self.dx-1,0,10000)
+				end
+			end
+			--up collision
+			while self.dy<0 and 0 < #searchmapcols(self.hb, 0b1, 1,0+(flr(abs(self.dy+.5))*sgn(self.dy)), -1,-(self.hb.bot-self.hb.top)) do
+				if self.dy>-1 then
+					self.dy = 0
+				else
+					self.dy = mid(self.dy+1,0,-10000)
+				end
+			end
+			--down collision
+			while self.dy>0 and 0 < #searchmapcols(self.hb, 0b1, 1,(self.hb.bot-self.hb.top), -1,-1+(flr(abs(self.dy+.5))*sgn(self.dy))) do
+				if self.dy<1 then
+					self.dy = 0
+				else
+					self.dy = mid(self.dy-1,0,10000)
+				end
+			end
+		end
+	
+	
+		-- other stuff
+		-- update movement
+		self.x += self.dx
+		self.y += self.dy
+	
+		-- update object
+		if self.parent then
+			if (self.xoff) then
+				self.xoff += self.dx
+				self.yoff += self.dy
+			end	
+			self.x += self.parent.dx
+			self.y += self.parent.dy
+		end
+		
+		//update position
+		self.mapposx, self.mapposy = map_pos(self.x,self.y)
+		self.mapcellx, self.mapcelly = map_cell(self.x+4,self.y+4)
+		
+	--end of update object
+	end
+	
+	if data.update then
+	 obj.update_object = data.update
+	end
+	
+	function obj:draw_object()
+	 if (self.level==curlevel and self.sprite and player.mapposx == self.mapposx and player.mapposy == self.mapposy) spr(self.sprite,flr(self.x)%128,flr(self.y)%128,1.0,1.0,self.flipx,self.flipy)
+	end
+ 	
+	if data.draw then
+	 obj.draw_object = data.draw
+	end
+	
+		// init mappos/cell
+	obj.mapposx, obj.mapposy = map_pos(data.x,data.y)
+	obj.mapcellx, obj.mapcelly = map_cell(data.x,data.y)
+	
+	
+	--add to gameplay update loop
+	add(objectpool, obj)
+	--return obj reference
+	return obj
+end
 __gfx__
 00000000000000001111111111111111222222222ff7f22222ff2222222fff22222222222222222200000000222222222222222222222222222222222ff7f222
 0000000000005500111cc11111111111222222222f7ff22222ff22222222fff22222222222222222000880002ff222222f62222222ffff22222222222ffff6f2
