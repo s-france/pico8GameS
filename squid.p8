@@ -155,7 +155,7 @@ end
 
 // routine updates every frame
 // using designed update funcs.
-function _update60()
+function _update()
 	//process input
 	update_input()
 	
