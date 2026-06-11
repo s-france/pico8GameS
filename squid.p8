@@ -170,14 +170,14 @@ function _update()
 	
 	// update objects with local func
 	foreach(objectpool,function(obj) obj:type_update() end)
-	--foreach(objectpool,type_update)
+	//foreach(objectpool,type_update)
  
  // update coroutines
  foreach(coroutines, update_coroutine)
  
  // update objects and hitboxes
-	--foreach(objectpool,function(obj) obj:update_object() end)
-	foreach(objectpool,update_object)
+	foreach(objectpool,function(obj) obj:update_object() end)
+	--foreach(objectpool,update_object)
 	foreach(hitboxes,update_hitbox)
 	
 	// run collision coroutine
@@ -200,7 +200,7 @@ function _draw()
 	pal(make_kv(16,curpallete))
 	print(curlevel)
 	print(curregion)
-	print(player.hb.issolid)
+	print(#searchmapcols(player.hb, 0b1, 0+(flr(abs(player.dx+.5))*sgn(player.dx)),1, -(player.hb.right-player.hb.left),-1))
 end
 -->8
 --objects
@@ -693,7 +693,7 @@ function make_player()
 		update_player)--]]
 		
 	player = add_object2{x=300,y=60,
-	duration=-2,hp=1000,
+	duration=-2,hp=1000,isglobal=true,
 	type_update=update_player,
 	sprite=2,draw=draw_player}
 	
@@ -726,17 +726,17 @@ end
 
 // move player
 
-function move_player()
+function move_player(p)
 	// initialize dx, dy and diag
-	setdxdy(player,0)
+	setdxdy(p,0)
 	
-	if (btn(0)) player.dx-=1.001
-	if (btn(1)) player.dx+=1.001
-	if (btn(2)) player.dy-=1.001
-	if (btn(3)) player.dy+=1.001
+	if (btn(0)) p.dx-=1.001
+	if (btn(1)) p.dx+=1.001
+	if (btn(2)) p.dy-=1.001
+	if (btn(3)) p.dy+=1.001
 
-	player.hb.kbx = player.dx*2
-	player.hb.kby = player.dy*2
+	p.hb.kbx = p.dx*2
+	p.hb.kby = p.dy*2
 end
 
 // update player
@@ -772,7 +772,7 @@ function update_player(p)
  		50,0,0,2,nil,pib_ompcol,player)
  end
 	// called from above
-	move_player()
+	move_player(p)
 end
 
 // draw player
@@ -1475,6 +1475,8 @@ function add_object2(data)
 			self.duration = 0
 		end
 	
+		if (self.level != curlevel) return
+		
 		-- lifetime based on duration
 		if (self.duration > 0) then
 		-- subtract 1 from duration
@@ -1499,7 +1501,7 @@ function add_object2(data)
 		--map collisions
 	
 		--prevent solid objects from entering walls
-		if self.hb and self.hb.solid==true then
+		if self.hb and self.hb.issolid==true then
 			
 			-- if |dx|>0 and checking a bitwise flag for spriteflag1
 			while self.dx<0 and 0 < #searchmapcols(self.hb, 0b1, 0+(flr(abs(self.dx+.5))*sgn(self.dx)),1, -(self.hb.right-self.hb.left),-1) do
