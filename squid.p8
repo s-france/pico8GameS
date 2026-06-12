@@ -1018,7 +1018,7 @@ function add_arrow(origin)
 	
 	arrow.hb = add_hitbox(1,4,4,3,3,-1, true, 80, 2*global_faces[origin.face][1],2*global_faces[origin.face][2],4,  arrow_oncollision, arrow_onmapcollision, arrow)
  
- function arrow:update() 
+ function arrow:type_update() 
   if ((self.dx  == 0) and (self.dy == 0)) sfx(10) self.duration = 0 
  end
 end
