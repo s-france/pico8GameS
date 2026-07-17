@@ -1039,10 +1039,11 @@ function add_rock(x,y)
 	rock = add_object(x,y,0,0,-2,10000,nil,true,51)
 	rock.hb = add_hitbox(6,4,4,7,7,-1, true, 0, 0,0,0, nil, nil, rock)
  function rock:update() setdxdy(self,0) end
-end --]]
+end 
+--]]
 
-function add_rock(rx,ry)
-	rock = add_object2{x=rx,y=ry,duration=-2,hp=1000,isglobal=true,sprite=51}
+function add_rock(x,y)
+	rock = add_object2{x=x,y=y,duration=-2,hp=1000,isglobal=true,sprite=51}
 	rock.hb = add_hitbox(6,4,4,7,7,-1, true, 0, 0,0,0, nil, nil, rock)
 	function rock:type_update() setdxdy(self,0) end
 end
