@@ -142,7 +142,9 @@ function _init()
 	
 	add_item(40*8,6*8,"bombs",18,5)
 	add_switch(296,86,32*8,2*8)
+		--]]
 	add_rock(280,86)
+	--[[
 	add_item(36*8,6*8,"bow",42)
 	add_item(41*8,6*8,"arrows",40,20)
 	add_item(41*8,5*8,"arrows",40,20)
@@ -1032,10 +1034,17 @@ if (0 != #searchmapcols(arrowhb, 0b1, 0+sgn(arrowhb.parent.dx), 0+sgn(arrowhb.pa
 end
 
 -- rock
+--[[
 function add_rock(x,y)
 	rock = add_object(x,y,0,0,-2,10000,nil,true,51)
 	rock.hb = add_hitbox(6,4,4,7,7,-1, true, 0, 0,0,0, nil, nil, rock)
  function rock:update() setdxdy(self,0) end
+end --]]
+
+function add_rock(rx,ry)
+	rock = add_object2{x=rx,y=ry,duration=-2,hp=1000,isglobal=true,sprite=51}
+	rock.hb = add_hitbox(6,4,4,7,7,-1, true, 0, 0,0,0, nil, nil, rock)
+	function rock:type_update() setdxdy(self,0) end
 end
 
 -- button
@@ -1424,6 +1433,7 @@ function stripanim(_o,mx,n,bfr,act,...)
 end
 
 -->8
+--ao2
 function add_object2(data)
 	--init
 	local obj = {}
